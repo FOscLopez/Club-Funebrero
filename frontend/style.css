@@ -1,14 +1,18 @@
-/* VARIABLES DE COLORES DEL CLUB */
-:root {
+/* ====================================================
+   ESTILOS PREMIUM - CLUB FUNEBRERO (BLANCO, NEGRO, ROJO)
+   ==================================================== */
+
+   :root {
+    --bg-dark: #050505;
     --rojo-funebrero: #dc2626;
-    --rojo-oscuro: #991b1b;
-    --negro-funebrero: #050505;
-    --gris-oscuro: #171717;
+    --rojo-brillante: #ff3b3b;
     --blanco: #ffffff;
-    --font-titulos: 'Oswald', sans-serif;
+    --gris-claro: #a3a3a3;
+    --font-titulos: 'Bebas Neue', cursive;
     --font-textos: 'Poppins', sans-serif;
 }
 
+/* Reset Básico */
 * {
     margin: 0;
     padding: 0;
@@ -19,256 +23,258 @@ html {
     scroll-behavior: smooth;
 }
 
+/* 1. Fondo Animado Respirable (Tonos Oscuros y Rojizos) */
+@keyframes dynamicBg {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
 body {
-    font-family: var(--font-textos);
-    background-color: var(--negro-funebrero);
+    background: linear-gradient(-45deg, #050505, #1a0505, #0a0a0a, #2a0808);
+    background-size: 400% 400%;
+    animation: dynamicBg 15s ease infinite;
     color: var(--blanco);
-    line-height: 1.6;
+    font-family: var(--font-textos);
+    min-height: 100vh;
+    overflow-x: hidden;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-/* HEADER */
-.header {
-    background-color: var(--negro-funebrero);
-    border-bottom: 2px solid var(--rojo-funebrero);
-    position: sticky;
+/* 2. Ticker Último Momento */
+.ticker-wrap {
+    width: 100%;
+    overflow: hidden;
+    background: linear-gradient(90deg, #7f1d1d, var(--rojo-funebrero));
+    color: var(--blanco);
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    position: fixed;
     top: 0;
+    left: 0;
     z-index: 1000;
+    height: 32px;
 }
 
-.header-content {
+.ticker-move {
+    display: inline-flex;
+    white-space: nowrap;
+    animation: tickerAnim 25s linear infinite;
+}
+
+.ticker-move:hover {
+    animation-play-state: paused;
+}
+
+.ticker-item {
+    padding: 0 2rem;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.ticker-item span {
+    background: var(--bg-dark);
+    color: var(--rojo-funebrero);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 8px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+@keyframes tickerAnim {
+    0% { transform: translateX(100vw); }
+    100% { transform: translateX(-100%); }
+}
+
+/* 3. Navegación de Cristal */
+.header {
+    position: fixed;
+    top: 32px; /* Justo debajo del ticker */
+    left: 0;
+    width: 100%;
+    background: rgba(5, 5, 5, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 900;
+    border-bottom: 1px solid rgba(220, 38, 38, 0.3);
+    padding: 12px 0;
+    transition: 0.3s;
+}
+
+.header-inner {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
-}
-
-.logo {
-    width: 60px;
-    height: auto;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .nav-links a {
     color: var(--blanco);
     text-decoration: none;
-    margin-left: 20px;
+    font-size: 0.9rem;
     font-weight: 600;
-    transition: color 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: 0.3s;
+    margin-left: 20px;
 }
 
 .nav-links a:hover {
     color: var(--rojo-funebrero);
+    text-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
 }
 
-/* BOTONES */
-.btn-primary {
-    background-color: var(--rojo-funebrero);
-    color: var(--blanco);
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    text-transform: uppercase;
-    font-family: var(--font-titulos);
-    font-size: 1rem;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background 0.3s;
-}
-
-.btn-primary:hover {
-    background-color: var(--rojo-oscuro);
-}
-
-.btn-secondary {
-    background-color: transparent;
-    color: var(--rojo-funebrero);
-    padding: 10px 20px;
-    border: 2px solid var(--rojo-funebrero);
-    border-radius: 5px;
-    text-transform: uppercase;
-    font-family: var(--font-titulos);
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.btn-secondary:hover {
-    background-color: var(--rojo-funebrero);
-    color: var(--blanco);
-}
-
-.btn-hero {
-    display: inline-block;
-    background-color: var(--blanco);
-    color: var(--negro-funebrero);
-    padding: 15px 30px;
-    font-family: var(--font-titulos);
-    font-size: 1.2rem;
-    text-transform: uppercase;
-    text-decoration: none;
-    border-radius: 5px;
-    margin-top: 20px;
-    font-weight: bold;
-    transition: transform 0.3s;
-}
-
-.btn-hero:hover {
-    transform: scale(1.05);
-}
-
-/* HERO SECTION */
+/* 4. Sección Hero y Escudo Flotante */
 .hero {
-    position: relative;
-    background-color: var(--gris-oscuro);
-    /* Aquí luego pondremos una imagen de fondo subida a imgbb */
-    background-size: cover;
-    background-position: center;
-    padding: 100px 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-}
-
-.hero-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(rgba(5,5,5,0.7), rgba(220, 38, 38, 0.4));
-}
-
-.hero-content {
+    padding-top: 50px;
     position: relative;
-    z-index: 10;
 }
 
-.hero h1 {
+.hero-logo {
+    width: 220px;
+    filter: drop-shadow(0 0 25px rgba(220, 38, 38, 0.5));
+    animation: floatLogo 4s ease-in-out infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes floatLogo {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); filter: drop-shadow(0 0 40px rgba(220, 38, 38, 0.8)); }
+}
+
+.club-title-glow {
     font-family: var(--font-titulos);
-    font-size: 3.5rem;
-    line-height: 1.1;
-    margin-bottom: 20px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    font-size: 5.5rem;
+    margin: 0;
+    letter-spacing: 5px;
+    background: linear-gradient(to right, var(--blanco), var(--rojo-funebrero));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 4px 10px rgba(220, 38, 38, 0.3));
+    line-height: 1;
 }
 
-.hero p {
+.hero-subtitle {
     font-size: 1.2rem;
-    max-width: 800px;
-    margin: 0 auto;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+    color: var(--gris-claro);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-weight: 300;
+    margin-top: 10px;
 }
 
-/* SECCIONES GLOBALES */
-.section {
-    padding: 80px 0;
+/* 5. Cristalería Premium (Tarjetas Levitantes) */
+.section-padding {
+    padding: 80px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .section-title {
+    text-align: center;
     font-family: var(--font-titulos);
-    font-size: 2.5rem;
-    text-align: center;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-}
-
-.section-subtitle {
-    text-align: center;
-    color: #a3a3a3;
+    font-size: 3rem;
     margin-bottom: 40px;
-}
-
-.dark-section { background-color: var(--negro-funebrero); }
-.red-section { background-color: var(--rojo-oscuro); }
-.light-section { background-color: var(--blanco); }
-.text-white { color: var(--blanco); }
-.text-black { color: var(--negro-funebrero); }
-.text-center { text-align: center; }
-
-/* GALERÍA DE PLANTELES */
-.grid-gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
-}
-
-.gallery-card {
-    background-color: var(--gris-oscuro);
-    border: 1px solid #333;
-    border-radius: 8px;
-    overflow: hidden;
-    text-align: center;
-    padding-bottom: 15px;
-}
-
-.img-placeholder {
-    width: 100%;
-    height: 200px;
-    background-color: #333;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #666;
-    margin-bottom: 15px;
-}
-
-.gallery-card h3 {
-    font-family: var(--font-titulos);
-    font-size: 1.5rem;
-}
-
-/* BADGES DE CATEGORÍAS */
-.categories-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-}
-
-.cat-badge {
-    background-color: var(--negro-funebrero);
     color: var(--blanco);
-    padding: 10px 20px;
-    border-radius: 30px;
-    font-family: var(--font-titulos);
-    font-size: 1.2rem;
-    border: 1px solid rgba(255,255,255,0.2);
+    letter-spacing: 2px;
 }
 
-/* COLABORAR (SOCIOS DISTANCIA) */
-.colaborar-options {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 30px;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.colab-card {
-    background-color: #f5f5f5;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    color: var(--negro-funebrero);
-}
-
-.colab-card h3 {
-    font-family: var(--font-titulos);
-    font-size: 1.8rem;
-    margin-bottom: 15px;
+.section-title span {
     color: var(--rojo-funebrero);
 }
 
-.colab-card p {
-    margin-bottom: 20px;
+.grid-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
 }
 
-/* FOOTER */
-.footer {
-    background-color: var(--gris-oscuro);
-    padding: 40px 0;
+.glass-premium {
+    background: rgba(15, 15, 15, 0.5);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 2px solid var(--rojo-funebrero);
+    border-radius: 16px;
+    padding: 30px;
     text-align: center;
-    border-top: 4px solid var(--rojo-funebrero);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, border-color 0.4s;
+}
+
+.glass-premium:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 45px rgba(220, 38, 38, 0.15);
+    border-color: var(--rojo-brillante);
+}
+
+.glass-premium h3 {
+    font-family: var(--font-titulos);
+    font-size: 2.2rem;
+    color: var(--blanco);
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+}
+
+.glass-premium p {
+    color: var(--gris-claro);
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+/* 6. Botones Neón */
+.btn-neon {
+    display: inline-block;
+    padding: 10px 25px;
+    border-radius: 30px;
+    background: transparent;
+    color: var(--rojo-funebrero);
+    border: 2px solid var(--rojo-funebrero);
+    font-weight: 600;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: 0.3s;
+    margin-top: 15px;
+    letter-spacing: 1px;
+    font-size: 0.85rem;
+}
+
+.btn-neon:hover {
+    background: var(--rojo-funebrero);
+    color: var(--blanco);
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.6);
+    transform: translateY(-2px);
+}
+
+.btn-white {
+    border-color: var(--blanco);
+    color: var(--blanco);
+}
+
+.btn-white:hover {
+    background: var(--blanco);
+    color: var(--bg-dark);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+}
+
+/* 7. Footer */
+.main-footer {
+    background: rgba(5, 5, 5, 0.95);
+    border-top: 2px solid var(--rojo-funebrero);
+    padding: 40px 20px;
+    text-align: center;
+    margin-top: 40px;
 }
