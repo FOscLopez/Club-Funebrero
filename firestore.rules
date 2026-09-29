@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // REGLA ÚNICA Y LIMPIA PARA EL CLUB FUNEBRERO
+    match /{document=**} {
+      
+      // 1. Lectura pública: Cualquier hincha que entre a la web puede leer el fixture y los datos.
+      allow read: if true;
+      
+      // 2. Escritura blindada: SOLO tu correo maestro puede crear, editar o borrar datos.
+      // (Nadie más podrá modificar nada hasta que construyamos los paneles a futuro).
+      allow write: if request.auth != null && request.auth.token.email == "mecinfotec@gmail.com";
+      
+    }
+  }
+}
