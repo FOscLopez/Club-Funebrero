@@ -38,9 +38,9 @@
       <button id="logoutBtn" class="logout-btn">Cerrar Sesión</button>
     </div>
 
-    <!-- Módulo de Partidos (Existente) -->
+    <!-- Módulo Manual de Partidos -->
     <div class="admin-card">
-      <h3 class="module-title">Programar Nuevo Partido</h3>
+      <h3 class="module-title">Programar Partido Individual</h3>
       <form id="fixtureForm">
         <div class="form-group">
           <select id="categoria" class="form-select" required>
@@ -72,10 +72,38 @@
       </form>
     </div>
 
+    <!-- Módulo de Carga Masiva de Fixtures (Caja Mágica) -->
+    <div class="admin-card" style="border-color: #3b82f6;">
+      <h3 class="module-title" style="color: #3b82f6;">Caja Mágica: Fixtures Completos</h3>
+      <p style="color:#a3a3a3; font-size:0.9rem; margin-bottom:15px;">Pega la lista de partidos con el formato "1 Local VS Visitante". El sistema limpiará automáticamente cruces duplicados "A definir".</p>
+      <form id="magicFixtureForm">
+        <div class="form-group">
+          <select id="magicFixtureCategory" class="form-select" required>
+            <option value="">Seleccionar Categoría</option>
+            <option value="Mosquito">Mosquito</option>
+            <option value="Mini">Mini</option>
+            <option value="Pre Mini">Pre Mini</option>
+            <option value="U11">U11</option>
+            <option value="U13">U13</option>
+            <option value="U15">U15</option>
+            <option value="U17">U17</option>
+            <option value="U21">U21</option>
+            <option value="Primera">Primera</option>
+            <option value="Maxi 35">Maxi 35</option>
+            <option value="Maxi 42">Maxi 42</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <textarea id="magicFixtureBox" class="form-input" rows="6" placeholder="Ejemplo:&#10;1 Funebrero VS S. Zapallar&#10;2 Urquiza VS Funebrero" required style="resize: vertical;"></textarea>
+        </div>
+        <button type="submit" class="action-btn" id="saveMagicFixturesBtn" style="background:#3b82f6;">Procesar Fixture</button>
+      </form>
+    </div>
+
     <!-- Módulo de Carga de Jugadores (Caja Mágica) -->
-    <div class="admin-card">
-      <h3 class="module-title">Caja Mágica: Planteles</h3>
-      <p style="color:#a3a3a3; font-size:0.9rem; margin-bottom:15px;">Selecciona la categoría y pega la lista directamente desde Excel o Word (Nombre y Fecha de Nacimiento). El sistema ignorará los encabezados.</p>
+    <div class="admin-card" style="border-color: #10b981;">
+      <h3 class="module-title" style="color: #10b981;">Caja Mágica: Planteles</h3>
+      <p style="color:#a3a3a3; font-size:0.9rem; margin-bottom:15px;">Selecciona la categoría y pega la lista directamente desde Excel (Nombre y Fecha). Se ignoran los encabezados.</p>
       <form id="playerForm">
         <div class="form-group">
           <select id="playerCategory" class="form-select" required>
@@ -107,7 +135,7 @@
         <thead>
           <tr>
             <th>Categoría</th>
-            <th>Día y Hora</th>
+            <th>Fase / Día</th>
             <th>Local</th>
             <th>Visitante</th>
             <th>Acción</th>

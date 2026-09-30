@@ -1,9 +1,11 @@
 import { auth, db } from "./services/firebase.config.js";
 import { addPlayersBulk, getPlayers } from "./services/firestore.service.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// 1. Candado de Seguridad y Arranque
+// ==========================================
+// 1. SEGURIDAD Y ARRANQUE
+// ==========================================
 onAuthStateChanged(auth, (user) => {
     if (!user || user.email !== "mecinfotec@gmail.com") {
         window.location.replace("login.html");
@@ -19,7 +21,7 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
 });
 
 // ==========================================
-// MÓDULO FIXTURES (EXISTENTE)
+// 2. MÓDULO MANUAL: FIXTURES
 // ==========================================
 document.getElementById("fixtureForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -30,6 +32,7 @@ document.getElementById("fixtureForm").addEventListener("submit", async (e) => {
         categoryId: document.getElementById("categoria").value,
         homeClubId: document.getElementById("condicion").value === "local" ? "Funebrero" : document.getElementById("rival").value.trim(),
         awayClubId: document.getElementById("condicion").value === "visita" ? "Funebrero" : document.getElementById("rival").value.trim(),
+        round: "A definir",
         date: document.getElementById("fecha").value,
         time: document.getElementById("hora").value || null,
         status: "scheduled",
@@ -45,38 +48,99 @@ document.getElementById("fixtureForm").addEventListener("submit", async (e) => {
     finally { btn.textContent = "Guardar Partido"; btn.disabled = false; }
 });
 
-async function loadFixtures() {
-    const tbody = document.getElementById("fixturesList");
-    try {
-        const q = query(collection(db, "fixtures"), orderBy("date", "desc"));
-        const snapshot = await getDocs(q);
-        if (snapshot.empty) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#a3a3a3;">El fixture está vacío.</td></tr>'; return; }
+// ==========================================
+// 3. CAJA MÁGICA: FIXTURES MASIVOS
+// ==========================================
+document.getElementById("magicFixtureForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById("saveMagicFixturesBtn");
+    btn.textContent = "Procesando..."; btn.disabled = true;
 
-        tbody.innerHTML = snapshot.docs.map(docSnap => {
-            const f = docSnap.data();
-            const homeStyle = f.homeClubId === 'Funebrero' ? 'color:#fff; font-weight:bold;' : 'color:#a3a3a3;';
-            const awayStyle = f.awayClubId === 'Funebrero' ? 'color:#fff; font-weight:bold;' : 'color:#a3a3a3;';
-            return `
-                <tr>
-                    <td><span style="background: rgba(220,38,38,0.2); color: #dc2626; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">${f.categoryId}</span></td>
-                    <td>${f.date} ${f.time ? '<br><span style="color:#a3a3a3; font-size:0.8rem;">'+f.time+'</span>' : ''}</td>
-                    <td style="${homeStyle}">${f.homeClubId}</td>
-                    <td style="${awayStyle}">${f.awayClubId}</td>
-                    <td><button class="delete-btn" onclick="deleteFixture('${docSnap.id}')">Borrar</button></td>
-                </tr>`;
-        }).join("");
-    } catch (error) { tbody.innerHTML = '<tr><td colspan="5">Error de lectura.</td></tr>'; }
-}
+    const category = document.getElementById("magicFixtureCategory").value;
+    const text = document.getElementById("magicFixtureBox").value;
+    const lines = text.split('\n');
+    const fixturesToSave = [];
 
-window.deleteFixture = async (id) => {
-    if (confirm("¿Eliminar este partido permanentemente?")) {
-        await deleteDoc(doc(db, "fixtures", id));
-        loadFixtures();
+    lines.forEach(line => {
+        const cleanLine = line.trim();
+        // Ignoramos líneas vacías o fechas Libres
+        if (!cleanLine || cleanLine.toUpperCase().includes("LIBRE")) return;
+
+        const matchVs = cleanLine.toUpperCase().split(" VS ");
+        if (matchVs.length === 2) {
+            const firstPart = matchVs[0].trim();
+            const spaceIndex = firstPart.indexOf(" ");
+            let round = "A definir";
+            let home = firstPart;
+            
+            // Si empieza con un número, lo extraemos como número de Fecha
+            if (spaceIndex > -1 && !isNaN(firstPart.substring(0, spaceIndex))) {
+                round = "Fecha " + firstPart.substring(0, spaceIndex);
+                home = firstPart.substring(spaceIndex + 1).trim();
+            }
+
+            // Normalización para mantener la estética
+            home = home.replace("S. ZAPALLAR", "S. Zapallar").replace("FUNEBRERO", "Funebrero");
+            const away = matchVs[1].trim().replace("S. ZAPALLAR", "S. Zapallar").replace("FUNEBRERO", "Funebrero");
+
+            fixturesToSave.push({
+                categoryId: category,
+                homeClubId: home,
+                awayClubId: away,
+                round: round,
+                date: "A definir",
+                time: "",
+                status: "scheduled",
+                scoreLocal: null,
+                scoreAway: null,
+                createdAt: new Date().toISOString()
+            });
+        }
+    });
+
+    if (fixturesToSave.length === 0) {
+        alert("No se detectaron partidos. Usa el formato '1 Funebrero VS Rival'.");
+        btn.textContent = "Procesar Fixture"; btn.disabled = false;
+        return;
     }
-};
+
+    try {
+        // Obtenemos los fixtures de esta categoría para aplicar anti-duplicados
+        const q = query(collection(db, "fixtures"), where("categoryId", "==", category));
+        const existingSnap = await getDocs(q);
+        const batch = writeBatch(db);
+        
+        // Si ya existía el mismo cruce marcado como "A definir", lo borramos para poner el nuevo
+        existingSnap.forEach(docSnap => {
+            const d = docSnap.data();
+            const matchExists = fixturesToSave.find(f => 
+                (f.homeClubId.toUpperCase() === d.homeClubId.toUpperCase() && f.awayClubId.toUpperCase() === d.awayClubId.toUpperCase()) ||
+                (f.homeClubId.toUpperCase() === d.awayClubId.toUpperCase() && f.awayClubId.toUpperCase() === d.homeClubId.toUpperCase())
+            );
+            if (matchExists && d.date === "A definir") {
+                batch.delete(docSnap.ref);
+            }
+        });
+
+        // Inyectamos los nuevos partidos masivos
+        fixturesToSave.forEach(f => {
+            const newRef = doc(collection(db, "fixtures"));
+            batch.set(newRef, f);
+        });
+
+        await batch.commit();
+        document.getElementById("magicFixtureBox").value = "";
+        await loadFixtures();
+        alert(`Se cargaron ${fixturesToSave.length} partidos correctamente en ${category}.`);
+    } catch (err) { 
+        console.error(err);
+        alert("Error al procesar los fixtures."); 
+    } 
+    finally { btn.textContent = "Procesar Fixture"; btn.disabled = false; }
+});
 
 // ==========================================
-// MÓDULO CAJA MÁGICA: JUGADORES
+// 4. CAJA MÁGICA: JUGADORES (EXISTENTE)
 // ==========================================
 document.getElementById("playerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -90,10 +154,7 @@ document.getElementById("playerForm").addEventListener("submit", async (e) => {
 
     lines.forEach(line => {
         const cleanLine = line.trim();
-        if (!cleanLine) return;
-        
-        // Blindaje contra encabezados de Excel
-        if (cleanLine.toLowerCase().includes("apellido") || cleanLine.toLowerCase().includes("fecha de nacimiento")) return;
+        if (!cleanLine || cleanLine.toLowerCase().includes("apellido") || cleanLine.toLowerCase().includes("fecha de nacimiento")) return;
 
         let parts = cleanLine.split('\t');
         if (parts.length < 2) parts = cleanLine.split(/ {2,}/);
@@ -101,7 +162,6 @@ document.getElementById("playerForm").addEventListener("submit", async (e) => {
         if (parts.length >= 2) {
             playersToSave.push({ name: parts[0].trim(), birthdate: parts[1].trim(), categoryId: category, clubId: "Funebrero", createdAt: new Date().toISOString() });
         } else {
-            // Intento de rescate si copiaron con un solo espacio (busca el último espacio antes de la fecha)
             const lastSpace = cleanLine.lastIndexOf(' ');
             if (lastSpace > 0) {
                 playersToSave.push({ name: cleanLine.substring(0, lastSpace).trim(), birthdate: cleanLine.substring(lastSpace + 1).trim(), categoryId: category, clubId: "Funebrero", createdAt: new Date().toISOString() });
@@ -124,13 +184,45 @@ document.getElementById("playerForm").addEventListener("submit", async (e) => {
     finally { btn.textContent = "Procesar Plantel"; btn.disabled = false; }
 });
 
+// ==========================================
+// 5. LECTURA DE TABLAS (FIXTURES Y JUGADORES)
+// ==========================================
+async function loadFixtures() {
+    const tbody = document.getElementById("fixturesList");
+    try {
+        const q = query(collection(db, "fixtures"), orderBy("createdAt", "desc"));
+        const snapshot = await getDocs(q);
+        if (snapshot.empty) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#a3a3a3;">El fixture está vacío.</td></tr>'; return; }
+
+        tbody.innerHTML = snapshot.docs.map(docSnap => {
+            const f = docSnap.data();
+            const homeStyle = f.homeClubId === 'Funebrero' ? 'color:#fff; font-weight:bold;' : 'color:#a3a3a3;';
+            const awayStyle = f.awayClubId === 'Funebrero' ? 'color:#fff; font-weight:bold;' : 'color:#a3a3a3;';
+            return `
+                <tr>
+                    <td><span style="background: rgba(220,38,38,0.2); color: #dc2626; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">${f.categoryId}</span></td>
+                    <td><span style="color:#3b82f6; font-weight:bold; font-size:0.8rem;">${f.round || ''}</span><br>${f.date} ${f.time ? '<br><span style="color:#a3a3a3; font-size:0.8rem;">'+f.time+'</span>' : ''}</td>
+                    <td style="${homeStyle}">${f.homeClubId}</td>
+                    <td style="${awayStyle}">${f.awayClubId}</td>
+                    <td><button class="delete-btn" onclick="deleteFixture('${docSnap.id}')">Borrar</button></td>
+                </tr>`;
+        }).join("");
+    } catch (error) { tbody.innerHTML = '<tr><td colspan="5">Error de lectura.</td></tr>'; }
+}
+
+window.deleteFixture = async (id) => {
+    if (confirm("¿Eliminar este partido permanentemente?")) {
+        await deleteDoc(doc(db, "fixtures", id));
+        loadFixtures();
+    }
+};
+
 async function loadPlayers() {
     const container = document.getElementById("playersListContainer");
     try {
         const players = await getPlayers();
         if(players.length === 0) { container.innerHTML = "<p style='color:#a3a3a3;'>No hay jugadores registrados.</p>"; return; }
 
-        // Apilar por categoría
         const grouped = {};
         players.forEach(p => {
             if(!grouped[p.categoryId]) grouped[p.categoryId] = [];
