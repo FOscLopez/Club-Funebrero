@@ -6,21 +6,21 @@ import { collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/
 // Reemplaza los enlaces por los tuyos de ImgBB
 // ==========================================
 const CLUB_LOGOS = {
-    "FUNEBRERO": "https://ibb.co/J6rNsGH", // Usa tu logo local
-    "UNIÓN": "https://ibb.co/V862hcp",
-    "UNION": "https://ibb.co/V862hcp",
-    "URQUIZA": "https://ibb.co/5gX5r6wP",
-    "ZAPALLAR": "https://ibb.co/5hq0JTC1",
-    "PALERMO": "https://ibb.co/B2h8JbNY",
-    "EBEN": "https://ibb.co/JwrN72yY",
-    "LIBERTAD": "https://ibb.co/Qv8rs8Qz",
-    "CEF": "https://ibb.co/qLRLCsk7",
-    "SOLARI": "https://ibb.co/3XvPyCc",
-    "BERMEJO": "https://ibb.co/zWBJmPfk"
+    "FUNEBRERO": "https://i.ibb.co/r85gwzH/funebrero.webp", // Usa tu logo local
+    "UNIÓN": "https://i.ibb.co/YGgpKFT/union.webp",
+    "UNION": "https://i.ibb.co/YGgpKFT/union.webp",
+    "URQUIZA": "https://i.ibb.co/ZpRhBV70/urquiza.webp",
+    "ZAPALLAR": "https://i.ibb.co/JjX1Sn8c/zapallar.webp",
+    "PALERMO": "https://i.ibb.co/60K6SzBq/palermo.webp",
+    "EBEN": "https://i.ibb.co/W4BQyFPr/eben-vedia.webp",
+    "LIBERTAD": "https://i.ibb.co/3mfBtfdG/villa-libertad.webp",
+    "CEF": "https://i.ibb.co/4wjw2TPK/cef-n3.webp",
+    "SOLARI": "https://i.ibb.co/STcZX3B/solari.webp",
+    "BERMEJO": "https://i.ibb.co/kVw1Gqcd/puerto-bermejo.webp"
 };
 
 // URL para rivales no encontrados o "A definir"
-const DEFAULT_LOGO = "https://i.ibb.co/ejemplo/default.png";
+const DEFAULT_LOGO = "https://i.ibb.co/Cpw4zbBv/571425287-18303994912267310-8920899741855718292-n.jpg";
 
 // Función inteligente que busca coincidencias en el nombre
 function getLogoSrc(clubName) {
