@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Planteles e Historia - Club Funebrero</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="logo-funebrero_2.png">
+  
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Ajustes específicos para las tarjetas de jugadores */
+    .player-card {
+      background: rgba(15, 15, 15, 0.5);
+      backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255,255,255,0.05); border-left: 4px solid #dc2626;
+      border-radius: 8px; padding: 15px 20px; text-align: left;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .player-card:hover {
+      transform: translateX(5px);
+      box-shadow: 0 5px 15px rgba(220,38,38,0.2);
+    }
+    .player-name { font-weight: 600; font-size: 1.1rem; color: #ffffff; display: block; margin-bottom: 5px; }
+    .player-date { color: #a3a3a3; font-size: 0.85rem; }
+    .cat-title { font-family: 'Bebas Neue', cursive; font-size: 2.5rem; color: #dc2626; border-bottom: 2px solid rgba(220,38,38,0.3); padding-bottom: 10px; margin: 40px 0 20px; letter-spacing: 1px; }
+  </style>
+</head>
+<body>
+
+  <!-- TICKER -->
+  <div class="ticker-wrap">
+    <div class="ticker-move">
+      <div class="ticker-item"><span>CLUB FUNEBRERO</span> Conocé a nuestros jugadores y nuestra historia.</div>
+      <div class="ticker-item"><span>SOCIOS</span> Sumate a nuestra campaña a distancia.</div>
+      <div class="ticker-item"><span>ORGULLO</span> Desde el semillero hasta la primera división.</div>
+    </div>
+  </div>
+
+  <!-- NAVEGACIÓN CRISTAL -->
+  <header class="header">
+    <div class="header-inner">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <img src="logo-funebrero_2.png" alt="Logo" style="height: 35px;">
+        <h2 style="margin:0; font-size:1.5rem; color:#fff; font-family: 'Bebas Neue', cursive; letter-spacing: 2px;">FUNEBRERO</h2>
+      </div>
+      <nav class="nav-links" style="display: flex; align-items: center; flex-wrap: wrap;">
+        <a href="/index.html">Inicio</a>
+        <a href="/index.html#fixture">Competencia</a>
+        <a href="/index.html#socios" style="color: #dc2626;">Acompañanos</a>
+        <a href="/login.html" style="margin-left: 30px; padding: 5px 10px; border: 1px solid #333; border-radius: 4px; color: #a3a3a3; font-size: 0.8rem; text-transform: uppercase; text-decoration: none;">⚙️ Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO MINI -->
+  <section class="hero" style="min-height: 40vh; padding-top: 100px;">
+    <h1 class="club-title-glow" style="font-size: 4rem;">NUESTROS PLANTELES</h1>
+    <p class="hero-subtitle">La sangre de nuestro club en la cancha</p>
+  </section>
+
+  <!-- SECCIÓN PLANTELES DINÁMICOS -->
+  <section class="section-padding" style="padding-top: 0;">
+    <div id="rostersContainer" style="max-width: 1000px; margin: 0 auto;">
+      <p style="text-align: center; color: #a3a3a3;">Cargando planteles desde la base de datos...</p>
+    </div>
+  </section>
+
+  <!-- SECCIÓN HISTORIA / VISOR DE DRIVE -->
+  <section class="section-padding" style="background: linear-gradient(to bottom, transparent, rgba(220,38,38,0.05), transparent);">
+    <h2 class="section-title">Nuestra <span>Historia</span></h2>
+    <p style="text-align: center; color: #a3a3a3; max-width: 600px; margin: 0 auto 30px;">
+      Conocé los estatutos, la historia viva y los documentos oficiales de nuestra institución.
+    </p>
+    
+    <div class="glass-premium" style="max-width: 900px; margin: 0 auto; padding: 0; overflow: hidden; height: 600px; border-radius: 12px;">
+      <!-- AQUÍ REEMPLAZARÁS EL ENLACE LUEGO CON EL DE TU DRIVE -->
+      <iframe src="https://drive.google.com/file/d/1EjXk59s4XQz4V1X-ejX/preview" width="100%" height="100%" frameborder="0" style="border:none;"></iframe>
+    </div>
+  </section>
+
+  <footer class="main-footer">
+    <img src="logo-funebrero_2.png" alt="Escudo" style="width: 60px; margin-bottom: 15px; filter: grayscale(100%); opacity: 0.5;">
+    <p style="color: #ffffff; margin: 0;">© 2026 Club Funebrero - Todos los derechos reservados.</p>
+    <p style="color: #a3a3a3; font-size: 0.85rem; margin-top: 5px;">Desarrollado con pasión basquetbolera.</p>
+  </footer>
+
+  <script type="module" src="/js/club.js"></script>
+</body>
+</html>
