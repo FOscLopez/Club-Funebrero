@@ -1,21 +1,13 @@
 import { getPlayers } from "./services/firestore.service.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
-    console.log("🏀 Cargando Perfil del Club Funebrero...");
+    console.log("🏀 Perfil del Club inicializado.");
 
-    // Navegación suave
-    document.querySelectorAll('.nav-links a').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            const targetId = this.getAttribute('href');
-            if (targetId.startsWith('#')) {
-                e.preventDefault();
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    targetElement.scrollIntoView({ behavior: 'smooth' });
-                }
-            }
-        });
-    });
+    // Animación de aparición suave
+    setTimeout(() => {
+        const hero = document.querySelector(".hero");
+        if (hero) hero.style.opacity = "1";
+    }, 100);
 
     await loadPublicRosters();
 });
@@ -45,12 +37,12 @@ async function loadPublicRosters() {
 
         let html = "";
         
-        // Ordenamos las categorías alfabéticamente
+        // Ordenamos las categorías
         Object.keys(grouped).sort().forEach(cat => {
-            html += `<h2 class="cat-title">Categoría ${cat}</h2>`;
+            html += `<h2 class="cat-title">Categoría ${cat} <span style="font-size: 1rem; color: #a3a3a3; font-family: 'Poppins', sans-serif;">(${grouped[cat].length} Jugadores)</span></h2>`;
             html += `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;">`;
             
-            // Ordenamos a los jugadores por nombre dentro de la categoría
+            // Ordenamos a los jugadores alfabéticamente
             grouped[cat].sort((a, b) => a.name.localeCompare(b.name)).forEach(p => {
                 html += `
                     <div class="player-card">
