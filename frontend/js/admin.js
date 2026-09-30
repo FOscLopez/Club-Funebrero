@@ -3,11 +3,10 @@ import { addPlayersBulk, getPlayers } from "./services/firestore.service.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// ==========================================
-// 1. SEGURIDAD Y ARRANQUE (ACTUALIZADO AL NUEVO CORREO)
-// ==========================================
+const allowedAdmins = ["mecinfotec@gmail.com", "admin@abnch.com", "admin@reydigital.com"];
+
 onAuthStateChanged(auth, (user) => {
-    if (!user || user.email !== "admin@reydigital.com") {
+    if (!user || !allowedAdmins.includes(user.email)) {
         window.location.replace("index.html");
     } else {
         loadFixtures();
@@ -20,9 +19,6 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
     window.location.replace("index.html");
 });
 
-// ==========================================
-// 2. MÓDULO MANUAL: FIXTURES
-// ==========================================
 document.getElementById("fixtureForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const btn = document.getElementById("saveBtn");
@@ -48,9 +44,6 @@ document.getElementById("fixtureForm").addEventListener("submit", async (e) => {
     finally { btn.textContent = "Guardar Partido"; btn.disabled = false; }
 });
 
-// ==========================================
-// 3. CAJA MÁGICA: FIXTURES MASIVOS
-// ==========================================
 document.getElementById("magicFixtureForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const btn = document.getElementById("saveMagicFixturesBtn");
@@ -133,9 +126,6 @@ document.getElementById("magicFixtureForm").addEventListener("submit", async (e)
     finally { btn.textContent = "Procesar Fixture"; btn.disabled = false; }
 });
 
-// ==========================================
-// 4. CAJA MÁGICA: JUGADORES
-// ==========================================
 document.getElementById("playerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const btn = document.getElementById("savePlayersBtn");
@@ -178,9 +168,6 @@ document.getElementById("playerForm").addEventListener("submit", async (e) => {
     finally { btn.textContent = "Procesar Plantel"; btn.disabled = false; }
 });
 
-// ==========================================
-// 5. LECTURA DE TABLAS (FIXTURES Y JUGADORES)
-// ==========================================
 async function loadFixtures() {
     const tbody = document.getElementById("fixturesList");
     try {

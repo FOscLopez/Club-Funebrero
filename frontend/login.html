@@ -2,84 +2,48 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Acceso Administrador - Club Funebrero</title>
+  <title>Login Admin - Funebrero</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
   <style>
-    body {
-      background-color: #050505; 
-      display: flex; justify-content: center; align-items: center; 
-      height: 100vh; margin: 0; font-family: 'Poppins', sans-serif;
-    }
+    body { background-color: #020617; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: 'Poppins', sans-serif; }
+    .login-container { background: rgba(15, 23, 42, 0.9); padding: 40px; border-radius: 12px; border: 1px solid rgba(255,140,0,0.3); text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-width: 350px; width: 100%; }
+    .password-container { position: relative; width: 100%; margin-bottom: 25px; }
+    .password-container input { width: 100%; box-sizing: border-box; padding: 12px; padding-right: 40px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; outline: none; font-family: inherit; }
+    .password-container input:focus { border-color: #ff8c00; }
+    .toggle-password { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.2rem; padding: 0; outline: none; }
+    .toggle-password:hover { color: #ff8c00; }
     
-    .login-container {
-      background: rgba(15, 15, 15, 0.8); padding: 40px; border-radius: 12px; 
-      border: 1px solid rgba(220, 38, 38, 0.3); border-top: 3px solid #dc2626; text-align: center; 
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-width: 350px; width: 100%; backdrop-filter: blur(10px);
-    }
-
-    .password-container {
-      position: relative; width: 100%; margin-bottom: 25px;
-    }
-    .password-container input {
-      width: 100%; box-sizing: border-box; padding: 12px; padding-right: 40px; 
-      border-radius: 6px; border: 1px solid #333; background: #050505; 
-      color: white; outline: none; font-family: inherit;
-    }
-    .password-container input:focus { border-color: #dc2626; }
-    
-    .toggle-password {
-      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-      background: none; border: none; color: #a3a3a3; cursor: pointer;
-      font-size: 1.2rem; padding: 0; outline: none;
-    }
-    .toggle-password:hover { color: #dc2626; }
-
-    /* PANTALLA DE ALERTA (SCAREWARE) */
     @keyframes sirenAlarm {
       0% { background-color: #7f1d1d; box-shadow: 0 0 20px #ef4444; transform: scale(1); }
       50% { background-color: #991b1b; box-shadow: 0 0 50px #ef4444; transform: scale(1.02); }
       100% { background-color: #7f1d1d; box-shadow: 0 0 20px #ef4444; transform: scale(1); }
     }
-    
-    .alert-container {
-      display: none; 
-      background-color: #7f1d1d; padding: 40px; border-radius: 12px; 
-      border: 2px solid #ef4444; text-align: center; 
-      max-width: 450px; width: 100%; color: white;
-      animation: sirenAlarm 1.5s infinite;
-    }
+    .alert-container { display: none; background-color: #7f1d1d; padding: 40px; border-radius: 12px; border: 2px solid #ef4444; text-align: center; max-width: 450px; width: 100%; color: white; animation: sirenAlarm 1.5s infinite; }
     .alert-container h2 { font-family: 'Bebas Neue', cursive; font-size: 3rem; margin: 0 0 15px 0; color: #fca5a5; letter-spacing: 2px; }
     .alert-container p { font-size: 0.95rem; line-height: 1.6; margin-bottom: 25px; font-weight: 400; }
-    
-    .escape-btn {
-      background: #000; color: #ef4444; border: 1px solid #ef4444; 
-      padding: 12px 25px; border-radius: 6px; font-weight: 800; 
-      cursor: pointer; text-transform: uppercase; font-family: inherit;
-      transition: 0.3s; text-decoration: none; display: inline-block;
-    }
+    .escape-btn { background: #000; color: #ef4444; border: 1px solid #ef4444; padding: 12px 25px; border-radius: 6px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: 0.3s; text-decoration: none; display: inline-block; }
     .escape-btn:hover { background: #ef4444; color: #fff; }
   </style>
 </head>
 <body>
 
   <div id="loginBox" class="login-container">
-    <img src="logo-funebrero_2.png" alt="Logo Funebrero" style="width: 100px; margin-bottom: 15px;">
-    <h2 style="color: #ffffff; margin-bottom: 25px; font-family: 'Bebas Neue', cursive; font-size: 2.2rem; letter-spacing: 1px;">Acceso <span style="color: #dc2626;">Directivo</span></h2>
-
-    <input type="email" id="email" placeholder="Correo Administrador" style="width: 100%; box-sizing: border-box; padding: 12px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #333; background: #050505; color: white; outline: none; font-family: inherit;" />
+    <h2 style="color: #ff8c00; margin-bottom: 25px; font-weight: 600;">🛡️ Acceso Admin</h2>
+    <input type="email" id="email" placeholder="Email Administrador" style="width: 100%; box-sizing: border-box; padding: 12px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; outline: none; font-family: inherit;" />
     
     <div class="password-container">
       <input type="password" id="password" placeholder="Contraseña" />
-      <button type="button" id="togglePasswordBtn" class="toggle-password" aria-label="Mostrar contraseña">👁️</button>
+      <button type="button" id="togglePasswordBtn" class="toggle-password">👁️</button>
     </div>
 
-    <button id="loginBtn" style="width: 100%; padding: 12px; background: #dc2626; color: white; border: none; border-radius: 6px; font-family: 'Bebas Neue', cursive; font-size: 1.3rem; cursor: pointer; transition: 0.3s; letter-spacing: 1px;">Ingresar al Panel</button>
+    <button id="loginBtn" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #ff6b00, #ff8c00); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 1rem; font-family: inherit;">Ingresar al Panel</button>
+    <p id="errorMsg" style="color: #ef4444; display: none; margin-top: 15px; font-size: 0.85rem; font-weight: bold;">Credenciales incorrectas o error de conexión.</p>
   </div>
 
   <div id="alertBox" class="alert-container">
     <h2>⚠️ ACCESO DENEGADO ⚠️</h2>
-    <p><strong>INTENTO DE INGRESO NO AUTORIZADO DETECTADO.</strong><br><br>Su dirección IP y los datos de su dispositivo han sido registrados temporalmente en nuestros servidores. Si no cuenta con autorización de <strong>Nivel Administrador</strong>, su dispositivo será bloqueado permanentemente del sistema institucional.</p>
+    <p><strong>INTENTO DE INGRESO NO AUTORIZADO DETECTADO.</strong><br><br>Su dirección IP ha sido registrada. Si no cuenta con autorización de <strong>Nivel Administrador</strong>, su dispositivo será bloqueado permanentemente.</p>
     <a href="/index.html" class="escape-btn">SALIR INMEDIATAMENTE</a>
   </div>
 
@@ -87,7 +51,6 @@
     import { auth } from "./js/services/firebase.config.js";
     import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    // LÓGICA DEL OJITO
     const toggleBtn = document.getElementById("togglePasswordBtn");
     const passwordInput = document.getElementById("password");
 
@@ -97,28 +60,31 @@
       this.textContent = type === "password" ? "👁️" : "🙈";
     });
 
-    // LÓGICA DE INGRESO ESTRICTA
     document.getElementById("loginBtn").onclick = async () => {
       const email = document.getElementById("email").value.trim().toLowerCase();
       const password = passwordInput.value;
       const loginBox = document.getElementById("loginBox");
       const alertBox = document.getElementById("alertBox");
+      const errorMsg = document.getElementById("errorMsg");
+      const btn = document.getElementById("loginBtn");
 
-      // Candado maestro: Solo permite admin@reydigital.com
-      if (email !== "admin@reydigital.com") {
+      // Lista de correos autorizados
+      const allowedAdmins = ["mecinfotec@gmail.com", "admin@abnch.com", "admin@reydigital.com"];
+
+      if (!allowedAdmins.includes(email)) {
         loginBox.style.display = "none";
         alertBox.style.display = "block";
         return; 
       }
 
       try {
-        const btn = document.getElementById("loginBtn");
         btn.textContent = "Verificando...";
+        errorMsg.style.display = "none";
         await signInWithEmailAndPassword(auth, email, password);
-        window.location.replace("admin.html"); 
+        window.location.href = "/admin.html"; 
       } catch (e) {
-        loginBox.style.display = "none";
-        alertBox.style.display = "block";
+        errorMsg.style.display = "block";
+        btn.textContent = "Ingresar al Panel";
       }
     };
   </script>
