@@ -1,61 +1,126 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
   <title>Acceso Administrador - Club Funebrero</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
   <style>
-    .login-container { max-width: 400px; margin: 100px auto; padding: 40px 30px; background: rgba(15, 15, 15, 0.8); border: 1px solid rgba(220, 38, 38, 0.3); border-top: 3px solid #dc2626; border-radius: 12px; backdrop-filter: blur(10px); text-align: center; }
-    .login-input { width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 6px; border: 1px solid #333; background: #050505; color: #fff; font-family: 'Poppins', sans-serif; box-sizing: border-box; outline: none; }
-    .login-input:focus { border-color: #dc2626; }
-    .login-btn { width: 100%; padding: 12px; background: #dc2626; color: #fff; border: none; border-radius: 6px; font-family: 'Bebas Neue', cursive; font-size: 1.5rem; cursor: pointer; transition: 0.3s; letter-spacing: 1px; }
-    .login-btn:hover { background: #ff3b3b; transform: translateY(-2px); }
+    body {
+      background-color: #050505; 
+      display: flex; justify-content: center; align-items: center; 
+      height: 100vh; margin: 0; font-family: 'Poppins', sans-serif;
+    }
+    
+    .login-container {
+      background: rgba(15, 15, 15, 0.8); padding: 40px; border-radius: 12px; 
+      border: 1px solid rgba(220, 38, 38, 0.3); border-top: 3px solid #dc2626; text-align: center; 
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-width: 350px; width: 100%; backdrop-filter: blur(10px);
+    }
+
+    .password-container {
+      position: relative; width: 100%; margin-bottom: 25px;
+    }
+    .password-container input {
+      width: 100%; box-sizing: border-box; padding: 12px; padding-right: 40px; 
+      border-radius: 6px; border: 1px solid #333; background: #050505; 
+      color: white; outline: none; font-family: inherit;
+    }
+    .password-container input:focus { border-color: #dc2626; }
+    
+    .toggle-password {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: #a3a3a3; cursor: pointer;
+      font-size: 1.2rem; padding: 0; outline: none;
+    }
+    .toggle-password:hover { color: #dc2626; }
+
+    /* PANTALLA DE ALERTA (SCAREWARE) */
+    @keyframes sirenAlarm {
+      0% { background-color: #7f1d1d; box-shadow: 0 0 20px #ef4444; transform: scale(1); }
+      50% { background-color: #991b1b; box-shadow: 0 0 50px #ef4444; transform: scale(1.02); }
+      100% { background-color: #7f1d1d; box-shadow: 0 0 20px #ef4444; transform: scale(1); }
+    }
+    
+    .alert-container {
+      display: none; 
+      background-color: #7f1d1d; padding: 40px; border-radius: 12px; 
+      border: 2px solid #ef4444; text-align: center; 
+      max-width: 450px; width: 100%; color: white;
+      animation: sirenAlarm 1.5s infinite;
+    }
+    .alert-container h2 { font-family: 'Bebas Neue', cursive; font-size: 3rem; margin: 0 0 15px 0; color: #fca5a5; letter-spacing: 2px; }
+    .alert-container p { font-size: 0.95rem; line-height: 1.6; margin-bottom: 25px; font-weight: 400; }
+    
+    .escape-btn {
+      background: #000; color: #ef4444; border: 1px solid #ef4444; 
+      padding: 12px 25px; border-radius: 6px; font-weight: 800; 
+      cursor: pointer; text-transform: uppercase; font-family: inherit;
+      transition: 0.3s; text-decoration: none; display: inline-block;
+    }
+    .escape-btn:hover { background: #ef4444; color: #fff; }
   </style>
 </head>
-<body style="background: #050505; color: #fff;">
-  <div class="login-container">
-    <img src="logo-funebrero_2.png" alt="Logo Funebrero" style="width: 120px; margin-bottom: 20px;">
-    <h2 style="font-family: 'Bebas Neue', cursive; font-size: 2.5rem; margin-bottom: 30px;">Acceso <span style="color: #dc2626;">Directivo</span></h2>
+<body>
+
+  <div id="loginBox" class="login-container">
+    <img src="logo-funebrero_2.png" alt="Logo Funebrero" style="width: 100px; margin-bottom: 15px;">
+    <h2 style="color: #ffffff; margin-bottom: 25px; font-family: 'Bebas Neue', cursive; font-size: 2.2rem; letter-spacing: 1px;">Acceso <span style="color: #dc2626;">Directivo</span></h2>
+
+    <input type="email" id="email" placeholder="Correo Administrador" style="width: 100%; box-sizing: border-box; padding: 12px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #333; background: #050505; color: white; outline: none; font-family: inherit;" />
     
-    <input type="email" id="email" class="login-input" placeholder="Correo Electrónico">
-    <input type="password" id="password" class="login-input" placeholder="Contraseña">
-    
-    <button id="loginBtn" class="login-btn">Ingresar al Panel</button>
-    <p id="errorMsg" style="color: #ff3b3b; font-size: 0.9rem; margin-top: 15px; display: none; font-weight: 600;"></p>
+    <div class="password-container">
+      <input type="password" id="password" placeholder="Contraseña" />
+      <button type="button" id="togglePasswordBtn" class="toggle-password" aria-label="Mostrar contraseña">👁️</button>
+    </div>
+
+    <button id="loginBtn" style="width: 100%; padding: 12px; background: #dc2626; color: white; border: none; border-radius: 6px; font-family: 'Bebas Neue', cursive; font-size: 1.3rem; cursor: pointer; transition: 0.3s; letter-spacing: 1px;">Ingresar al Panel</button>
+  </div>
+
+  <div id="alertBox" class="alert-container">
+    <h2>⚠️ ACCESO DENEGADO ⚠️</h2>
+    <p><strong>INTENTO DE INGRESO NO AUTORIZADO DETECTADO.</strong><br><br>Su dirección IP y los datos de su dispositivo han sido registrados temporalmente en nuestros servidores. Si no cuenta con autorización de <strong>Nivel Administrador</strong>, su dispositivo será bloqueado permanentemente del sistema institucional.</p>
+    <a href="/index.html" class="escape-btn">SALIR INMEDIATAMENTE</a>
   </div>
 
   <script type="module">
     import { auth } from "./js/services/firebase.config.js";
     import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    
-    document.getElementById("loginBtn").addEventListener("click", async () => {
-        const email = document.getElementById("email").value.trim();
-        const password = document.getElementById("password").value.trim();
-        const errorMsg = document.getElementById("errorMsg");
-        const btn = document.getElementById("loginBtn");
-        
-        if (!email || !password) return;
-        
-        btn.textContent = "Verificando...";
-        
-        try {
-            const userCred = await signInWithEmailAndPassword(auth, email, password);
-            if (userCred.user.email === "mecinfotec@gmail.com") {
-                window.location.replace("admin.html");
-            } else {
-                errorMsg.textContent = "Acceso denegado: Usuario no autorizado.";
-                errorMsg.style.display = "block";
-                auth.signOut();
-                btn.textContent = "Ingresar al Panel";
-            }
-        } catch (error) {
-            errorMsg.textContent = "Credenciales incorrectas o usuario inexistente.";
-            errorMsg.style.display = "block";
-            btn.textContent = "Ingresar al Panel";
-        }
+
+    // LÓGICA DEL OJITO
+    const toggleBtn = document.getElementById("togglePasswordBtn");
+    const passwordInput = document.getElementById("password");
+
+    toggleBtn.addEventListener("click", function () {
+      const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+      passwordInput.setAttribute("type", type);
+      this.textContent = type === "password" ? "👁️" : "🙈";
     });
+
+    // LÓGICA DE INGRESO ESTRICTA
+    document.getElementById("loginBtn").onclick = async () => {
+      const email = document.getElementById("email").value.trim().toLowerCase();
+      const password = passwordInput.value;
+      const loginBox = document.getElementById("loginBox");
+      const alertBox = document.getElementById("alertBox");
+
+      // Candado maestro: Solo permite admin@reydigital.com
+      if (email !== "admin@reydigital.com") {
+        loginBox.style.display = "none";
+        alertBox.style.display = "block";
+        return; 
+      }
+
+      try {
+        const btn = document.getElementById("loginBtn");
+        btn.textContent = "Verificando...";
+        await signInWithEmailAndPassword(auth, email, password);
+        window.location.replace("admin.html"); 
+      } catch (e) {
+        loginBox.style.display = "none";
+        alertBox.style.display = "block";
+      }
+    };
   </script>
 </body>
 </html>

@@ -4,11 +4,11 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // ==========================================
-// 1. SEGURIDAD Y ARRANQUE
+// 1. SEGURIDAD Y ARRANQUE (ACTUALIZADO AL NUEVO CORREO)
 // ==========================================
 onAuthStateChanged(auth, (user) => {
-    if (!user || user.email !== "mecinfotec@gmail.com") {
-        window.location.replace("login.html");
+    if (!user || user.email !== "admin@reydigital.com") {
+        window.location.replace("index.html");
     } else {
         loadFixtures();
         loadPlayers();
@@ -63,7 +63,6 @@ document.getElementById("magicFixtureForm").addEventListener("submit", async (e)
 
     lines.forEach(line => {
         const cleanLine = line.trim();
-        // Ignoramos líneas vacías o fechas Libres
         if (!cleanLine || cleanLine.toUpperCase().includes("LIBRE")) return;
 
         const matchVs = cleanLine.toUpperCase().split(" VS ");
@@ -73,13 +72,11 @@ document.getElementById("magicFixtureForm").addEventListener("submit", async (e)
             let round = "A definir";
             let home = firstPart;
             
-            // Si empieza con un número, lo extraemos como número de Fecha
             if (spaceIndex > -1 && !isNaN(firstPart.substring(0, spaceIndex))) {
                 round = "Fecha " + firstPart.substring(0, spaceIndex);
                 home = firstPart.substring(spaceIndex + 1).trim();
             }
 
-            // Normalización para mantener la estética
             home = home.replace("S. ZAPALLAR", "S. Zapallar").replace("FUNEBRERO", "Funebrero");
             const away = matchVs[1].trim().replace("S. ZAPALLAR", "S. Zapallar").replace("FUNEBRERO", "Funebrero");
 
@@ -105,12 +102,10 @@ document.getElementById("magicFixtureForm").addEventListener("submit", async (e)
     }
 
     try {
-        // Obtenemos los fixtures de esta categoría para aplicar anti-duplicados
         const q = query(collection(db, "fixtures"), where("categoryId", "==", category));
         const existingSnap = await getDocs(q);
         const batch = writeBatch(db);
         
-        // Si ya existía el mismo cruce marcado como "A definir", lo borramos para poner el nuevo
         existingSnap.forEach(docSnap => {
             const d = docSnap.data();
             const matchExists = fixturesToSave.find(f => 
@@ -122,7 +117,6 @@ document.getElementById("magicFixtureForm").addEventListener("submit", async (e)
             }
         });
 
-        // Inyectamos los nuevos partidos masivos
         fixturesToSave.forEach(f => {
             const newRef = doc(collection(db, "fixtures"));
             batch.set(newRef, f);
@@ -140,7 +134,7 @@ document.getElementById("magicFixtureForm").addEventListener("submit", async (e)
 });
 
 // ==========================================
-// 4. CAJA MÁGICA: JUGADORES (EXISTENTE)
+// 4. CAJA MÁGICA: JUGADORES
 // ==========================================
 document.getElementById("playerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
