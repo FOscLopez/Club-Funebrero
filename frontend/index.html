@@ -12,30 +12,35 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  
   <style>
-    /* Estilos para Ticker y Sponsors heredados de tu base */
-    .ticker-wrap { width: 100%; overflow: hidden; background: linear-gradient(90deg, #dc2626, #991b1b); color: white; padding: 6px 0; border-bottom: 2px solid rgba(255,255,255,0.1); position: fixed; top: 0; left: 0; z-index: 1000; height: 32px; box-sizing: border-box; }
-    .ticker-move { display: inline-flex; white-space: nowrap; animation: tickerAnim 25s linear infinite; }
-    .ticker-move:hover { animation-play-state: paused; }
-    .ticker-item { padding: 0 2rem; font-size: 0.85rem; font-family: 'Poppins', sans-serif; display: flex; align-items: center; height: 100%; }
-    @keyframes tickerAnim { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
-    .header { top: 32px !important; } 
-    .hero { padding-top: 32px !important; }
-    
-    .sponsors-bar { background: #020617; padding: 20px 0; border-top: 1px solid #1e293b; overflow: hidden; white-space: nowrap; }
-    .sponsors-track { display: inline-flex; animation: scrollSponsors 30s linear infinite; gap: 40px; padding: 0 20px; }
-    .sponsor-card { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.02); padding: 10px 20px; border-radius: 8px; border: 1px solid #1e293b; text-decoration: none; color: white; transition: 0.3s; }
-    .sponsor-card:hover { border-color: #dc2626; background: rgba(220,38,38,0.05); }
-    .sponsor-logo { height: 40px; max-width: 100px; object-fit: contain; }
-    .sponsor-info p { margin: 0; font-size: 0.75rem; color: #94a3b8; }
-    @keyframes scrollSponsors { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    /* ACORDEONES ESTILO FUNEBRERO */
+    details.fune-accordion { border: 1px solid rgba(220, 38, 38, 0.3); border-radius: 8px; margin-bottom: 15px; transition: 0.3s; }
+    details.fune-accordion summary { background: linear-gradient(135deg, #7f1d1d, #dc2626); color: white; padding: 12px 20px; font-family: 'Bebas Neue', cursive; font-size: 1.5rem; cursor: pointer; border-radius: 8px; list-style: none; display: flex; justify-content: space-between; align-items: center; letter-spacing: 1px; }
+    details.fune-accordion summary::-webkit-details-marker { display: none; }
+    details.fune-accordion[open] { box-shadow: 0 5px 20px rgba(220, 38, 38, 0.2); }
+    details.fune-accordion[open] summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+    .fune-accordion-content { background: rgba(15, 15, 15, 0.9); padding: 20px; border-radius: 0 0 8px 8px; border-top: none; }
+
+    /* CARRUSEL DE SPONSORS */
+    .sponsors-bar { background: #050505; padding: 30px 0; border-top: 2px solid rgba(220, 38, 38, 0.2); overflow: hidden; position: relative; }
+    .sponsors-track { display: flex; gap: 40px; width: max-content; animation: sponsorScroll 30s linear infinite; padding-left: 30px; }
+    .sponsors-track:hover { animation-play-state: paused; }
+    @keyframes sponsorScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .sponsor-card { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.03); padding: 10px 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); text-decoration: none; transition: 0.3s; }
+    .sponsor-card:hover { background: rgba(220,38,38,0.1); border-color: rgba(220,38,38,0.4); transform: translateY(-3px); }
+    .sponsor-logo { height: 50px; max-width: 120px; object-fit: contain; }
   </style>
 </head>
 <body>
 
   <!-- TICKER -->
   <div class="ticker-wrap">
-    <div class="ticker-move"></div>
+    <div class="ticker-move">
+      <div class="ticker-item"><span>CLUB FUNEBRERO</span> Bienvenidos a la nueva plataforma oficial.</div>
+      <div class="ticker-item"><span>SOCIOS</span> Sumate a nuestra campaña a distancia.</div>
+      <div class="ticker-item"><span>COMPETENCIA</span> Seguí los resultados al instante.</div>
+    </div>
   </div>
 
   <!-- NAVEGACIÓN CRISTAL -->
@@ -47,62 +52,80 @@
       </div>
       <nav class="nav-links" style="display: flex; align-items: center; flex-wrap: wrap;">
         <a href="#inicio">Inicio</a>
-        <a href="#planteles">Planteles</a>
         <a href="#fixture">Competencia</a>
-        <a href="#socios" style="color: #dc2626;">Acompañanos</a>
+        <a href="#planteles">Planteles</a>
+        <a href="#institucional">Institucional</a>
+        <a href="#socios" style="color: #dc2626;">Socios</a>
         <a href="/login.html" style="margin-left: 30px; padding: 5px 10px; border: 1px solid #333; border-radius: 4px; color: #a3a3a3; font-size: 0.8rem; text-transform: uppercase; text-decoration: none;">⚙️ Admin</a>
       </nav>
     </div>
   </header>
 
-  <!-- HERO VIVO -->
+  <!-- HERO -->
   <section id="inicio" class="hero">
-    <canvas id="particle-canvas" style="position: absolute; top:0; left:0; width:100%; height:100%; z-index: -1;"></canvas>
     <img src="logo-funebrero_2.png" alt="Escudo Funebrero" class="hero-logo">
-    <h1 class="club-title-glow" id="animated-title">FUNEBRERO</h1>
+    <h1 class="club-title-glow">FUNEBRERO</h1>
     <p class="hero-subtitle">Asociación Civil Club Social Cultural y Deportivo</p>
-    
-    <div style="margin-top: 30px; display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
-      <a href="#socios" class="btn-neon">Hacete Socio Protector</a>
-      <a href="#fixture" class="btn-neon btn-white">Ver Fixture</a>
-      <button id="soundToggleBtn" style="background: transparent; border: 1px solid rgba(220, 38, 38, 0.5); color: #dc2626; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: 0.3s;">🔇</button>
-    </div>
-    <audio id="court-sound" src="/audio/cancha.mp3" loop preload="none"></audio>
   </section>
 
-  <main>
-    <!-- SECCIÓN COMPETENCIA (FIXTURE ORDENADO) -->
-    <section id="fixture" class="section-padding" style="background: linear-gradient(to bottom, #050505, rgba(220, 38, 38, 0.05), #050505);">
-      <h2 class="section-title">Campaña <span>Actual</span></h2>
-      <div id="results-container" style="max-width: 900px; margin: 0 auto;">
-        <p style="text-align:center; color:#94a3b8;">Sincronizando con la base de datos...</p>
+  <!-- SECCIÓN COMPETENCIA (ACORDEONES) -->
+  <section id="fixture" class="section-padding" style="background: linear-gradient(to bottom, #050505, rgba(220, 38, 38, 0.05), #050505);">
+    <h2 class="section-title">Campaña <span>Actual</span></h2>
+    <div id="publicFixturesContainer" style="max-width: 900px; margin: 0 auto;">
+      <p style="text-align: center; color: #a3a3a3;">Sincronizando fixture...</p>
+    </div>
+  </section>
+
+  <!-- SECCIÓN PLANTELES (ACORDEONES) -->
+  <section id="planteles" class="section-padding">
+    <h2 class="section-title">Nuestros <span>Planteles</span></h2>
+    <div id="rostersContainer" style="max-width: 900px; margin: 0 auto;">
+      <p style="text-align: center; color: #a3a3a3;">Cargando jugadores...</p>
+    </div>
+  </section>
+
+  <!-- SECCIÓN INSTITUCIONAL (ACTAS) -->
+  <section id="institucional" class="section-padding">
+    <h2 class="section-title">Comisión <span>Directiva</span></h2>
+    <div style="max-width: 900px; margin: 0 auto;">
+      <details class="fune-accordion">
+        <summary>📜 Boletín Oficial y Actas</summary>
+        <div class="fune-accordion-content" id="meetingsContainer">
+          <p style="text-align: center; color: #a3a3a3;">Buscando documentos oficiales...</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- SECCIÓN SOCIOS -->
+  <section id="socios" class="section-padding">
+    <h2 class="section-title">Apoyo a <span>Distancia</span></h2>
+    <div class="grid-cards" style="max-width: 900px; margin: 0 auto;">
+      <div class="glass-premium">
+        <h3>Socio Protector</h3>
+        <p>Tu aporte mensual es vital para sostener viajes y materiales.</p>
+        <a href="#" class="btn-neon">Quiero Aportar</a>
       </div>
-    </section>
+      <div class="glass-premium">
+        <h3 style="color: #ffffff;">Tienda Funebrera</h3>
+        <p>Adquirí la indumentaria oficial con envíos a todo el país.</p>
+        <a href="#" class="btn-neon btn-white">Ver Catálogo</a>
+      </div>
+    </div>
+  </section>
 
-    <!-- SECCIÓN COMISIÓN DIRECTIVA (ACTAS) -->
-    <section id="comision" class="section-padding">
-      <h2 class="section-title">Comisión <span>Directiva</span></h2>
-      <div id="meetings-container" style="max-width: 800px; margin: 0 auto;"></div>
-    </section>
-
-    <!-- SECCIÓN CLUBES -->
-    <section id="clubes" class="section-padding">
-      <h2 class="section-title">Clubes <span>Participantes</span></h2>
-      <div class="grid-cards" id="clubs-container"></div>
-    </section>
-  </main>
-
-  <!-- BARRA DE SPONSORS -->
+  <!-- CARRUSEL DE SPONSORS -->
   <div class="sponsors-bar">
-    <div style="text-align: center; color: #94a3b8; font-size: 0.85rem; margin-bottom: 25px; letter-spacing: 3px; text-transform: uppercase; font-weight: 600;">Acompañan al Club</div>
-    <div class="sponsors-track" id="sponsors-container"></div>
+    <div style="text-align: center; color: #a3a3a3; font-size: 0.85rem; margin-bottom: 25px; letter-spacing: 3px; text-transform: uppercase; font-weight: 600;">Acompañan al Club</div>
+    <div class="sponsors-track" id="sponsorsContainer">
+      <!-- Se inyectan por JS -->
+    </div>
   </div>
 
   <footer class="main-footer">
-    <div class="footer-content" style="text-align: center; padding: 20px;">
-      <p class="copyright" style="color: #ffffff; margin: 0;">© 2026 Club Funebrero - Todos los derechos reservados</p>
-      <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 5px;">Desarrollado por <strong style="color: #dc2626;">Rey Digital del Norte</strong></p>
-    </div>
+    <img src="logo-funebrero_2.png" alt="Escudo" style="width: 60px; margin-bottom: 15px; filter: grayscale(100%); opacity: 0.5;">
+    <p style="color: #ffffff; margin: 0;">© 2026 Club Funebrero - Todos los derechos reservados.</p>
+    <p style="color: #a3a3a3; font-size: 0.85rem; margin-top: 5px;">Desarrollado por <strong style="color: #dc2626;">Rey Digital del Norte</strong></p>
   </footer>
 
   <script type="module" src="/js/app.js"></script>
