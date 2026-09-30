@@ -1,10 +1,15 @@
 import { auth, db } from "./services/firebase.config.js";
-import { addPlayersBulk, getPlayers } from "./services/firestore.service.js";
+import { addPlayersBulk, getPlayers, updatePlayer, deletePlayer, getFixtures, updateFixture, deleteFixture } from "./services/firestore.service.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, addDoc, getDocs, doc, query, orderBy, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const allowedAdmins = ["mecinfotec@gmail.com", "admin@abnch.com", "admin@reydigital.com"];
+let allFixturesCache = [];
+let currentEditTarget = { id: null, type: null }; 
 
+// ==========================================
+// 1. SEGURIDAD Y ARRANQUE
+// ==========================================
 onAuthStateChanged(auth, (user) => {
     if (!user || !allowedAdmins.includes(user.email)) {
         window.location.replace("index.html");
@@ -19,6 +24,9 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
     window.location.replace("index.html");
 });
 
+// ==========================================
+// 2. MÓDULO MANUAL: FIXTURES
+// ==========================================
 document.getElementById("fixtureForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const btn = document.getElementById("saveBtn");
@@ -44,6 +52,9 @@ document.getElementById("fixtureForm").addEventListener("submit", async (e) => {
     finally { btn.textContent = "Guardar Partido"; btn.disabled = false; }
 });
 
+// ==========================================
+// 3. CAJA MÁGICA: FIXTURES MASIVOS
+// ==========================================
 document.getElementById("magicFixtureForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const btn = document.getElementById("saveMagicFixturesBtn");
@@ -89,7 +100,7 @@ document.getElementById("magicFixtureForm").addEventListener("submit", async (e)
     });
 
     if (fixturesToSave.length === 0) {
-        alert("No se detectaron partidos. Usa el formato '1 Funebrero VS Rival'.");
+        alert("No se detectaron partidos.");
         btn.textContent = "Procesar Fixture"; btn.disabled = false;
         return;
     }
@@ -118,14 +129,16 @@ document.getElementById("magicFixtureForm").addEventListener("submit", async (e)
         await batch.commit();
         document.getElementById("magicFixtureBox").value = "";
         await loadFixtures();
-        alert(`Se cargaron ${fixturesToSave.length} partidos correctamente en ${category}.`);
+        alert(`Se cargaron ${fixturesToSave.length} partidos correctamente.`);
     } catch (err) { 
-        console.error(err);
         alert("Error al procesar los fixtures."); 
     } 
     finally { btn.textContent = "Procesar Fixture"; btn.disabled = false; }
 });
 
+// ==========================================
+// 4. CAJA MÁGICA: JUGADORES
+// ==========================================
 document.getElementById("playerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const btn = document.getElementById("savePlayersBtn");
@@ -154,7 +167,7 @@ document.getElementById("playerForm").addEventListener("submit", async (e) => {
     });
 
     if (playersToSave.length === 0) {
-        alert("No se pudo detectar el formato. Copia Nombre y Fecha separados por un espacio o tabulación.");
+        alert("No se detectó el formato correcto.");
         btn.textContent = "Procesar Plantel"; btn.disabled = false;
         return;
     }
@@ -168,6 +181,9 @@ document.getElementById("playerForm").addEventListener("submit", async (e) => {
     finally { btn.textContent = "Procesar Plantel"; btn.disabled = false; }
 });
 
+// ==========================================
+// 5. LECTURA Y RENDER DE TABLAS
+// ==========================================
 async function loadFixtures() {
     const tbody = document.getElementById("fixturesList");
     try {
@@ -175,8 +191,9 @@ async function loadFixtures() {
         const snapshot = await getDocs(q);
         if (snapshot.empty) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#a3a3a3;">El fixture está vacío.</td></tr>'; return; }
 
-        tbody.innerHTML = snapshot.docs.map(docSnap => {
-            const f = docSnap.data();
+        allFixturesCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        tbody.innerHTML = allFixturesCache.map(f => {
             const homeStyle = f.homeClubId === 'Funebrero' ? 'color:#fff; font-weight:bold;' : 'color:#a3a3a3;';
             const awayStyle = f.awayClubId === 'Funebrero' ? 'color:#fff; font-weight:bold;' : 'color:#a3a3a3;';
             return `
@@ -185,15 +202,20 @@ async function loadFixtures() {
                     <td><span style="color:#3b82f6; font-weight:bold; font-size:0.8rem;">${f.round || ''}</span><br>${f.date} ${f.time ? '<br><span style="color:#a3a3a3; font-size:0.8rem;">'+f.time+'</span>' : ''}</td>
                     <td style="${homeStyle}">${f.homeClubId}</td>
                     <td style="${awayStyle}">${f.awayClubId}</td>
-                    <td><button class="delete-btn" onclick="deleteFixture('${docSnap.id}')">Borrar</button></td>
+                    <td style="text-align: center;">
+                        <div style="display:flex; gap:5px;">
+                            <button class="action-btn" style="background:#3b82f6; flex:1; padding: 4px; font-size: 0.7rem;" onclick="openEditFixture('${f.id}')">✏️ Editar</button>
+                            <button class="danger delete-btn" style="flex:1; padding: 4px; font-size: 0.7rem;" onclick="deleteFixtureAdmin('${f.id}')">X Borrar</button>
+                        </div>
+                    </td>
                 </tr>`;
         }).join("");
     } catch (error) { tbody.innerHTML = '<tr><td colspan="5">Error de lectura.</td></tr>'; }
 }
 
-window.deleteFixture = async (id) => {
+window.deleteFixtureAdmin = async (id) => {
     if (confirm("¿Eliminar este partido permanentemente?")) {
-        await deleteDoc(doc(db, "fixtures", id));
+        await deleteFixture(id);
         loadFixtures();
     }
 };
@@ -220,7 +242,10 @@ async function loadPlayers() {
                 html += `<tr>
                             <td style="font-weight:600;">${p.name}</td>
                             <td style="color:#a3a3a3;">${p.birthdate}</td>
-                            <td style="text-align:right;"><button class="delete-btn" onclick="deletePlayer('${p.id}')">Eliminar</button></td>
+                            <td style="text-align:right; width: 140px;">
+                                <button class="action-btn" style="background:#3b82f6; padding: 4px 8px; font-size: 0.7rem; margin-right: 5px;" onclick="openEditPlayer('${p.id}', '${p.name}', '${p.birthdate}', '${p.categoryId}')">✏️ Editar</button>
+                                <button class="delete-btn" onclick="deletePlayerAdmin('${p.id}')">Borrar</button>
+                            </td>
                          </tr>`;
             });
             html += `</tbody></table>`;
@@ -229,9 +254,84 @@ async function loadPlayers() {
     } catch(e) { container.innerHTML = "<p style='color:#ff3b3b;'>Error al cargar los planteles.</p>"; }
 }
 
-window.deletePlayer = async (id) => {
+window.deletePlayerAdmin = async (id) => {
     if(confirm("¿Eliminar este jugador del plantel?")) {
-        await deleteDoc(doc(db, "players", id));
+        await deletePlayer(id);
         loadPlayers();
     }
+};
+
+// ==========================================
+// 6. LÓGICA DEL MODAL DE EDICIÓN RÁPIDA
+// ==========================================
+const catsOptions = `
+    <option value="Mosquito">Mosquito</option><option value="Mini">Mini</option><option value="Pre Mini">Pre Mini</option>
+    <option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option>
+    <option value="U17">U17</option><option value="U21">U21</option><option value="Primera">Primera</option>
+    <option value="Maxi 35">Maxi 35</option><option value="Maxi 42">Maxi 42</option>
+`;
+
+window.openEditPlayer = (id, name, birthdate, cat) => {
+    currentEditTarget = { id, type: 'player' };
+    document.getElementById('modalTitle').textContent = "✏️ Editar Jugador";
+    document.getElementById('modalFormContainer').innerHTML = `
+        <label style="color:#a3a3a3; font-size:0.8rem; margin-bottom:-10px;">Nombre Completo:</label>
+        <input type="text" id="editPName" class="form-input" value="${name}">
+        <label style="color:#a3a3a3; font-size:0.8rem; margin-bottom:-10px;">Fecha de Nacimiento:</label>
+        <input type="text" id="editPBirth" class="form-input" value="${birthdate}">
+        <label style="color:#a3a3a3; font-size:0.8rem; margin-bottom:-10px;">Corregir Categoría:</label>
+        <select id="editPCat" class="form-select">${catsOptions}</select>
+    `;
+    document.getElementById('editPCat').value = cat;
+    document.getElementById('editModal').style.display = 'flex';
+};
+
+window.openEditFixture = (id) => {
+    const f = allFixturesCache.find(x => x.id === id);
+    if (!f) return;
+    currentEditTarget = { id, type: 'fixture' };
+    document.getElementById('modalTitle').textContent = "✏️ Editar Partido";
+    document.getElementById('modalFormContainer').innerHTML = `
+        <div style="display:flex; gap:10px;">
+            <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Local:</label><input type="text" id="editFHome" class="form-input" value="${f.homeClubId}"></div>
+            <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Visitante:</label><input type="text" id="editFAway" class="form-input" value="${f.awayClubId}"></div>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Fase/Jornada:</label><input type="text" id="editFRound" class="form-input" value="${f.round}"></div>
+            <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Categoría:</label><select id="editFCat" class="form-select">${catsOptions}</select></div>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Fecha Calendario:</label><input type="text" id="editFDate" class="form-input" value="${f.date}"></div>
+            <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Hora (Opcional):</label><input type="time" id="editFTime" class="form-input" value="${f.time}"></div>
+        </div>
+    `;
+    document.getElementById('editFCat').value = f.categoryId;
+    document.getElementById('editModal').style.display = 'flex';
+};
+
+document.getElementById('modalSaveBtn').onclick = async () => {
+    const btn = document.getElementById('modalSaveBtn');
+    btn.textContent = "⏳ Procesando..."; btn.disabled = true;
+    try {
+        if (currentEditTarget.type === 'player') {
+            await updatePlayer(currentEditTarget.id, {
+                name: document.getElementById('editPName').value.trim(),
+                birthdate: document.getElementById('editPBirth').value.trim(),
+                categoryId: document.getElementById('editPCat').value
+            });
+            await loadPlayers();
+        } else if (currentEditTarget.type === 'fixture') {
+            await updateFixture(currentEditTarget.id, {
+                homeClubId: document.getElementById('editFHome').value.trim(),
+                awayClubId: document.getElementById('editFAway').value.trim(),
+                round: document.getElementById('editFRound').value.trim(),
+                categoryId: document.getElementById('editFCat').value,
+                date: document.getElementById('editFDate').value.trim(),
+                time: document.getElementById('editFTime').value.trim()
+            });
+            await loadFixtures();
+        }
+        document.getElementById('editModal').style.display = 'none';
+    } catch (e) { alert("Error al guardar los cambios."); } 
+    finally { btn.textContent = "Guardar Cambios"; btn.disabled = false; }
 };

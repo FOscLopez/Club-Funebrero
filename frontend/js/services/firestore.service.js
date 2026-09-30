@@ -1,6 +1,9 @@
 import { db } from "./firebase.config.js";
-import { collection, getDocs, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, getDocs, doc, writeBatch, addDoc, updateDoc, deleteDoc, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+// ==============================
+// GESTIÓN DE FIXTURES
+// ==============================
 export async function getFixtures() {
     try {
         const snapshot = await getDocs(collection(db, "fixtures"));
@@ -10,27 +13,13 @@ export async function getFixtures() {
         return [];
     }
 }
+export const addFixture = async (data) => await addDoc(collection(db, "fixtures"), data);
+export const updateFixture = async (id, data) => await updateDoc(doc(db, "fixtures", id), data);
+export const deleteFixture = async (id) => await deleteDoc(doc(db, "fixtures", id));
 
-export async function getClubs() {
-    try {
-        const snapshot = await getDocs(collection(db, "clubs"));
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    } catch (error) {
-        console.error("Error al obtener los clubes:", error);
-        return [];
-    }
-}
-
-export async function getCategories() {
-    try {
-        const snapshot = await getDocs(collection(db, "categories"));
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    } catch (error) {
-        console.error("Error al obtener las categorías:", error);
-        return [];
-    }
-}
-
+// ==============================
+// JUGADORES Y PLANTELES
+// ==============================
 export async function getPlayers() {
     try {
         const snapshot = await getDocs(collection(db, "players"));
@@ -55,3 +44,6 @@ export async function addPlayersBulk(playersArray) {
         throw error;
     }
 }
+
+export const updatePlayer = async (id, data) => await updateDoc(doc(db, "players", id), data);
+export const deletePlayer = async (id) => await deleteDoc(doc(db, "players", id));
