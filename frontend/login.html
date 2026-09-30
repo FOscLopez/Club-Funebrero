@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso Administrador - Club Funebrero</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .login-container { max-width: 400px; margin: 100px auto; padding: 40px 30px; background: rgba(15, 15, 15, 0.8); border: 1px solid rgba(220, 38, 38, 0.3); border-top: 3px solid #dc2626; border-radius: 12px; backdrop-filter: blur(10px); text-align: center; }
+    .login-input { width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 6px; border: 1px solid #333; background: #050505; color: #fff; font-family: 'Poppins', sans-serif; box-sizing: border-box; outline: none; }
+    .login-input:focus { border-color: #dc2626; }
+    .login-btn { width: 100%; padding: 12px; background: #dc2626; color: #fff; border: none; border-radius: 6px; font-family: 'Bebas Neue', cursive; font-size: 1.5rem; cursor: pointer; transition: 0.3s; letter-spacing: 1px; }
+    .login-btn:hover { background: #ff3b3b; transform: translateY(-2px); }
+  </style>
+</head>
+<body style="background: #050505; color: #fff;">
+  <div class="login-container">
+    <img src="logo-funebrero_2.png" alt="Logo Funebrero" style="width: 120px; margin-bottom: 20px;">
+    <h2 style="font-family: 'Bebas Neue', cursive; font-size: 2.5rem; margin-bottom: 30px;">Acceso <span style="color: #dc2626;">Directivo</span></h2>
+    
+    <input type="email" id="email" class="login-input" placeholder="Correo Electrónico">
+    <input type="password" id="password" class="login-input" placeholder="Contraseña">
+    
+    <button id="loginBtn" class="login-btn">Ingresar al Panel</button>
+    <p id="errorMsg" style="color: #ff3b3b; font-size: 0.9rem; margin-top: 15px; display: none; font-weight: 600;"></p>
+  </div>
+
+  <script type="module">
+    import { auth } from "./js/services/firebase.config.js";
+    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const errorMsg = document.getElementById("errorMsg");
+        const btn = document.getElementById("loginBtn");
+        
+        if (!email || !password) return;
+        
+        btn.textContent = "Verificando...";
+        
+        try {
+            const userCred = await signInWithEmailAndPassword(auth, email, password);
+            if (userCred.user.email === "mecinfotec@gmail.com") {
+                window.location.replace("admin.html");
+            } else {
+                errorMsg.textContent = "Acceso denegado: Usuario no autorizado.";
+                errorMsg.style.display = "block";
+                auth.signOut();
+                btn.textContent = "Ingresar al Panel";
+            }
+        } catch (error) {
+            errorMsg.textContent = "Credenciales incorrectas o usuario inexistente.";
+            errorMsg.style.display = "block";
+            btn.textContent = "Ingresar al Panel";
+        }
+    });
+  </script>
+</body>
+</html>
