@@ -1,22 +1,18 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyBXiiMjA2vNRuuJ_GwA7VBIgrN7RAtxqKo",
   authDomain: "funebrero.firebaseapp.com",
-  databaseURL: "https://funebrero-default-rtdb.firebaseio.com",
   projectId: "funebrero",
   storageBucket: "funebrero.firebasestorage.app",
   messagingSenderId: "6897282754",
-  appId: "1:6897282754:web:479a27c2a36e4b94d4d55b",
-  measurementId: "G-JTF498WM40"
+  appId: "1:6897282754:web:479a27c2a36e4b94d4d55b"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+export const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app, "funebrero");
+export const auth = getAuth(app);
+export const storage = getStorage(app);
