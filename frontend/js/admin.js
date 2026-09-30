@@ -8,7 +8,11 @@ const IMGBB_API_KEY = "4b6599a15cc7870198cb96ee95df9905";
 
 let allFixturesCache = [];
 let currentEditTarget = { id: null, type: null }; 
-let currentSort = { column: 'createdAt', direction: 'desc' };
+
+// =========================================
+// ESTADO DEL ORDENAMIENTO (Por defecto: FECHA ASCENDENTE)
+// =========================================
+let currentSort = { column: 'date', direction: 'asc' };
 
 window.setSort = (column) => {
     if (currentSort.column === column) {
@@ -19,13 +23,13 @@ window.setSort = (column) => {
     }
     
     document.getElementById("sortCatArrow").textContent = currentSort.column === 'category' ? (currentSort.direction === 'asc' ? '↑' : '↓') : '↕';
-    document.getElementById("sortCatArrow").style.color = currentSort.column === 'category' ? '#3b82f6' : '#94a3b8';
+    document.getElementById("sortCatArrow").style.color = currentSort.column === 'category' ? '#ff3b3b' : '#94a3b8';
     
-    document.getElementById("sortRoundArrow").textContent = currentSort.column === 'round' ? (currentSort.direction === 'asc' ? '↑' : '↓') : '↕';
-    document.getElementById("sortRoundArrow").style.color = currentSort.column === 'round' ? '#3b82f6' : '#94a3b8';
+    document.getElementById("sortRoundArrow").textContent = currentSort.column === 'date' ? (currentSort.direction === 'asc' ? '↑' : '↓') : '↕';
+    document.getElementById("sortRoundArrow").style.color = currentSort.column === 'date' ? '#ff3b3b' : '#94a3b8';
     
     document.getElementById("sortTeamsArrow").textContent = currentSort.column === 'teams' ? (currentSort.direction === 'asc' ? '↑' : '↓') : '↕';
-    document.getElementById("sortTeamsArrow").style.color = currentSort.column === 'teams' ? '#3b82f6' : '#94a3b8';
+    document.getElementById("sortTeamsArrow").style.color = currentSort.column === 'teams' ? '#ff3b3b' : '#94a3b8';
     
     renderFixturesTable();
 };
@@ -192,13 +196,15 @@ document.getElementById("playerForm").addEventListener("submit", async (e) => {
 });
 
 // =========================================
-// TABLA DE FIXTURES (EDICIÓN EN LÍNEA)
+// TABLA DE FIXTURES (EDICIÓN EN LÍNEA Y ORDEN AUTOMÁTICO)
 // =========================================
 async function loadFixtures() {
     const tbody = document.getElementById("fixturesList");
     try {
-        const q = query(collection(db, "fixtures"), orderBy("createdAt", "desc"));
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Cargando base de datos...</td></tr>';
+        const q = query(collection(db, "fixtures"));
         const snapshot = await getDocs(q);
+        
         allFixturesCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderFixturesTable();
     } catch (error) { 
@@ -216,20 +222,24 @@ function renderFixturesTable() {
 
     let sortedFixtures = [...allFixturesCache];
 
+    // Lógica Matemática de Ordenamiento Inteligente
     sortedFixtures.sort((a, b) => {
         let valA, valB;
         if (currentSort.column === 'category') {
-            valA = (a.categoryId || '').toLowerCase(); valB = (b.categoryId || '').toLowerCase();
-        } else if (currentSort.column === 'round') {
-            const numA = parseInt((a.round || '').replace(/\D/g, '')) || 999;
-            const numB = parseInt((b.round || '').replace(/\D/g, '')) || 999;
-            if (numA !== numB) return currentSort.direction === 'asc' ? numA - numB : numB - numA;
-            valA = (a.round || '').toLowerCase(); valB = (b.round || '').toLowerCase();
+            valA = (a.categoryId || '').toLowerCase(); 
+            valB = (b.categoryId || '').toLowerCase();
+        } else if (currentSort.column === 'date') {
+            // Ordenamos combinando Fecha Calendario + Categoría para que quede impecable
+            valA = (a.date || '9999-12-31') + 'T' + (a.time || '23:59') + (a.categoryId || '');
+            valB = (b.date || '9999-12-31') + 'T' + (b.time || '23:59') + (b.categoryId || '');
         } else if (currentSort.column === 'teams') {
-            valA = (a.homeClubId || '').toLowerCase(); valB = (b.homeClubId || '').toLowerCase();
+            valA = (a.homeClubId || '').toLowerCase(); 
+            valB = (b.homeClubId || '').toLowerCase();
         } else {
-            valA = (a.createdAt || '').toLowerCase(); valB = (b.createdAt || '').toLowerCase();
+            valA = (a.createdAt || '').toLowerCase(); 
+            valB = (b.createdAt || '').toLowerCase();
         }
+        
         if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1;
         if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1;
         return 0;
@@ -244,11 +254,11 @@ function renderFixturesTable() {
             if (url) {
                 return `<div style="margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between; background: rgba(16, 185, 129, 0.1); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.3);">
                             <a href="${url}" target="_blank" style="color:#10b981; font-size:0.65rem; text-decoration:none; font-weight:bold;">✅ ${label}</a>
-                            <span onclick="triggerInlineUpload('${f.id}', '${type}')" id="lbl-${f.id}-${type}" style="font-size:0.6rem; cursor:pointer; color:#3b82f6; background: rgba(59, 130, 246, 0.2); padding: 2px 6px; border-radius: 4px;">Cambiar</span>
+                            <span onclick="triggerInlineUpload('${f.id}', '${type}')" style="font-size:0.6rem; cursor:pointer; color:#3b82f6; background: rgba(59, 130, 246, 0.2); padding: 2px 6px; border-radius: 4px;">Cambiar</span>
                         </div>`;
             } else {
                 return `<div style="margin-bottom: 5px;">
-                            <label onclick="triggerInlineUpload('${f.id}', '${type}')" id="lbl-${f.id}-${type}" style="cursor:pointer; font-size: 0.65rem; background: #1e293b; padding: 4px 8px; border-radius: 4px; border: 1px solid #334155; display: block; text-align: center; color: #a3a3a3; transition: 0.3s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.color='#fff';" onmouseout="this.style.borderColor='#334155'; this.style.color='#a3a3a3';">📷 ${label}</label>
+                            <label onclick="triggerInlineUpload('${f.id}', '${type}')" style="cursor:pointer; font-size: 0.65rem; background: #1e293b; padding: 4px 8px; border-radius: 4px; border: 1px solid #334155; display: block; text-align: center; color: #a3a3a3; transition: 0.3s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.color='#fff';" onmouseout="this.style.borderColor='#334155'; this.style.color='#a3a3a3';">📷 ${label}</label>
                         </div>`;
             }
         };
@@ -281,7 +291,7 @@ function renderFixturesTable() {
                 <td style="text-align: center; vertical-align: middle;">
                     ${actionBtn}
                     <div style="display:flex; gap: 5px;">
-                        <button style="flex:1; padding: 4px; font-size: 0.7rem; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="openEditInfo('${f.id}')">✏️️ Info</button>
+                        <button style="flex:1; padding: 4px; font-size: 0.7rem; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="openEditInfo('${f.id}')">✏️ Info</button>
                         <button style="flex:1; padding: 4px; font-size: 0.7rem; background: transparent; border: 1px solid #ef4444; color: #ef4444; border-radius: 4px; cursor: pointer;" onclick="deleteFixtureAdmin('${f.id}')">X</button>
                     </div>
                 </td>
@@ -289,7 +299,6 @@ function renderFixturesTable() {
     }).join("");
 }
 
-// Actualiza el marcador silenciosamente sin recargar la tabla para que no pierdas foco
 window.updateScoreInline = async (id, val, side) => {
     const data = side === 'L' ? { scoreLocal: val === "" ? null : Number(val) } : { scoreAway: val === "" ? null : Number(val) };
     await updateFixture(id, data);
@@ -326,10 +335,7 @@ document.getElementById('adminFileUploader').onchange = async (e) => {
     const file = e.target.files[0];
     if (!file || !inlineUploadId) return;
     
-    const label = document.getElementById(`lbl-${inlineUploadId}-${inlineUploadType}`);
-    const originalText = label ? label.textContent : "📷";
-    if (label) label.textContent = "⏳ Subiendo...";
-    
+    alert("⏳ Subiendo imagen... El panel se actualizará cuando termine.");
     const formData = new FormData();
     formData.append("image", file);
     
@@ -342,7 +348,6 @@ document.getElementById('adminFileUploader').onchange = async (e) => {
         } else throw new Error();
     } catch(err) {
         alert("Error al subir la imagen. Intenta nuevamente.");
-        if (label) label.textContent = originalText;
     } finally { 
         e.target.value = ""; 
         inlineUploadId = null; 
@@ -351,7 +356,7 @@ document.getElementById('adminFileUploader').onchange = async (e) => {
 };
 
 // =========================================
-// RENDERIZADO DE JUGADORES
+// RENDERIZADO DE JUGADORES Y BORRADO MASIVO
 // =========================================
 async function loadPlayers() {
     const container = document.getElementById("playersListContainer");
@@ -367,11 +372,15 @@ async function loadPlayers() {
 
         let html = "";
         Object.keys(grouped).sort().forEach(cat => {
-            html += `<h4 class="cat-header">Categoría ${cat} <span style="color:#a3a3a3; font-size:0.8rem;">(${grouped[cat].length} jugadores)</span></h4>`;
+            html += `<div style="display:flex; justify-content:space-between; align-items:center; margin-top:25px; margin-bottom:10px; border-bottom: 1px solid #333; padding-bottom:5px;">
+                        <h4 class="cat-header" style="margin:0; border:none; padding:0;">Categoría ${cat} <span style="color:#a3a3a3; font-size:0.8rem;">(${grouped[cat].length} jugadores)</span></h4>
+                        <button class="danger delete-btn" style="padding: 5px 15px; font-size: 0.8rem; background: transparent; border: 1px solid #ef4444; color: #ef4444; border-radius: 4px; cursor: pointer;" onclick="deleteAllPlayersInCategory('${cat}')">🗑️ Borrar Toda la Categoría</button>
+                     </div>`;
+                     
             html += `<table>
                         <thead><tr><th>Nombre Completo</th><th>Fecha Nac.</th><th style="text-align:right;">Acción</th></tr></thead>
                         <tbody>`;
-            grouped[cat].forEach(p => {
+            grouped[cat].sort((a, b) => a.name.localeCompare(b.name)).forEach(p => {
                 html += `<tr>
                             <td style="font-weight:600;">${p.name}</td>
                             <td style="color:#a3a3a3;">${p.birthdate}</td>
@@ -388,14 +397,32 @@ async function loadPlayers() {
 }
 
 window.deletePlayerAdmin = async (id) => {
-    if(confirm("¿Eliminar este jugador?")) {
+    if(confirm("¿Eliminar este jugador individualmente?")) {
         await deletePlayer(id);
         loadPlayers();
     }
 };
 
+window.deleteAllPlayersInCategory = async (cat) => {
+    if(confirm(`⚠️ PELIGRO EXTREMO: ¿Estás seguro de borrar TODOS los jugadores de la categoría ${cat}? Esta acción no se puede deshacer y borrará el plantel completo.`)) {
+        try {
+            const q = query(collection(db, "players"), where("categoryId", "==", cat));
+            const snap = await getDocs(q);
+            const batch = writeBatch(db);
+            snap.forEach(docSnap => {
+                batch.delete(docSnap.ref);
+            });
+            await batch.commit();
+            alert(`✅ Plantel de ${cat} eliminado por completo.`);
+            loadPlayers();
+        } catch (error) {
+            alert("Ocurrió un error al borrar el plantel masivamente.");
+        }
+    }
+};
+
 // ==========================================
-// MODALES (AHORA SOLO PARA FECHA, EQUIPOS Y JUGADORES)
+// MODALES (REPARACIÓN DE ERRORES)
 // ==========================================
 const catsOptions = `
     <option value="Mosquito">Mosquito</option><option value="Mini">Mini</option><option value="Pre Mini">Pre Mini</option>
@@ -406,7 +433,7 @@ const catsOptions = `
 
 window.openEditPlayer = (id, name, birthdate, cat) => {
     currentEditTarget = { id, type: 'player' };
-    document.getElementById('modalTitle').textContent = "✏️ Editar Jugador";
+    document.getElementById('modalTitle').textContent = "✏️ Reparar Jugador";
     document.getElementById('modalFormContainer').innerHTML = `
         <label style="color:#a3a3a3; font-size:0.8rem; margin-bottom:-10px;">Nombre Completo:</label>
         <input type="text" id="editPName" class="form-input" value="${name}">
@@ -423,7 +450,7 @@ window.openEditInfo = (id) => {
     const f = allFixturesCache.find(x => x.id === id);
     if (!f) return;
     currentEditTarget = { id, type: 'fixture' };
-    document.getElementById('modalTitle').textContent = "✏️ Editar Información de Partido";
+    document.getElementById('modalTitle').textContent = "✏️ Reparar Información de Partido";
     
     document.getElementById('modalFormContainer').innerHTML = `
         <div style="display:flex; gap:10px;">
