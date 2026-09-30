@@ -4,12 +4,11 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { collection, addDoc, getDocs, doc, query, orderBy, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const allowedAdmins = ["mecinfotec@gmail.com", "admin@abnch.com", "admin@reydigital.com"];
+const IMGBB_API_KEY = "4b6599a15cc7870198cb96ee95df9905"; // Tu clave ImgBB 
+
 let allFixturesCache = [];
 let currentEditTarget = { id: null, type: null }; 
 
-// ==========================================
-// 1. SEGURIDAD Y ARRANQUE
-// ==========================================
 onAuthStateChanged(auth, (user) => {
     if (!user || !allowedAdmins.includes(user.email)) {
         window.location.replace("index.html");
@@ -24,9 +23,6 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
     window.location.replace("index.html");
 });
 
-// ==========================================
-// 2. MÓDULO MANUAL: FIXTURES
-// ==========================================
 document.getElementById("fixtureForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const btn = document.getElementById("saveBtn");
@@ -52,9 +48,6 @@ document.getElementById("fixtureForm").addEventListener("submit", async (e) => {
     finally { btn.textContent = "Guardar Partido"; btn.disabled = false; }
 });
 
-// ==========================================
-// 3. CAJA MÁGICA: FIXTURES MASIVOS
-// ==========================================
 document.getElementById("magicFixtureForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const btn = document.getElementById("saveMagicFixturesBtn");
@@ -92,8 +85,7 @@ document.getElementById("magicFixtureForm").addEventListener("submit", async (e)
                 date: "A definir",
                 time: "",
                 status: "scheduled",
-                scoreLocal: null,
-                scoreAway: null,
+                scoreLocal: null, scoreAway: null,
                 createdAt: new Date().toISOString()
             });
         }
@@ -129,15 +121,13 @@ document.getElementById("magicFixtureForm").addEventListener("submit", async (e)
         await batch.commit();
         document.getElementById("magicFixtureBox").value = "";
         await loadFixtures();
-        alert(`Se cargaron ${fixturesToSave.length} partidos correctamente.`);
-    } catch (err) { 
-        alert("Error al procesar los fixtures."); 
-    } 
+        alert(`Se cargaron ${fixturesToSave.length} partidos.`);
+    } catch (err) { alert("Error al procesar."); } 
     finally { btn.textContent = "Procesar Fixture"; btn.disabled = false; }
 });
 
 // ==========================================
-// 4. CAJA MÁGICA: JUGADORES
+// CAJA MÁGICA: JUGADORES (FILTRO DNI)
 // ==========================================
 document.getElementById("playerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -150,8 +140,11 @@ document.getElementById("playerForm").addEventListener("submit", async (e) => {
     const playersToSave = [];
 
     lines.forEach(line => {
-        const cleanLine = line.trim();
+        let cleanLine = line.trim();
         if (!cleanLine || cleanLine.toLowerCase().includes("apellido") || cleanLine.toLowerCase().includes("fecha de nacimiento")) return;
+
+        // FILTRO MAGICO: Elimina cualquier numero largo tipo DNI (con o sin puntos)
+        cleanLine = cleanLine.replace(/\b\d{1,2}[\.\-]?\d{3}[\.\-]?\d{3}\b/g, "").replace(/\s{2,}/g, " ").trim();
 
         let parts = cleanLine.split('\t');
         if (parts.length < 2) parts = cleanLine.split(/ {2,}/);
@@ -159,6 +152,7 @@ document.getElementById("playerForm").addEventListener("submit", async (e) => {
         if (parts.length >= 2) {
             playersToSave.push({ name: parts[0].trim(), birthdate: parts[1].trim(), categoryId: category, clubId: "Funebrero", createdAt: new Date().toISOString() });
         } else {
+            // Intenta separar el último bloque como fecha si pegaron todo junto
             const lastSpace = cleanLine.lastIndexOf(' ');
             if (lastSpace > 0) {
                 playersToSave.push({ name: cleanLine.substring(0, lastSpace).trim(), birthdate: cleanLine.substring(lastSpace + 1).trim(), categoryId: category, clubId: "Funebrero", createdAt: new Date().toISOString() });
@@ -167,7 +161,7 @@ document.getElementById("playerForm").addEventListener("submit", async (e) => {
     });
 
     if (playersToSave.length === 0) {
-        alert("No se detectó el formato correcto.");
+        alert("Formato no reconocido. Asegurate de que quede Nombre y Fecha.");
         btn.textContent = "Procesar Plantel"; btn.disabled = false;
         return;
     }
@@ -176,20 +170,17 @@ document.getElementById("playerForm").addEventListener("submit", async (e) => {
         await addPlayersBulk(playersToSave);
         document.getElementById("magicBox").value = "";
         await loadPlayers();
-        alert(`Se cargaron ${playersToSave.length} jugadores en ${category}.`);
-    } catch(err) { alert("Error al guardar en la base de datos."); } 
+        alert(`Se cargaron ${playersToSave.length} jugadores.`);
+    } catch(err) { alert("Error al guardar."); } 
     finally { btn.textContent = "Procesar Plantel"; btn.disabled = false; }
 });
 
-// ==========================================
-// 5. LECTURA Y RENDER DE TABLAS
-// ==========================================
 async function loadFixtures() {
     const tbody = document.getElementById("fixturesList");
     try {
         const q = query(collection(db, "fixtures"), orderBy("createdAt", "desc"));
         const snapshot = await getDocs(q);
-        if (snapshot.empty) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#a3a3a3;">El fixture está vacío.</td></tr>'; return; }
+        if (snapshot.empty) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">El fixture está vacío.</td></tr>'; return; }
 
         allFixturesCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
@@ -204,7 +195,7 @@ async function loadFixtures() {
                     <td style="${awayStyle}">${f.awayClubId}</td>
                     <td style="text-align: center;">
                         <div style="display:flex; gap:5px;">
-                            <button class="action-btn" style="background:#3b82f6; flex:1; padding: 4px; font-size: 0.7rem;" onclick="openEditFixture('${f.id}')">✏️ Editar</button>
+                            <button class="action-btn" style="background:#3b82f6; flex:1; padding: 4px; font-size: 0.7rem;" onclick="openEditFixture('${f.id}')">✏️️ Editar</button>
                             <button class="danger delete-btn" style="flex:1; padding: 4px; font-size: 0.7rem;" onclick="deleteFixtureAdmin('${f.id}')">X Borrar</button>
                         </div>
                     </td>
@@ -214,7 +205,7 @@ async function loadFixtures() {
 }
 
 window.deleteFixtureAdmin = async (id) => {
-    if (confirm("¿Eliminar este partido permanentemente?")) {
+    if (confirm("¿Eliminar partido?")) {
         await deleteFixture(id);
         loadFixtures();
     }
@@ -224,7 +215,7 @@ async function loadPlayers() {
     const container = document.getElementById("playersListContainer");
     try {
         const players = await getPlayers();
-        if(players.length === 0) { container.innerHTML = "<p style='color:#a3a3a3;'>No hay jugadores registrados.</p>"; return; }
+        if(players.length === 0) { container.innerHTML = "<p style='text-align:center;'>No hay jugadores.</p>"; return; }
 
         const grouped = {};
         players.forEach(p => {
@@ -243,7 +234,7 @@ async function loadPlayers() {
                             <td style="font-weight:600;">${p.name}</td>
                             <td style="color:#a3a3a3;">${p.birthdate}</td>
                             <td style="text-align:right; width: 140px;">
-                                <button class="action-btn" style="background:#3b82f6; padding: 4px 8px; font-size: 0.7rem; margin-right: 5px;" onclick="openEditPlayer('${p.id}', '${p.name}', '${p.birthdate}', '${p.categoryId}')">✏️ Editar</button>
+                                <button class="action-btn" style="background:#3b82f6; padding: 4px 8px; font-size: 0.7rem; margin-right: 5px;" onclick="openEditPlayer('${p.id}', '${p.name}', '${p.birthdate}', '${p.categoryId}')">✏️️ Editar</button>
                                 <button class="delete-btn" onclick="deletePlayerAdmin('${p.id}')">Borrar</button>
                             </td>
                          </tr>`;
@@ -251,18 +242,18 @@ async function loadPlayers() {
             html += `</tbody></table>`;
         });
         container.innerHTML = html;
-    } catch(e) { container.innerHTML = "<p style='color:#ff3b3b;'>Error al cargar los planteles.</p>"; }
+    } catch(e) { container.innerHTML = "<p style='color:#ff3b3b;'>Error.</p>"; }
 }
 
 window.deletePlayerAdmin = async (id) => {
-    if(confirm("¿Eliminar este jugador del plantel?")) {
+    if(confirm("¿Eliminar este jugador?")) {
         await deletePlayer(id);
         loadPlayers();
     }
 };
 
 // ==========================================
-// 6. LÓGICA DEL MODAL DE EDICIÓN RÁPIDA
+// MODAL DE EDICIÓN Y SUBIDA IMGBB
 // ==========================================
 const catsOptions = `
     <option value="Mosquito">Mosquito</option><option value="Mini">Mini</option><option value="Pre Mini">Pre Mini</option>
@@ -290,11 +281,22 @@ window.openEditFixture = (id) => {
     const f = allFixturesCache.find(x => x.id === id);
     if (!f) return;
     currentEditTarget = { id, type: 'fixture' };
-    document.getElementById('modalTitle').textContent = "✏️ Editar Partido";
+    document.getElementById('modalTitle').textContent = "✏️ Editar Partido y Cargar Fotos";
+    
     document.getElementById('modalFormContainer').innerHTML = `
         <div style="display:flex; gap:10px;">
             <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Local:</label><input type="text" id="editFHome" class="form-input" value="${f.homeClubId}"></div>
             <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Visitante:</label><input type="text" id="editFAway" class="form-input" value="${f.awayClubId}"></div>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Pts Local:</label><input type="number" id="editScoreHome" class="form-input" value="${f.scoreLocal || ''}" placeholder="-"></div>
+            <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Pts Visita:</label><input type="number" id="editScoreAway" class="form-input" value="${f.scoreAway || ''}" placeholder="-"></div>
+            <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Estado:</label>
+                <select id="editStatus" class="form-select">
+                    <option value="scheduled" ${f.status==='scheduled'?'selected':''}>Pendiente</option>
+                    <option value="finished" ${f.status==='finished'?'selected':''}>Finalizado</option>
+                </select>
+            </div>
         </div>
         <div style="display:flex; gap:10px;">
             <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Fase/Jornada:</label><input type="text" id="editFRound" class="form-input" value="${f.round}"></div>
@@ -302,11 +304,74 @@ window.openEditFixture = (id) => {
         </div>
         <div style="display:flex; gap:10px;">
             <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Fecha Calendario:</label><input type="text" id="editFDate" class="form-input" value="${f.date}"></div>
-            <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Hora (Opcional):</label><input type="time" id="editFTime" class="form-input" value="${f.time}"></div>
+            <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Hora:</label><input type="time" id="editFTime" class="form-input" value="${f.time}"></div>
+        </div>
+        <hr style="border-color: #333; margin: 10px 0;">
+        <div style="display:flex; gap:10px;">
+            <div style="flex:1;">
+                <label style="color:#a3a3a3; font-size:0.8rem;">Planilla de Juego:</label>
+                <div style="display:flex; gap:5px;">
+                    <input type="text" id="editPlanilla" class="form-input" value="${f.planilla || ''}" placeholder="Link ImgBB">
+                    <button type="button" id="btnPlanilla" class="action-btn" style="padding: 0 10px; font-size: 0.8rem;" onclick="triggerModalUpload('Planilla')">📷 Subir</button>
+                </div>
+            </div>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <div style="flex:1;">
+                <label style="color:#a3a3a3; font-size:0.8rem;">Foto Local:</label>
+                <div style="display:flex; gap:5px;">
+                    <input type="text" id="editPhotoHome" class="form-input" value="${f.photoHome || ''}" placeholder="Link ImgBB">
+                    <button type="button" id="btnPhotoHome" class="action-btn" style="padding: 0 10px; font-size: 0.8rem;" onclick="triggerModalUpload('PhotoHome')">📷 Subir</button>
+                </div>
+            </div>
+            <div style="flex:1;">
+                <label style="color:#a3a3a3; font-size:0.8rem;">Foto Visita:</label>
+                <div style="display:flex; gap:5px;">
+                    <input type="text" id="editPhotoAway" class="form-input" value="${f.photoAway || ''}" placeholder="Link ImgBB">
+                    <button type="button" id="btnPhotoAway" class="action-btn" style="padding: 0 10px; font-size: 0.8rem;" onclick="triggerModalUpload('PhotoAway')">📷 Subir</button>
+                </div>
+            </div>
         </div>
     `;
     document.getElementById('editFCat').value = f.categoryId;
     document.getElementById('editModal').style.display = 'flex';
+};
+
+// ==========================================
+// CONTROLADOR DE SUBIDA IMGBB DESDE EL MODAL
+// ==========================================
+let currentUploadField = '';
+
+window.triggerModalUpload = (field) => {
+    currentUploadField = field;
+    document.getElementById('modalFileUploader').click();
+};
+
+document.getElementById('modalFileUploader').onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !currentUploadField) return;
+    
+    const btn = document.getElementById('btn' + currentUploadField);
+    const originalText = btn.textContent;
+    btn.textContent = "⏳...";
+    
+    const formData = new FormData();
+    formData.append("image", file);
+    
+    try {
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('edit' + currentUploadField).value = data.data.url;
+            btn.textContent = "✅ OK";
+            btn.style.background = "#10b981";
+        } else throw new Error();
+    } catch(err) {
+        alert("Error al subir la imagen. Intenta nuevamente.");
+        btn.textContent = originalText;
+    } finally { 
+        e.target.value = ""; 
+    }
 };
 
 document.getElementById('modalSaveBtn').onclick = async () => {
@@ -327,7 +392,13 @@ document.getElementById('modalSaveBtn').onclick = async () => {
                 round: document.getElementById('editFRound').value.trim(),
                 categoryId: document.getElementById('editFCat').value,
                 date: document.getElementById('editFDate').value.trim(),
-                time: document.getElementById('editFTime').value.trim()
+                time: document.getElementById('editFTime').value.trim(),
+                scoreLocal: document.getElementById('editScoreHome').value ? Number(document.getElementById('editScoreHome').value) : null,
+                scoreAway: document.getElementById('editScoreAway').value ? Number(document.getElementById('editScoreAway').value) : null,
+                status: document.getElementById('editStatus').value,
+                planilla: document.getElementById('editPlanilla').value.trim() || null,
+                photoHome: document.getElementById('editPhotoHome').value.trim() || null,
+                photoAway: document.getElementById('editPhotoAway').value.trim() || null
             });
             await loadFixtures();
         }

@@ -25,9 +25,8 @@
     .module-title { font-family: 'Bebas Neue', cursive; font-size: 1.8rem; margin-bottom: 20px; color: #dc2626; letter-spacing: 1px; }
     .cat-header { color: #ff3b3b; margin-top: 25px; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; font-weight: 600; }
     
-    /* Estilos del Modal de Edición */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-    .modal-content { background: #0a0a0a; border: 1px solid #dc2626; border-radius: 12px; padding: 30px; width: 100%; max-width: 500px; box-shadow: 0 10px 40px rgba(220,38,38,0.2); }
+    .modal-content { background: #0a0a0a; border: 1px solid #dc2626; border-radius: 12px; padding: 30px; width: 100%; max-width: 600px; box-shadow: 0 10px 40px rgba(220,38,38,0.2); max-height: 90vh; overflow-y: auto; }
   </style>
 </head>
 <body style="background: #050505; color: #fff;">
@@ -48,17 +47,10 @@
         <div class="form-group">
           <select id="categoria" class="form-select" required>
             <option value="">Seleccionar Categoría</option>
-            <option value="Mosquito">Mosquito</option>
-            <option value="Mini">Mini</option>
-            <option value="Pre Mini">Pre Mini</option>
-            <option value="U11">U11</option>
-            <option value="U13">U13</option>
-            <option value="U15">U15</option>
-            <option value="U17">U17</option>
-            <option value="U21">U21</option>
-            <option value="Primera">Primera</option>
-            <option value="Maxi 35">Maxi 35</option>
-            <option value="Maxi 42">Maxi 42</option>
+            <option value="Mosquito">Mosquito</option><option value="Mini">Mini</option><option value="Pre Mini">Pre Mini</option>
+            <option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option>
+            <option value="U17">U17</option><option value="U21">U21</option><option value="Primera">Primera</option>
+            <option value="Maxi 35">Maxi 35</option><option value="Maxi 42">Maxi 42</option>
           </select>
           <select id="condicion" class="form-select" required>
             <option value="">Localía del Funebrero</option>
@@ -75,63 +67,49 @@
       </form>
     </div>
 
-    <!-- Módulo de Carga Masiva de Fixtures (Caja Mágica) -->
+    <!-- Módulo Masivo Fixtures -->
     <div class="admin-card" style="border-color: #3b82f6;">
       <h3 class="module-title" style="color: #3b82f6;">Caja Mágica: Fixtures Completos</h3>
-      <p style="color:#a3a3a3; font-size:0.9rem; margin-bottom:15px;">Pega la lista de partidos con el formato "1 Local VS Visitante". El sistema limpiará automáticamente cruces duplicados "A definir".</p>
+      <p style="color:#a3a3a3; font-size:0.9rem; margin-bottom:15px;">Pega la lista de partidos con formato "1 Local VS Visitante". Se limpiarán duplicados "A definir" automáticamente.</p>
       <form id="magicFixtureForm">
         <div class="form-group">
           <select id="magicFixtureCategory" class="form-select" required>
             <option value="">Seleccionar Categoría</option>
-            <option value="Mosquito">Mosquito</option>
-            <option value="Mini">Mini</option>
-            <option value="Pre Mini">Pre Mini</option>
-            <option value="U11">U11</option>
-            <option value="U13">U13</option>
-            <option value="U15">U15</option>
-            <option value="U17">U17</option>
-            <option value="U21">U21</option>
-            <option value="Primera">Primera</option>
-            <option value="Maxi 35">Maxi 35</option>
-            <option value="Maxi 42">Maxi 42</option>
+            <option value="Mosquito">Mosquito</option><option value="Mini">Mini</option><option value="Pre Mini">Pre Mini</option>
+            <option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option>
+            <option value="U17">U17</option><option value="U21">U21</option><option value="Primera">Primera</option>
+            <option value="Maxi 35">Maxi 35</option><option value="Maxi 42">Maxi 42</option>
           </select>
         </div>
         <div class="form-group">
-          <textarea id="magicFixtureBox" class="form-input" rows="6" placeholder="Ejemplo:&#10;1 Funebrero VS S. Zapallar&#10;2 Urquiza VS Funebrero" required style="resize: vertical;"></textarea>
+          <textarea id="magicFixtureBox" class="form-input" rows="6" placeholder="Ejemplo:&#10;1 Funebrero VS S. Zapallar" required style="resize: vertical;"></textarea>
         </div>
         <button type="submit" class="action-btn" id="saveMagicFixturesBtn" style="background:#3b82f6;">Procesar Fixture</button>
       </form>
     </div>
 
-    <!-- Módulo de Carga de Jugadores (Caja Mágica) -->
+    <!-- Módulo Masivo Jugadores (Filtro DNI) -->
     <div class="admin-card" style="border-color: #10b981;">
       <h3 class="module-title" style="color: #10b981;">Caja Mágica: Planteles</h3>
-      <p style="color:#a3a3a3; font-size:0.9rem; margin-bottom:15px;">Selecciona la categoría y pega la lista directamente desde Excel (Nombre y Fecha). Se ignoran los encabezados.</p>
+      <p style="color:#a3a3a3; font-size:0.9rem; margin-bottom:15px;">Pega desde Word/PDF. El sistema ignorará automáticamente números de DNI y leerá solo Nombre y Fecha.</p>
       <form id="playerForm">
         <div class="form-group">
           <select id="playerCategory" class="form-select" required>
             <option value="">Seleccionar Categoría</option>
-            <option value="Mosquito">Mosquito</option>
-            <option value="Mini">Mini</option>
-            <option value="Pre Mini">Pre Mini</option>
-            <option value="U11">U11</option>
-            <option value="U13">U13</option>
-            <option value="U15">U15</option>
-            <option value="U17">U17</option>
-            <option value="U21">U21</option>
-            <option value="Primera">Primera</option>
-            <option value="Maxi 35">Maxi 35</option>
-            <option value="Maxi 42">Maxi 42</option>
+            <option value="Mosquito">Mosquito</option><option value="Mini">Mini</option><option value="Pre Mini">Pre Mini</option>
+            <option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option>
+            <option value="U17">U17</option><option value="U21">U21</option><option value="Primera">Primera</option>
+            <option value="Maxi 35">Maxi 35</option><option value="Maxi 42">Maxi 42</option>
           </select>
         </div>
         <div class="form-group">
-          <textarea id="magicBox" class="form-input" rows="6" placeholder="Ejemplo:&#10;Juan Perez    15/05/2010&#10;Carlos Gomez    22/08/2011" required style="resize: vertical;"></textarea>
+          <textarea id="magicBox" class="form-input" rows="6" placeholder="Ejemplo:&#10;Juan Perez 35.123.456 15/05/2010" required style="resize: vertical;"></textarea>
         </div>
         <button type="submit" class="action-btn" id="savePlayersBtn" style="background:#10b981;">Procesar Plantel</button>
       </form>
     </div>
 
-    <!-- Listado de Partidos -->
+    <!-- Listados -->
     <div class="admin-card" style="overflow-x: auto;">
       <h3 class="module-title">Partidos Activos</h3>
       <table>
@@ -144,34 +122,30 @@
             <th style="text-align:center;">Acción</th>
           </tr>
         </thead>
-        <tbody id="fixturesList">
-          <tr><td colspan="5" style="text-align:center;">Cargando base de datos...</td></tr>
-        </tbody>
+        <tbody id="fixturesList"><tr><td colspan="5" style="text-align:center;">Cargando...</td></tr></tbody>
       </table>
     </div>
 
-    <!-- Listado de Jugadores Apilados -->
     <div class="admin-card" style="overflow-x: auto;">
       <h3 class="module-title">Planteles Registrados</h3>
-      <div id="playersListContainer">
-        <p style="text-align:center; color:#a3a3a3;">Cargando planteles...</p>
-      </div>
+      <div id="playersListContainer"><p style="text-align:center;">Cargando...</p></div>
     </div>
   </div>
 
-  <!-- MODAL DE EDICIÓN FLOTANTE -->
+  <!-- MODAL DE EDICIÓN FLOTANTE (Con Subida de Archivos) -->
   <div id="editModal" class="modal-overlay" style="display: none;">
     <div class="modal-content">
       <h3 id="modalTitle" style="color: #dc2626; font-family: 'Bebas Neue', cursive; font-size: 2.2rem; margin-top: 0;">Editar Registro</h3>
-      <div id="modalFormContainer" style="display: flex; flex-direction: column; gap: 15px;">
-        <!-- Se inyectan los inputs dinámicamente -->
-      </div>
+      <div id="modalFormContainer" style="display: flex; flex-direction: column; gap: 15px;"></div>
       <div style="display: flex; gap: 10px; margin-top: 25px;">
         <button id="modalSaveBtn" class="action-btn" style="flex: 1;">Guardar Cambios</button>
         <button onclick="document.getElementById('editModal').style.display='none'" class="logout-btn" style="flex: 1; padding: 12px;">Cancelar</button>
       </div>
     </div>
   </div>
+
+  <!-- INPUT OCULTO PARA IMGBB -->
+  <input type="file" id="modalFileUploader" accept="image/*" style="display: none;">
 
   <script type="module" src="/js/admin.js"></script>
 </body>

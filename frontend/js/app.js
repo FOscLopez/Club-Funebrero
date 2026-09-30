@@ -1,7 +1,7 @@
 import { listenToFixtures, getPlayers, getMeetings, getSponsors } from "./services/firestore.service.js";
 
 // ==========================================
-// DICCIONARIO DE LOGOS (IMGBB) - TUS ENLACES
+// DICCIONARIO DE LOGOS (IMGBB)
 // ==========================================
 const CLUB_LOGOS = {
     "FUNEBRERO": "https://i.ibb.co/r85gwzH/funebrero.webp",
@@ -31,7 +31,6 @@ function getLogoSrc(clubName) {
 document.addEventListener("DOMContentLoaded", () => {
     console.log("🏀 Plataforma del Club Funebrero inicializada.");
 
-    // Navegación suave
     document.querySelectorAll('.nav-links a').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             const targetId = this.getAttribute('href');
@@ -47,20 +46,16 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function initApp() {
-    // 1. Conectar Fixtures en Vivo (Acordeones y Ordenado por Fecha)
     listenToFixtures((fixtures) => {
         renderFixtures(fixtures);
     });
 
-    // 2. Cargar Planteles
     const players = await getPlayers();
     renderRosters(players);
 
-    // 3. Cargar Actas Institucionales
     const meetings = await getMeetings();
     renderMeetings(meetings);
 
-    // 4. Cargar Sponsors
     const sponsors = await getSponsors();
     renderSponsors(sponsors);
 }
@@ -87,14 +82,14 @@ function renderFixtures(fixtures) {
     let finalHtml = "";
 
     Object.keys(grouped).sort().forEach(cat => {
-        // Orden Inteligente por Fecha (Fecha 1, Fecha 2, Fecha 3...)
         grouped[cat].sort((a, b) => {
             const getNum = (r) => { const m = r?.match(/\d+/); return m ? parseInt(m[0]) : 999; };
             return getNum(a.round) - getNum(b.round);
         });
 
+        // NOTA: Se quitó el atributo 'open' para que inicie cerrado
         finalHtml += `
-            <details class="fune-accordion" open>
+            <details class="fune-accordion">
                 <summary>🏆 CATEGORÍA ${cat}</summary>
                 <div class="fune-accordion-content">
         `;
@@ -195,7 +190,7 @@ function renderMeetings(meetings) {
 }
 
 // ==========================================
-// RENDER: SPONSORS (CARRUSEL AL PIE)
+// RENDER: SPONSORS
 // ==========================================
 function renderSponsors(sponsors) {
     const container = document.getElementById("sponsorsContainer");
@@ -206,7 +201,6 @@ function renderSponsors(sponsors) {
         return;
     }
 
-    // Duplicamos el arreglo para hacer el efecto infinito suave
     const duplicated = [...sponsors, ...sponsors, ...sponsors];
     
     container.innerHTML = duplicated.map(s => `
