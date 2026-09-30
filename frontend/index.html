@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <title>Club Funebrero - Sitio Oficial</title>
-  <meta name="description" content="Sitio web oficial de la Asociación Civil Club Social Cultural y Deportivo Funebrero." />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/png" href="logo-funebrero_2.png">
   
@@ -13,16 +12,30 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Estilos para Ticker y Sponsors heredados de tu base */
+    .ticker-wrap { width: 100%; overflow: hidden; background: linear-gradient(90deg, #dc2626, #991b1b); color: white; padding: 6px 0; border-bottom: 2px solid rgba(255,255,255,0.1); position: fixed; top: 0; left: 0; z-index: 1000; height: 32px; box-sizing: border-box; }
+    .ticker-move { display: inline-flex; white-space: nowrap; animation: tickerAnim 25s linear infinite; }
+    .ticker-move:hover { animation-play-state: paused; }
+    .ticker-item { padding: 0 2rem; font-size: 0.85rem; font-family: 'Poppins', sans-serif; display: flex; align-items: center; height: 100%; }
+    @keyframes tickerAnim { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
+    .header { top: 32px !important; } 
+    .hero { padding-top: 32px !important; }
+    
+    .sponsors-bar { background: #020617; padding: 20px 0; border-top: 1px solid #1e293b; overflow: hidden; white-space: nowrap; }
+    .sponsors-track { display: inline-flex; animation: scrollSponsors 30s linear infinite; gap: 40px; padding: 0 20px; }
+    .sponsor-card { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.02); padding: 10px 20px; border-radius: 8px; border: 1px solid #1e293b; text-decoration: none; color: white; transition: 0.3s; }
+    .sponsor-card:hover { border-color: #dc2626; background: rgba(220,38,38,0.05); }
+    .sponsor-logo { height: 40px; max-width: 100px; object-fit: contain; }
+    .sponsor-info p { margin: 0; font-size: 0.75rem; color: #94a3b8; }
+    @keyframes scrollSponsors { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+  </style>
 </head>
 <body>
 
   <!-- TICKER -->
   <div class="ticker-wrap">
-    <div class="ticker-move">
-      <div class="ticker-item"><span>CLUB FUNEBRERO</span> Bienvenidos a la nueva plataforma oficial.</div>
-      <div class="ticker-item"><span>SOCIOS</span> Sumate a nuestra campaña a distancia y ayudá al club desde cualquier parte del país.</div>
-      <div class="ticker-item"><span>ABNCH</span> Seguí la campaña de todas nuestras categorías.</div>
-    </div>
+    <div class="ticker-move"></div>
   </div>
 
   <!-- NAVEGACIÓN CRISTAL -->
@@ -44,70 +57,52 @@
 
   <!-- HERO VIVO -->
   <section id="inicio" class="hero">
+    <canvas id="particle-canvas" style="position: absolute; top:0; left:0; width:100%; height:100%; z-index: -1;"></canvas>
     <img src="logo-funebrero_2.png" alt="Escudo Funebrero" class="hero-logo">
-    <h1 class="club-title-glow">FUNEBRERO</h1>
+    <h1 class="club-title-glow" id="animated-title">FUNEBRERO</h1>
     <p class="hero-subtitle">Asociación Civil Club Social Cultural y Deportivo</p>
     
     <div style="margin-top: 30px; display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
       <a href="#socios" class="btn-neon">Hacete Socio Protector</a>
       <a href="#fixture" class="btn-neon btn-white">Ver Fixture</a>
+      <button id="soundToggleBtn" style="background: transparent; border: 1px solid rgba(220, 38, 38, 0.5); color: #dc2626; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: 0.3s;">🔇</button>
     </div>
+    <audio id="court-sound" src="/audio/cancha.mp3" loop preload="none"></audio>
   </section>
 
-  <!-- SECCIÓN PLANTELES -->
-  <section id="planteles" class="section-padding">
-    <h2 class="section-title">Nuestra <span>Cantera y Mayores</span></h2>
-    <div class="grid-cards">
-      <div class="glass-premium">
-        <h3>Formativas Menores</h3>
-        <p>El semillero del club. Categorías Mosquito, Mini, Pre Mini, U11 y U13. Formando el futuro del básquet chaqueño.</p>
+  <main>
+    <!-- SECCIÓN COMPETENCIA (FIXTURE ORDENADO) -->
+    <section id="fixture" class="section-padding" style="background: linear-gradient(to bottom, #050505, rgba(220, 38, 38, 0.05), #050505);">
+      <h2 class="section-title">Campaña <span>Actual</span></h2>
+      <div id="results-container" style="max-width: 900px; margin: 0 auto;">
+        <p style="text-align:center; color:#94a3b8;">Sincronizando con la base de datos...</p>
       </div>
-      <div class="glass-premium">
-        <h3>Formativas Mayores</h3>
-        <p>El salto a la competitividad. Categorías U15, U17 y U21 preparándose para el máximo nivel.</p>
-      </div>
-      <div class="glass-premium" style="border-top-color: #ffffff;">
-        <h3 style="color: #dc2626;">Primera División</h3>
-        <p>Nuestra máxima categoría representativa, defendiendo los colores en cada fecha de la ABNCH.</p>
-      </div>
-      <div class="glass-premium">
-        <h3>Categorías Maxi</h3>
-        <p>La experiencia no se retira. Planteles de Maxi 35 y Maxi 42 dejando su legado en la cancha.</p>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- SECCIÓN COMPETENCIA (CONECTADA EN VIVO) -->
-  <section id="fixture" class="section-padding" style="background: linear-gradient(to bottom, #050505, rgba(220, 38, 38, 0.05), #050505);">
-    <h2 class="section-title">Campaña <span>Actual</span></h2>
-    <div id="publicFixturesContainer" style="max-width: 900px; margin: 0 auto;">
-      <div class="glass-premium" style="padding: 50px 20px; text-align: center;">
-        <p style="font-size: 1.1rem; color: #a3a3a3;">Sincronizando con la base de datos...</p>
-      </div>
-    </div>
-  </section>
+    <!-- SECCIÓN COMISIÓN DIRECTIVA (ACTAS) -->
+    <section id="comision" class="section-padding">
+      <h2 class="section-title">Comisión <span>Directiva</span></h2>
+      <div id="meetings-container" style="max-width: 800px; margin: 0 auto;"></div>
+    </section>
 
-  <!-- SECCIÓN SOCIOS A DISTANCIA -->
-  <section id="socios" class="section-padding">
-    <h2 class="section-title">Apoyo a <span>Distancia</span></h2>
-    <div class="grid-cards" style="max-width: 900px; margin: 0 auto;">
-      <div class="glass-premium">
-        <h3>Socio Protector</h3>
-        <p>Si llevás nuestros colores en el corazón sin importar los kilómetros, tu aporte mensual es vital para sostener viajes, materiales e inscripciones.</p>
-        <a href="#" class="btn-neon">Quiero Aportar</a>
-      </div>
-      <div class="glass-premium">
-        <h3 style="color: #ffffff;">Tienda Funebrera</h3>
-        <p>Adquirí la indumentaria oficial del club. Musculosas, pantalones y accesorios con envíos a coordinar a todo el país.</p>
-        <a href="#" class="btn-neon btn-white">Ver Catálogo</a>
-      </div>
-    </div>
-  </section>
+    <!-- SECCIÓN CLUBES -->
+    <section id="clubes" class="section-padding">
+      <h2 class="section-title">Clubes <span>Participantes</span></h2>
+      <div class="grid-cards" id="clubs-container"></div>
+    </section>
+  </main>
+
+  <!-- BARRA DE SPONSORS -->
+  <div class="sponsors-bar">
+    <div style="text-align: center; color: #94a3b8; font-size: 0.85rem; margin-bottom: 25px; letter-spacing: 3px; text-transform: uppercase; font-weight: 600;">Acompañan al Club</div>
+    <div class="sponsors-track" id="sponsors-container"></div>
+  </div>
 
   <footer class="main-footer">
-    <img src="logo-funebrero_2.png" alt="Escudo" style="width: 60px; margin-bottom: 15px; filter: grayscale(100%); opacity: 0.5;">
-    <p style="color: #ffffff; margin: 0;">© 2026 Club Funebrero - Todos los derechos reservados.</p>
-    <p style="color: #a3a3a3; font-size: 0.85rem; margin-top: 5px;">Desarrollado con pasión basquetbolera.</p>
+    <div class="footer-content" style="text-align: center; padding: 20px;">
+      <p class="copyright" style="color: #ffffff; margin: 0;">© 2026 Club Funebrero - Todos los derechos reservados</p>
+      <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 5px;">Desarrollado por <strong style="color: #dc2626;">Rey Digital del Norte</strong></p>
+    </div>
   </footer>
 
   <script type="module" src="/js/app.js"></script>
