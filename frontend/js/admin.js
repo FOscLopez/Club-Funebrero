@@ -8,10 +8,6 @@ const IMGBB_API_KEY = "4b6599a15cc7870198cb96ee95df9905";
 
 let allFixturesCache = [];
 let currentEditTarget = { id: null, type: null }; 
-
-// =========================================
-// ESTADO DEL ORDENAMIENTO DE LA TABLA
-// =========================================
 let currentSort = { column: 'createdAt', direction: 'desc' };
 
 window.setSort = (column) => {
@@ -22,7 +18,6 @@ window.setSort = (column) => {
         currentSort.direction = 'asc'; 
     }
     
-    // Actualizar color e ícono de las flechitas visuales (Color Azul Admin)
     document.getElementById("sortCatArrow").textContent = currentSort.column === 'category' ? (currentSort.direction === 'asc' ? '↑' : '↓') : '↕';
     document.getElementById("sortCatArrow").style.color = currentSort.column === 'category' ? '#3b82f6' : '#94a3b8';
     
@@ -197,19 +192,17 @@ document.getElementById("playerForm").addEventListener("submit", async (e) => {
 });
 
 // =========================================
-// RENDERIZADO INTERACTIVO DE FIXTURES
+// TABLA DE FIXTURES (EDICIÓN EN LÍNEA)
 // =========================================
 async function loadFixtures() {
     const tbody = document.getElementById("fixturesList");
     try {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Cargando base de datos...</td></tr>';
         const q = query(collection(db, "fixtures"), orderBy("createdAt", "desc"));
         const snapshot = await getDocs(q);
-        
         allFixturesCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderFixturesTable();
     } catch (error) { 
-        tbody.innerHTML = '<tr><td colspan="5">Error de lectura.</td></tr>'; 
+        tbody.innerHTML = '<tr><td colspan="6">Error de lectura.</td></tr>'; 
     }
 }
 
@@ -217,68 +210,143 @@ function renderFixturesTable() {
     const tbody = document.getElementById("fixturesList");
     
     if (allFixturesCache.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#a3a3a3;">El fixture está vacío.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#a3a3a3;">El fixture está vacío.</td></tr>';
         return;
     }
 
-    // Copiamos la caché para ordenar sin mutar el original de Firebase
     let sortedFixtures = [...allFixturesCache];
 
-    // Lógica Matemática de Ordenamiento
     sortedFixtures.sort((a, b) => {
         let valA, valB;
-        
         if (currentSort.column === 'category') {
-            valA = (a.categoryId || '').toLowerCase();
-            valB = (b.categoryId || '').toLowerCase();
+            valA = (a.categoryId || '').toLowerCase(); valB = (b.categoryId || '').toLowerCase();
         } else if (currentSort.column === 'round') {
-            // Extrae el número de la Fase para ordenarlo matemáticamente (ej: Fecha 10 va después de Fecha 2)
             const numA = parseInt((a.round || '').replace(/\D/g, '')) || 999;
             const numB = parseInt((b.round || '').replace(/\D/g, '')) || 999;
-            if (numA !== numB) {
-                return currentSort.direction === 'asc' ? numA - numB : numB - numA;
-            }
-            // Si no hay números (ej: "A definir"), ordena alfabéticamente
-            valA = (a.round || '').toLowerCase();
-            valB = (b.round || '').toLowerCase();
+            if (numA !== numB) return currentSort.direction === 'asc' ? numA - numB : numB - numA;
+            valA = (a.round || '').toLowerCase(); valB = (b.round || '').toLowerCase();
         } else if (currentSort.column === 'teams') {
-            valA = (a.homeClubId || '').toLowerCase();
-            valB = (b.homeClubId || '').toLowerCase();
+            valA = (a.homeClubId || '').toLowerCase(); valB = (b.homeClubId || '').toLowerCase();
         } else {
-            valA = (a.createdAt || '').toLowerCase();
-            valB = (b.createdAt || '').toLowerCase();
+            valA = (a.createdAt || '').toLowerCase(); valB = (b.createdAt || '').toLowerCase();
         }
-
         if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1;
         if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1;
         return 0;
     });
 
-    // Renderizamos la tabla ordenada
     tbody.innerHTML = sortedFixtures.map(f => {
-        const homeStyle = f.homeClubId === 'Funebrero' ? 'color:#fff; font-weight:bold;' : 'color:#a3a3a3;';
-        const awayStyle = f.awayClubId === 'Funebrero' ? 'color:#fff; font-weight:bold;' : 'color:#a3a3a3;';
+        const isFinished = f.status === "finished";
+        const valL = f.scoreLocal !== null && f.scoreLocal !== undefined ? f.scoreLocal : '';
+        const valA = f.scoreAway !== null && f.scoreAway !== undefined ? f.scoreAway : '';
         
+        const checkPhotoInline = (url, label, type) => {
+            if (url) {
+                return `<div style="margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between; background: rgba(16, 185, 129, 0.1); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.3);">
+                            <a href="${url}" target="_blank" style="color:#10b981; font-size:0.65rem; text-decoration:none; font-weight:bold;">✅ ${label}</a>
+                            <span onclick="triggerInlineUpload('${f.id}', '${type}')" id="lbl-${f.id}-${type}" style="font-size:0.6rem; cursor:pointer; color:#3b82f6; background: rgba(59, 130, 246, 0.2); padding: 2px 6px; border-radius: 4px;">Cambiar</span>
+                        </div>`;
+            } else {
+                return `<div style="margin-bottom: 5px;">
+                            <label onclick="triggerInlineUpload('${f.id}', '${type}')" id="lbl-${f.id}-${type}" style="cursor:pointer; font-size: 0.65rem; background: #1e293b; padding: 4px 8px; border-radius: 4px; border: 1px solid #334155; display: block; text-align: center; color: #a3a3a3; transition: 0.3s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.color='#fff';" onmouseout="this.style.borderColor='#334155'; this.style.color='#a3a3a3';">📷 ${label}</label>
+                        </div>`;
+            }
+        };
+
+        const actionBtn = !isFinished
+            ? `<button onclick="toggleStatusAdmin('${f.id}', 'finished')" style="width: 100%; padding: 6px; margin-bottom: 5px; font-size: 0.7rem; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">🏁 Finalizar</button>`
+            : `<button onclick="toggleStatusAdmin('${f.id}', 'scheduled')" style="width: 100%; padding: 6px; margin-bottom: 5px; font-size: 0.7rem; background: #334155; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">⏪ Reabrir</button>`;
+
         return `
             <tr>
                 <td><span style="background: rgba(220,38,38,0.2); color: #dc2626; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">${f.categoryId}</span></td>
                 <td><span style="color:#3b82f6; font-weight:bold; font-size:0.8rem;">${f.round || ''}</span><br>${f.date} ${f.time ? '<br><span style="color:#a3a3a3; font-size:0.8rem;">'+f.time+'</span>' : ''}</td>
-                <td style="${homeStyle}">${f.homeClubId}</td>
-                <td style="${awayStyle}">${f.awayClubId}</td>
-                <td style="text-align: center;">
-                    <div style="display:flex; flex-direction: column; gap:5px; align-items: center;">
-                        <button class="action-btn" style="background:#3b82f6; width:100%; padding: 4px; font-size: 0.7rem;" onclick="openEditFixture('${f.id}')">✏️ Editar</button>
-                        <button class="danger delete-btn" style="width:100%; padding: 4px; font-size: 0.7rem;" onclick="deleteFixtureAdmin('${f.id}')">X Borrar</button>
+                <td>
+                    <div style="font-size: 0.85rem; font-weight: ${f.homeClubId === 'Funebrero' ? 'bold' : 'normal'}; color: ${f.homeClubId === 'Funebrero' ? '#fff' : '#a3a3a3'};">${f.homeClubId}</div>
+                    <div style="font-size: 0.65rem; color: #64748b;">vs</div>
+                    <div style="font-size: 0.85rem; font-weight: ${f.awayClubId === 'Funebrero' ? 'bold' : 'normal'}; color: ${f.awayClubId === 'Funebrero' ? '#fff' : '#a3a3a3'};">${f.awayClubId}</div>
+                </td>
+                <td style="text-align: center; white-space: nowrap;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                        <input type="number" value="${valL}" style="width: 45px; text-align: center; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 6px; padding: 6px; font-weight: bold; outline: none;" onchange="updateScoreInline('${f.id}', this.value, 'L')" ${isFinished ? 'disabled' : ''} placeholder="-">
+                        <span style="color: #64748b;">-</span>
+                        <input type="number" value="${valA}" style="width: 45px; text-align: center; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 6px; padding: 6px; font-weight: bold; outline: none;" onchange="updateScoreInline('${f.id}', this.value, 'A')" ${isFinished ? 'disabled' : ''} placeholder="-">
+                    </div>
+                </td>
+                <td style="min-width: 140px; vertical-align: middle;">
+                    ${checkPhotoInline(f.planilla, 'Planilla', 'planilla')}
+                    ${checkPhotoInline(f.photoHome, 'Eq. Local', 'photoHome')}
+                    ${checkPhotoInline(f.photoAway, 'Eq. Visita', 'photoAway')}
+                </td>
+                <td style="text-align: center; vertical-align: middle;">
+                    ${actionBtn}
+                    <div style="display:flex; gap: 5px;">
+                        <button style="flex:1; padding: 4px; font-size: 0.7rem; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="openEditInfo('${f.id}')">✏️️ Info</button>
+                        <button style="flex:1; padding: 4px; font-size: 0.7rem; background: transparent; border: 1px solid #ef4444; color: #ef4444; border-radius: 4px; cursor: pointer;" onclick="deleteFixtureAdmin('${f.id}')">X</button>
                     </div>
                 </td>
             </tr>`;
     }).join("");
 }
 
+// Actualiza el marcador silenciosamente sin recargar la tabla para que no pierdas foco
+window.updateScoreInline = async (id, val, side) => {
+    const data = side === 'L' ? { scoreLocal: val === "" ? null : Number(val) } : { scoreAway: val === "" ? null : Number(val) };
+    await updateFixture(id, data);
+};
+
+window.toggleStatusAdmin = async (id, newStatus) => {
+    let msg = newStatus === 'finished' ? "¿Sellar partido? Pasará a la vista pública." : "¿Reabrir partido? Se habilitará la edición del marcador.";
+    if(confirm(msg)) {
+        await updateFixture(id, { status: newStatus });
+        loadFixtures();
+    }
+};
+
 window.deleteFixtureAdmin = async (id) => {
     if (confirm("¿Eliminar este partido permanentemente?")) {
         await deleteFixture(id);
         loadFixtures();
+    }
+};
+
+// ==========================================
+// SUBIDA DE FOTOS EN LÍNEA (IMGBB)
+// ==========================================
+let inlineUploadId = null;
+let inlineUploadType = null;
+
+window.triggerInlineUpload = (id, type) => {
+    inlineUploadId = id;
+    inlineUploadType = type;
+    document.getElementById('adminFileUploader').click();
+};
+
+document.getElementById('adminFileUploader').onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !inlineUploadId) return;
+    
+    const label = document.getElementById(`lbl-${inlineUploadId}-${inlineUploadType}`);
+    const originalText = label ? label.textContent : "📷";
+    if (label) label.textContent = "⏳ Subiendo...";
+    
+    const formData = new FormData();
+    formData.append("image", file);
+    
+    try {
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
+        const data = await res.json();
+        if (data.success) {
+            await updateFixture(inlineUploadId, { [inlineUploadType]: data.data.url });
+            loadFixtures();
+        } else throw new Error();
+    } catch(err) {
+        alert("Error al subir la imagen. Intenta nuevamente.");
+        if (label) label.textContent = originalText;
+    } finally { 
+        e.target.value = ""; 
+        inlineUploadId = null; 
+        inlineUploadType = null; 
     }
 };
 
@@ -327,7 +395,7 @@ window.deletePlayerAdmin = async (id) => {
 };
 
 // ==========================================
-// MODAL DE EDICIÓN Y SUBIDA IMGBB
+// MODALES (AHORA SOLO PARA FECHA, EQUIPOS Y JUGADORES)
 // ==========================================
 const catsOptions = `
     <option value="Mosquito">Mosquito</option><option value="Mini">Mini</option><option value="Pre Mini">Pre Mini</option>
@@ -351,11 +419,11 @@ window.openEditPlayer = (id, name, birthdate, cat) => {
     document.getElementById('editModal').style.display = 'flex';
 };
 
-window.openEditFixture = (id) => {
+window.openEditInfo = (id) => {
     const f = allFixturesCache.find(x => x.id === id);
     if (!f) return;
     currentEditTarget = { id, type: 'fixture' };
-    document.getElementById('modalTitle').textContent = "✏️ Editar Partido y Cargar Fotos";
+    document.getElementById('modalTitle').textContent = "✏️ Editar Información de Partido";
     
     document.getElementById('modalFormContainer').innerHTML = `
         <div style="display:flex; gap:10px;">
@@ -363,85 +431,16 @@ window.openEditFixture = (id) => {
             <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Visitante:</label><input type="text" id="editFAway" class="form-input" value="${f.awayClubId}"></div>
         </div>
         <div style="display:flex; gap:10px;">
-            <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Pts Local:</label><input type="number" id="editScoreHome" class="form-input" value="${f.scoreLocal || ''}" placeholder="-"></div>
-            <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Pts Visita:</label><input type="number" id="editScoreAway" class="form-input" value="${f.scoreAway || ''}" placeholder="-"></div>
-            <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Estado:</label>
-                <select id="editStatus" class="form-select">
-                    <option value="scheduled" ${f.status==='scheduled'?'selected':''}>Pendiente</option>
-                    <option value="finished" ${f.status==='finished'?'selected':''}>Finalizado</option>
-                </select>
-            </div>
-        </div>
-        <div style="display:flex; gap:10px;">
             <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Fase/Jornada:</label><input type="text" id="editFRound" class="form-input" value="${f.round}"></div>
             <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Categoría:</label><select id="editFCat" class="form-select">${catsOptions}</select></div>
         </div>
         <div style="display:flex; gap:10px;">
             <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Fecha Calendario:</label><input type="text" id="editFDate" class="form-input" value="${f.date}"></div>
-            <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Hora:</label><input type="time" id="editFTime" class="form-input" value="${f.time}"></div>
-        </div>
-        <hr style="border-color: #333; margin: 10px 0;">
-        <div style="display:flex; gap:10px;">
-            <div style="flex:1;">
-                <label style="color:#a3a3a3; font-size:0.8rem;">Planilla de Juego:</label>
-                <div style="display:flex; gap:5px;">
-                    <input type="text" id="editPlanilla" class="form-input" value="${f.planilla || ''}" placeholder="Link ImgBB">
-                    <button type="button" id="btnPlanilla" class="action-btn" style="padding: 0 10px; font-size: 0.8rem;" onclick="triggerModalUpload('Planilla')">📷 Subir</button>
-                </div>
-            </div>
-        </div>
-        <div style="display:flex; gap:10px;">
-            <div style="flex:1;">
-                <label style="color:#a3a3a3; font-size:0.8rem;">Foto Local:</label>
-                <div style="display:flex; gap:5px;">
-                    <input type="text" id="editPhotoHome" class="form-input" value="${f.photoHome || ''}" placeholder="Link ImgBB">
-                    <button type="button" id="btnPhotoHome" class="action-btn" style="padding: 0 10px; font-size: 0.8rem;" onclick="triggerModalUpload('PhotoHome')">📷 Subir</button>
-                </div>
-            </div>
-            <div style="flex:1;">
-                <label style="color:#a3a3a3; font-size:0.8rem;">Foto Visita:</label>
-                <div style="display:flex; gap:5px;">
-                    <input type="text" id="editPhotoAway" class="form-input" value="${f.photoAway || ''}" placeholder="Link ImgBB">
-                    <button type="button" id="btnPhotoAway" class="action-btn" style="padding: 0 10px; font-size: 0.8rem;" onclick="triggerModalUpload('PhotoAway')">📷 Subir</button>
-                </div>
-            </div>
+            <div style="flex:1;"><label style="color:#a3a3a3; font-size:0.8rem;">Hora:</label><input type="time" id="editFTime" class="form-input" value="${f.time || ''}"></div>
         </div>
     `;
     document.getElementById('editFCat').value = f.categoryId;
     document.getElementById('editModal').style.display = 'flex';
-};
-
-let currentUploadField = '';
-window.triggerModalUpload = (field) => {
-    currentUploadField = field;
-    document.getElementById('modalFileUploader').click();
-};
-
-document.getElementById('modalFileUploader').onchange = async (e) => {
-    const file = e.target.files[0];
-    if (!file || !currentUploadField) return;
-    
-    const btn = document.getElementById('btn' + currentUploadField);
-    const originalText = btn.textContent;
-    btn.textContent = "⏳...";
-    
-    const formData = new FormData();
-    formData.append("image", file);
-    
-    try {
-        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
-        const data = await res.json();
-        if (data.success) {
-            document.getElementById('edit' + currentUploadField).value = data.data.url;
-            btn.textContent = "✅ OK";
-            btn.style.background = "#10b981";
-        } else throw new Error();
-    } catch(err) {
-        alert("Error al subir la imagen. Intenta nuevamente.");
-        btn.textContent = originalText;
-    } finally { 
-        e.target.value = ""; 
-    }
 };
 
 document.getElementById('modalSaveBtn').onclick = async () => {
@@ -462,13 +461,7 @@ document.getElementById('modalSaveBtn').onclick = async () => {
                 round: document.getElementById('editFRound').value.trim(),
                 categoryId: document.getElementById('editFCat').value,
                 date: document.getElementById('editFDate').value.trim(),
-                time: document.getElementById('editFTime').value.trim(),
-                scoreLocal: document.getElementById('editScoreHome').value ? Number(document.getElementById('editScoreHome').value) : null,
-                scoreAway: document.getElementById('editScoreAway').value ? Number(document.getElementById('editScoreAway').value) : null,
-                status: document.getElementById('editStatus').value,
-                planilla: document.getElementById('editPlanilla').value.trim() || null,
-                photoHome: document.getElementById('editPhotoHome').value.trim() || null,
-                photoAway: document.getElementById('editPhotoAway').value.trim() || null
+                time: document.getElementById('editFTime').value.trim()
             });
             await loadFixtures();
         }

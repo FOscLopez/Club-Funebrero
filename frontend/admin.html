@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <style>
-    .admin-wrapper { max-width: 1000px; margin: 40px auto; padding: 20px; }
+    .admin-wrapper { max-width: 1200px; margin: 40px auto; padding: 20px; }
     .admin-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #dc2626; padding-bottom: 15px; margin-bottom: 30px; }
     .admin-card { background: rgba(15, 15, 15, 0.8); border: 1px solid rgba(220, 38, 38, 0.3); border-radius: 12px; padding: 25px; margin-bottom: 30px; backdrop-filter: blur(10px); }
     .form-group { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
@@ -29,8 +29,10 @@
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
     .modal-content { background: #0a0a0a; border: 1px solid #dc2626; border-radius: 12px; padding: 30px; width: 100%; max-width: 600px; box-shadow: 0 10px 40px rgba(220,38,38,0.2); max-height: 90vh; overflow-y: auto; }
     
-    /* Estilos para los encabezados ordenables */
     th.sortable:hover { color: #ff3b3b; cursor: pointer; background: rgba(255,255,255,0.05); }
+    
+    /* Evitar inputs feos en marcadores */
+    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
   </style>
 </head>
 <body style="background: #050505; color: #fff;">
@@ -86,13 +88,13 @@
           </select>
         </div>
         <div class="form-group">
-          <textarea id="magicFixtureBox" class="form-input" rows="6" placeholder="Ejemplo:&#10;1 Funebrero VS S. Zapallar" required style="resize: vertical;"></textarea>
+            <textarea id="magicFixtureBox" class="form-input" rows="6" placeholder="Ejemplo:&#10;1 Funebrero VS S. Zapallar" required style="resize: vertical;"></textarea>
         </div>
         <button type="submit" class="action-btn" id="saveMagicFixturesBtn" style="background:#3b82f6;">Procesar Fixture</button>
       </form>
     </div>
 
-    <!-- Módulo Masivo Jugadores (Filtro DNI) -->
+    <!-- Módulo Masivo Jugadores -->
     <div class="admin-card" style="border-color: #10b981;">
       <h3 class="module-title" style="color: #10b981;">Caja Mágica: Planteles</h3>
       <p style="color:#a3a3a3; font-size:0.9rem; margin-bottom:15px;">Pega desde Word/PDF. El sistema ignorará automáticamente números de DNI y leerá solo Nombre y Fecha.</p>
@@ -113,30 +115,32 @@
       </form>
     </div>
 
-    <!-- Listados con Encabezados Interactivos -->
+    <!-- Listados Centrales (Partidos en Línea) -->
     <div class="admin-card" style="overflow-x: auto;">
       <h3 class="module-title">Partidos Activos</h3>
       <table>
         <thead>
           <tr>
-            <th onclick="setSort('category')" class="sortable" title="Ordenar por Categoría">Categoría <span id="sortCatArrow" style="color:#94a3b8; font-size: 0.9rem; margin-left: 5px;">↕</span></th>
+            <th onclick="setSort('category')" class="sortable" title="Ordenar por Categoría">Cat. <span id="sortCatArrow" style="color:#94a3b8; font-size: 0.9rem; margin-left: 5px;">↕</span></th>
             <th onclick="setSort('round')" class="sortable" title="Ordenar por Fase o Día">Fase / Día <span id="sortRoundArrow" style="color:#94a3b8; font-size: 0.9rem; margin-left: 5px;">↕</span></th>
-            <th onclick="setSort('teams')" class="sortable" title="Ordenar por Equipo Local">Local <span id="sortTeamsArrow" style="color:#94a3b8; font-size: 0.9rem; margin-left: 5px;">↕</span></th>
-            <th>Visitante</th>
-            <th style="text-align:center;">Acción</th>
+            <th onclick="setSort('teams')" class="sortable" title="Ordenar por Equipo Local">Equipos <span id="sortTeamsArrow" style="color:#94a3b8; font-size: 0.9rem; margin-left: 5px;">↕</span></th>
+            <th style="text-align:center;">Marcador</th>
+            <th style="min-width: 140px;">Fotos Control</th>
+            <th style="text-align:center; min-width: 100px;">Acción</th>
           </tr>
         </thead>
-        <tbody id="fixturesList"><tr><td colspan="5" style="text-align:center;">Cargando...</td></tr></tbody>
+        <tbody id="fixturesList"><tr><td colspan="6" style="text-align:center;">Cargando...</td></tr></tbody>
       </table>
     </div>
 
+    <!-- Planteles -->
     <div class="admin-card" style="overflow-x: auto;">
       <h3 class="module-title">Planteles Registrados</h3>
       <div id="playersListContainer"><p style="text-align:center;">Cargando...</p></div>
     </div>
   </div>
 
-  <!-- MODAL DE EDICIÓN FLOTANTE (Para reparar errores) -->
+  <!-- MODAL DE EDICIÓN FLOTANTE (Ahora solo para Info y Jugadores) -->
   <div id="editModal" class="modal-overlay" style="display: none;">
     <div class="modal-content">
       <h3 id="modalTitle" style="color: #dc2626; font-family: 'Bebas Neue', cursive; font-size: 2.2rem; margin-top: 0;">Editar Registro</h3>
@@ -148,8 +152,8 @@
     </div>
   </div>
 
-  <!-- INPUT OCULTO PARA IMGBB -->
-  <input type="file" id="modalFileUploader" accept="image/*" style="display: none;">
+  <!-- INPUT OCULTO PARA SUBIDA DIRECTA IMGBB EN TABLA -->
+  <input type="file" id="adminFileUploader" accept="image/*" style="display: none;">
 
   <script type="module" src="/js/admin.js"></script>
 </body>
