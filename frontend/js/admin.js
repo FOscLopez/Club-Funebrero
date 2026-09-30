@@ -4,10 +4,36 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { collection, addDoc, getDocs, doc, query, orderBy, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const allowedAdmins = ["mecinfotec@gmail.com", "admin@abnch.com", "admin@reydigital.com"];
-const IMGBB_API_KEY = "4b6599a15cc7870198cb96ee95df9905"; // Tu clave ImgBB 
+const IMGBB_API_KEY = "4b6599a15cc7870198cb96ee95df9905";
 
 let allFixturesCache = [];
 let currentEditTarget = { id: null, type: null }; 
+
+// =========================================
+// ESTADO DEL ORDENAMIENTO DE LA TABLA
+// =========================================
+let currentSort = { column: 'createdAt', direction: 'desc' };
+
+window.setSort = (column) => {
+    if (currentSort.column === column) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort.column = column;
+        currentSort.direction = 'asc'; 
+    }
+    
+    // Actualizar color e ícono de las flechitas visuales (Color Azul Admin)
+    document.getElementById("sortCatArrow").textContent = currentSort.column === 'category' ? (currentSort.direction === 'asc' ? '↑' : '↓') : '↕';
+    document.getElementById("sortCatArrow").style.color = currentSort.column === 'category' ? '#3b82f6' : '#94a3b8';
+    
+    document.getElementById("sortRoundArrow").textContent = currentSort.column === 'round' ? (currentSort.direction === 'asc' ? '↑' : '↓') : '↕';
+    document.getElementById("sortRoundArrow").style.color = currentSort.column === 'round' ? '#3b82f6' : '#94a3b8';
+    
+    document.getElementById("sortTeamsArrow").textContent = currentSort.column === 'teams' ? (currentSort.direction === 'asc' ? '↑' : '↓') : '↕';
+    document.getElementById("sortTeamsArrow").style.color = currentSort.column === 'teams' ? '#3b82f6' : '#94a3b8';
+    
+    renderFixturesTable();
+};
 
 onAuthStateChanged(auth, (user) => {
     if (!user || !allowedAdmins.includes(user.email)) {
@@ -126,9 +152,6 @@ document.getElementById("magicFixtureForm").addEventListener("submit", async (e)
     finally { btn.textContent = "Procesar Fixture"; btn.disabled = false; }
 });
 
-// ==========================================
-// CAJA MÁGICA: JUGADORES (FILTRO DNI)
-// ==========================================
 document.getElementById("playerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const btn = document.getElementById("savePlayersBtn");
@@ -143,7 +166,6 @@ document.getElementById("playerForm").addEventListener("submit", async (e) => {
         let cleanLine = line.trim();
         if (!cleanLine || cleanLine.toLowerCase().includes("apellido") || cleanLine.toLowerCase().includes("fecha de nacimiento")) return;
 
-        // FILTRO MAGICO: Elimina cualquier numero largo tipo DNI (con o sin puntos)
         cleanLine = cleanLine.replace(/\b\d{1,2}[\.\-]?\d{3}[\.\-]?\d{3}\b/g, "").replace(/\s{2,}/g, " ").trim();
 
         let parts = cleanLine.split('\t');
@@ -152,7 +174,6 @@ document.getElementById("playerForm").addEventListener("submit", async (e) => {
         if (parts.length >= 2) {
             playersToSave.push({ name: parts[0].trim(), birthdate: parts[1].trim(), categoryId: category, clubId: "Funebrero", createdAt: new Date().toISOString() });
         } else {
-            // Intenta separar el último bloque como fecha si pegaron todo junto
             const lastSpace = cleanLine.lastIndexOf(' ');
             if (lastSpace > 0) {
                 playersToSave.push({ name: cleanLine.substring(0, lastSpace).trim(), birthdate: cleanLine.substring(lastSpace + 1).trim(), categoryId: category, clubId: "Funebrero", createdAt: new Date().toISOString() });
@@ -175,42 +196,95 @@ document.getElementById("playerForm").addEventListener("submit", async (e) => {
     finally { btn.textContent = "Procesar Plantel"; btn.disabled = false; }
 });
 
+// =========================================
+// RENDERIZADO INTERACTIVO DE FIXTURES
+// =========================================
 async function loadFixtures() {
     const tbody = document.getElementById("fixturesList");
     try {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Cargando base de datos...</td></tr>';
         const q = query(collection(db, "fixtures"), orderBy("createdAt", "desc"));
         const snapshot = await getDocs(q);
-        if (snapshot.empty) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">El fixture está vacío.</td></tr>'; return; }
-
+        
         allFixturesCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderFixturesTable();
+    } catch (error) { 
+        tbody.innerHTML = '<tr><td colspan="5">Error de lectura.</td></tr>'; 
+    }
+}
 
-        tbody.innerHTML = allFixturesCache.map(f => {
-            const homeStyle = f.homeClubId === 'Funebrero' ? 'color:#fff; font-weight:bold;' : 'color:#a3a3a3;';
-            const awayStyle = f.awayClubId === 'Funebrero' ? 'color:#fff; font-weight:bold;' : 'color:#a3a3a3;';
-            return `
-                <tr>
-                    <td><span style="background: rgba(220,38,38,0.2); color: #dc2626; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">${f.categoryId}</span></td>
-                    <td><span style="color:#3b82f6; font-weight:bold; font-size:0.8rem;">${f.round || ''}</span><br>${f.date} ${f.time ? '<br><span style="color:#a3a3a3; font-size:0.8rem;">'+f.time+'</span>' : ''}</td>
-                    <td style="${homeStyle}">${f.homeClubId}</td>
-                    <td style="${awayStyle}">${f.awayClubId}</td>
-                    <td style="text-align: center;">
-                        <div style="display:flex; gap:5px;">
-                            <button class="action-btn" style="background:#3b82f6; flex:1; padding: 4px; font-size: 0.7rem;" onclick="openEditFixture('${f.id}')">✏️️ Editar</button>
-                            <button class="danger delete-btn" style="flex:1; padding: 4px; font-size: 0.7rem;" onclick="deleteFixtureAdmin('${f.id}')">X Borrar</button>
-                        </div>
-                    </td>
-                </tr>`;
-        }).join("");
-    } catch (error) { tbody.innerHTML = '<tr><td colspan="5">Error de lectura.</td></tr>'; }
+function renderFixturesTable() {
+    const tbody = document.getElementById("fixturesList");
+    
+    if (allFixturesCache.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#a3a3a3;">El fixture está vacío.</td></tr>';
+        return;
+    }
+
+    // Copiamos la caché para ordenar sin mutar el original de Firebase
+    let sortedFixtures = [...allFixturesCache];
+
+    // Lógica Matemática de Ordenamiento
+    sortedFixtures.sort((a, b) => {
+        let valA, valB;
+        
+        if (currentSort.column === 'category') {
+            valA = (a.categoryId || '').toLowerCase();
+            valB = (b.categoryId || '').toLowerCase();
+        } else if (currentSort.column === 'round') {
+            // Extrae el número de la Fase para ordenarlo matemáticamente (ej: Fecha 10 va después de Fecha 2)
+            const numA = parseInt((a.round || '').replace(/\D/g, '')) || 999;
+            const numB = parseInt((b.round || '').replace(/\D/g, '')) || 999;
+            if (numA !== numB) {
+                return currentSort.direction === 'asc' ? numA - numB : numB - numA;
+            }
+            // Si no hay números (ej: "A definir"), ordena alfabéticamente
+            valA = (a.round || '').toLowerCase();
+            valB = (b.round || '').toLowerCase();
+        } else if (currentSort.column === 'teams') {
+            valA = (a.homeClubId || '').toLowerCase();
+            valB = (b.homeClubId || '').toLowerCase();
+        } else {
+            valA = (a.createdAt || '').toLowerCase();
+            valB = (b.createdAt || '').toLowerCase();
+        }
+
+        if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1;
+        if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    // Renderizamos la tabla ordenada
+    tbody.innerHTML = sortedFixtures.map(f => {
+        const homeStyle = f.homeClubId === 'Funebrero' ? 'color:#fff; font-weight:bold;' : 'color:#a3a3a3;';
+        const awayStyle = f.awayClubId === 'Funebrero' ? 'color:#fff; font-weight:bold;' : 'color:#a3a3a3;';
+        
+        return `
+            <tr>
+                <td><span style="background: rgba(220,38,38,0.2); color: #dc2626; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">${f.categoryId}</span></td>
+                <td><span style="color:#3b82f6; font-weight:bold; font-size:0.8rem;">${f.round || ''}</span><br>${f.date} ${f.time ? '<br><span style="color:#a3a3a3; font-size:0.8rem;">'+f.time+'</span>' : ''}</td>
+                <td style="${homeStyle}">${f.homeClubId}</td>
+                <td style="${awayStyle}">${f.awayClubId}</td>
+                <td style="text-align: center;">
+                    <div style="display:flex; flex-direction: column; gap:5px; align-items: center;">
+                        <button class="action-btn" style="background:#3b82f6; width:100%; padding: 4px; font-size: 0.7rem;" onclick="openEditFixture('${f.id}')">✏️ Editar</button>
+                        <button class="danger delete-btn" style="width:100%; padding: 4px; font-size: 0.7rem;" onclick="deleteFixtureAdmin('${f.id}')">X Borrar</button>
+                    </div>
+                </td>
+            </tr>`;
+    }).join("");
 }
 
 window.deleteFixtureAdmin = async (id) => {
-    if (confirm("¿Eliminar partido?")) {
+    if (confirm("¿Eliminar este partido permanentemente?")) {
         await deleteFixture(id);
         loadFixtures();
     }
 };
 
+// =========================================
+// RENDERIZADO DE JUGADORES
+// =========================================
 async function loadPlayers() {
     const container = document.getElementById("playersListContainer");
     try {
@@ -234,7 +308,7 @@ async function loadPlayers() {
                             <td style="font-weight:600;">${p.name}</td>
                             <td style="color:#a3a3a3;">${p.birthdate}</td>
                             <td style="text-align:right; width: 140px;">
-                                <button class="action-btn" style="background:#3b82f6; padding: 4px 8px; font-size: 0.7rem; margin-right: 5px;" onclick="openEditPlayer('${p.id}', '${p.name}', '${p.birthdate}', '${p.categoryId}')">✏️️ Editar</button>
+                                <button class="action-btn" style="background:#3b82f6; padding: 4px 8px; font-size: 0.7rem; margin-right: 5px;" onclick="openEditPlayer('${p.id}', '${p.name}', '${p.birthdate}', '${p.categoryId}')">✏️ Editar</button>
                                 <button class="delete-btn" onclick="deletePlayerAdmin('${p.id}')">Borrar</button>
                             </td>
                          </tr>`;
@@ -337,11 +411,7 @@ window.openEditFixture = (id) => {
     document.getElementById('editModal').style.display = 'flex';
 };
 
-// ==========================================
-// CONTROLADOR DE SUBIDA IMGBB DESDE EL MODAL
-// ==========================================
 let currentUploadField = '';
-
 window.triggerModalUpload = (field) => {
     currentUploadField = field;
     document.getElementById('modalFileUploader').click();
