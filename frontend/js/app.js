@@ -1,13 +1,14 @@
-import { getFixtures, getClubs, getCategories } from "./services/firestore.service.js";
+import { db } from "./services/firebase.config.js";
+import { collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
     console.log("🏀 Plataforma del Club Funebrero inicializada.");
 
     // 1. Navegación suave
     document.querySelectorAll('.nav-links a').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             const targetId = this.getAttribute('href');
-            if (targetId.startsWith('#')) {
+            if (targetId && targetId.startsWith('#')) {
                 e.preventDefault();
                 const targetElement = document.querySelector(targetId);
                 if (targetElement) {
@@ -17,65 +18,74 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     });
 
-    // 2. Carga de Fixture y Resultados
-    await loadClubFixtures();
+    // 2. Conectar Fixture en Tiempo Real
+    listenToPublicFixtures();
 });
 
-async function loadClubFixtures() {
-    const fixtureContainer = document.querySelector("#fixture .glass-premium");
-    if (!fixtureContainer) return;
+function listenToPublicFixtures() {
+    const container = document.getElementById("publicFixturesContainer");
+    if (!container) return;
 
-    try {
-        // Obtenemos todos los datos necesarios
-        const [fixtures, clubs, categories] = await Promise.all([
-            getFixtures(),
-            getClubs(),
-            getCategories()
-        ]);
-
-        // Asegurarse de que el club base es el Funebrero
-        const funebreroId = "funebrero"; // Reemplazar si el ID en tu DB es distinto
-
-        // Filtramos solo los partidos donde juegue el Funebrero
-        const clubMatches = fixtures.filter(f => f.homeClubId === funebreroId || f.awayClubId === funebreroId)
-                                    .sort((a,b) => new Date(b.date) - new Date(a.date));
-
-        if (clubMatches.length === 0) {
-            fixtureContainer.innerHTML = `
-                <h3 style="color: #dc2626; font-size: 2.5rem;">Próximamente</h3>
-                <p style="font-size: 1.1rem; color: #a3a3a3;">Aún no hay partidos registrados en la base de datos para esta temporada.</p>
+    // Pedimos los partidos ordenados por fecha de creación (los más nuevos arriba)
+    const q = query(collection(db, "fixtures"), orderBy("createdAt", "desc"));
+    
+    // onSnapshot es el túnel en vivo: cualquier cambio en Firebase actualiza esto sin F5
+    onSnapshot(q, (snapshot) => {
+        if (snapshot.empty) {
+            container.innerHTML = `
+                <div class="glass-premium" style="padding: 50px 20px; text-align: center;">
+                    <h3 style="color: #dc2626; font-size: 2.5rem; margin-bottom: 15px;">Próximamente</h3>
+                    <p style="font-size: 1.1rem; color: #a3a3a3;">Aún no hay partidos programados para esta temporada.</p>
+                </div>
             `;
             return;
         }
 
-        // Renderizamos los partidos
-        fixtureContainer.innerHTML = clubMatches.map(f => {
-            const home = clubs.find(c => c.id === f.homeClubId)?.name || "Local";
-            const away = clubs.find(c => c.id === f.awayClubId)?.name || "Visita";
-            const cat = categories.find(c => c.id === f.categoryId)?.name || "Categoría";
-            
+        const fixtures = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        container.innerHTML = fixtures.map(f => {
             const isFinished = f.status === "finished";
-            const scoreHtml = isFinished 
-                ? `<strong style="color:#ffffff; font-size:1.5rem; margin: 0 15px; background: rgba(220,38,38,0.2); padding: 5px 15px; border-radius: 8px;">${f.scoreLocal} - ${f.scoreAway}</strong>` 
-                : `<strong style="color:#dc2626; font-size:1.2rem; margin: 0 15px;">VS</strong>`;
+            const isLive = f.status === "live";
             
+            let statusBadge = '';
+            let scoreHtml = `<strong style="color:#dc2626; font-size:1.5rem; margin: 0 15px;">VS</strong>`;
+            
+            if (isFinished) {
+                statusBadge = `<span style="background: #333; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; letter-spacing: 1px;">FINALIZADO</span>`;
+                scoreHtml = `<strong style="color:#ffffff; font-size:1.8rem; margin: 0 15px; background: rgba(220,38,38,0.2); padding: 5px 15px; border-radius: 8px;">${f.scoreLocal || 0} - ${f.scoreAway || 0}</strong>`;
+            } else if (isLive) {
+                statusBadge = `<span style="background: #dc2626; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; letter-spacing: 1px;">🔴 EN VIVO</span>`;
+                scoreHtml = `<strong style="color:#ffffff; font-size:1.8rem; margin: 0 15px; background: rgba(220,38,38,0.2); padding: 5px 15px; border-radius: 8px;">${f.scoreLocal || 0} - ${f.scoreAway || 0}</strong>`;
+            }
+
+            // Resaltamos visualmente cuando juega el Funebrero
+            const homeWeight = f.homeClubId.toUpperCase() === 'FUNEBRERO' ? '800' : '400';
+            const homeColor = f.homeClubId.toUpperCase() === 'FUNEBRERO' ? '#ffffff' : '#a3a3a3';
+            const awayWeight = f.awayClubId.toUpperCase() === 'FUNEBRERO' ? '800' : '400';
+            const awayColor = f.awayClubId.toUpperCase() === 'FUNEBRERO' ? '#ffffff' : '#a3a3a3';
+
             return `
-                <div style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-left: 4px solid #dc2626; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span style="font-size: 0.8rem; color: #dc2626; font-weight: bold; text-transform: uppercase;">${cat}</span>
-                        <span style="font-size: 0.8rem; color: #a3a3a3;">F. ${f.round || '?'} | 📅 ${f.date} | 🕒 ${f.time || 'A def.'}</span>
+                <div class="glass-premium" style="padding: 20px; margin-bottom: 20px; border-left: 5px solid #dc2626; display: flex; flex-direction: column; gap: 15px; text-align: left;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="background: rgba(220,38,38,0.2); color: #dc2626; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 0.85rem;">${f.categoryId}</span>
+                            <span style="color: #3b82f6; font-weight: bold; font-size: 0.85rem; text-transform: uppercase;">${f.round || ''}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            ${statusBadge}
+                            <span style="color: #a3a3a3; font-size: 0.85rem; font-weight: 600;">📅 ${f.date} ${f.time ? '🕒 ' + f.time : ''}</span>
+                        </div>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="flex:1; text-align:right; font-weight: ${f.homeClubId === funebreroId ? '800' : '400'}; color: ${f.homeClubId === funebreroId ? '#fff' : '#a3a3a3'};">${home}</span>
-                        ${scoreHtml}
-                        <span style="flex:1; text-align:left; font-weight: ${f.awayClubId === funebreroId ? '800' : '400'}; color: ${f.awayClubId === funebreroId ? '#fff' : '#a3a3a3'};">${away}</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div style="flex: 1; text-align: right; font-size: 1.5rem; font-family: 'Bebas Neue', cursive; letter-spacing: 1px; font-weight: ${homeWeight}; color: ${homeColor};">${f.homeClubId}</div>
+                        <div style="text-align: center; min-width: 100px;">${scoreHtml}</div>
+                        <div style="flex: 1; text-align: left; font-size: 1.5rem; font-family: 'Bebas Neue', cursive; letter-spacing: 1px; font-weight: ${awayWeight}; color: ${awayColor};">${f.awayClubId}</div>
                     </div>
                 </div>
             `;
         }).join("");
-
-    } catch (error) {
-        console.error("Error cargando fixture:", error);
-        fixtureContainer.innerHTML = `<p style="color: #dc2626;">Error al cargar los datos. Intenta nuevamente.</p>`;
-    }
+    }, (error) => {
+        console.error("Error al sincronizar fixtures:", error);
+        container.innerHTML = `<p style="color: #dc2626; text-align: center;">Error de conexión con la base de datos.</p>`;
+    });
 }
