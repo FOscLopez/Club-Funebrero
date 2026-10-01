@@ -27,6 +27,7 @@
         max-width: 350px; width: 90%;
         filter: drop-shadow(0 0 20px rgba(220,38,38,0.5));
         outline: none;
+        /* mix-blend-mode: screen; (Se puede descomentar si el MP4 tiene fondo negro puro) */
     }
     .landing-title {
         font-family: 'Bebas Neue', cursive; font-size: 3.5rem; color: #ffffff;
@@ -68,7 +69,11 @@
 
   <!-- PANTALLA DE CARGA ANIMADA -->
   <div id="landing-overlay">
-    <video id="landing-video" src="/img/animacion.mp4" autoplay muted playsinline preload="auto"></video>
+    <video id="landing-video" autoplay muted playsinline preload="auto">
+      <!-- Sistema Dual: Buscará primero un WebM transparente, si no existe, cargará el MP4 (ideal con fondo negro puro) -->
+      <source src="/img/animacion.webm" type="video/webm">
+      <source src="/img/animacion.mp4" type="video/mp4">
+    </video>
     <h1 class="landing-title">CLUB ATLÉTICO <br><span>FUNEBRERO</span></h1>
   </div>
 
@@ -85,28 +90,17 @@
         setTimeout(() => { 
           overlay.style.visibility = "hidden"; 
           overlay.style.display = "none"; 
-        }, 800); // 0.8s para que se desvanezca suavemente
+        }, 800);
       };
 
       if (video) {
-        // 1. Si el video falla en cargar (Error 404), mostramos el título 3 segundos y ocultamos.
-        video.addEventListener("error", () => {
-          setTimeout(hideOverlay, 3000);
-        });
-
-        // 2. Intentamos forzar la reproducción para evitar bloqueos del navegador
         let playPromise = video.play();
         if (playPromise !== undefined) {
           playPromise.catch(error => {
-            // Si el navegador bloquea el video, ocultamos después de 3 segundos
             setTimeout(hideOverlay, 3000);
           });
         }
-
-        // 3. Cuando la animación termine naturalmente, ocultamos la pantalla negra.
         video.addEventListener("ended", hideOverlay);
-        
-        // 4. Respaldo definitivo: pase lo que pase, la pantalla negra no puede durar más de 6 segundos.
         setTimeout(hideOverlay, 6000);
       } else {
         hideOverlay();
