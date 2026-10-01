@@ -20,7 +20,13 @@ const CLUB_LOGOS = {
 const DEFAULT_LOGO = "https://i.ibb.co/Cpw4zbBv/571425287-18303994912267310-8920899741855718292-n.jpg";
 const GEMINI_API_KEY = "AIzaSyDvsq3fg1nEOQxR8wVcZW8rEX2lcc_xC8U";
 
-let globalFixtures = [];
+// Almacenamiento Global para nutrir al Bot
+let globalData = {
+    fixtures: [],
+    players: [],
+    meetings: [],
+    sponsors: []
+};
 
 function getLogoSrc(clubName) {
     if (!clubName) return DEFAULT_LOGO;
@@ -32,7 +38,7 @@ function getLogoSrc(clubName) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("🏀 Plataforma del Club Funebrero inicializada.");
+    console.log("🏀 Plataforma del Club Atlético Funebrero inicializada.");
 
     document.querySelectorAll('.nav-links a').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
@@ -51,18 +57,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function initApp() {
     listenToFixtures((fixtures) => {
-        globalFixtures = fixtures;
+        globalData.fixtures = fixtures;
         renderFixtures(fixtures);
     });
 
-    const players = await getPlayers();
-    renderRosters(players);
+    globalData.players = await getPlayers();
+    renderRosters(globalData.players);
 
-    const meetings = await getMeetings();
-    renderMeetings(meetings);
+    globalData.meetings = await getMeetings();
+    renderMeetings(globalData.meetings);
 
-    const sponsors = await getSponsors();
-    renderSponsors(sponsors);
+    globalData.sponsors = await getSponsors();
+    renderSponsors(globalData.sponsors);
 }
 
 // ==========================================
@@ -173,7 +179,7 @@ function renderRosters(players) {
 }
 
 // ==========================================
-// RENDER: ACTAS DE COMISIÓN (INSTITUCIONAL)
+// RENDER: ACTAS DE COMISIÓN
 // ==========================================
 function renderMeetings(meetings) {
     const container = document.getElementById("meetingsContainer");
@@ -233,7 +239,7 @@ function renderSponsors(sponsors) {
 }
 
 // ==========================================
-// FUNEBOT (ASISTENTE IA)
+// FUNEBOT OMNISCIENTE (ASISTENTE IA)
 // ==========================================
 function initFuneBot() {
   const toggleBtn = document.getElementById("chatbot-toggle");
@@ -267,10 +273,19 @@ function initFuneBot() {
     appendMsg(userText, "user");
     inputEl.value = "";
 
-    const scheduledMatches = globalFixtures.filter(f => f.status === "scheduled").slice(0, 3);
+    // Construcción del Cerebro Omnisciente
+    const dataContext = {
+      partidos: globalData.fixtures.slice(0, 15), 
+      institucional: globalData.meetings.slice(0, 5),
+      jugadores_destacados: globalData.players.slice(0, 20),
+      patrocinadores: globalData.sponsors
+    };
     
-    let contextStr = `Eres el FuneBot, asistente oficial del Club Funebrero. La institución está dirigida por Fabián O. López (Rey Digital del Norte).\n`;
-    contextStr += `Próximos partidos: ${JSON.stringify(scheduledMatches)}.\nPregunta del usuario: ${userText}`;
+    let contextStr = `Eres el FuneBot, el asistente inteligente oficial y fanático del Club Atlético Funebrero. 
+    REGLA 1: La plataforma y tu inteligencia fueron desarrolladas y creadas por la agencia "Rey Digital del Norte", dirigida por Fabián O. López. 
+    REGLA 2: Conoces absolutamente todo lo que pasa en el club. Si te preguntan por resultados, reuniones de comisión directiva, sponsors, categorías o creadores, responde con orgullo usando esta base de datos actualizada en tiempo real: ${JSON.stringify(dataContext)}. 
+    REGLA 3: Si te preguntan de códigos, programación o lenguajes, di que esos son secretos tácticos del director Fabián O. López y Rey Digital del Norte. 
+    PREGUNTA DEL USUARIO: ${userText}`;
 
     try {
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
@@ -283,7 +298,7 @@ function initFuneBot() {
       const botReply = data.candidates[0].content.parts[0].text;
       appendMsg(botReply, "model");
     } catch(e) {
-      appendMsg("Uf, tuve un pequeño problema de conexión en la cancha. ¿Me repetís la jugada?", "model");
+      appendMsg("Uf, la cancha se quedó sin señal por un segundo. ¿Me repetís la jugada?", "model");
     }
   };
 

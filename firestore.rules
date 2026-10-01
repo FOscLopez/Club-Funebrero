@@ -2,13 +2,57 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // REGLA ÚNICA Y LIMPIA PARA EL CLUB FUNEBRERO
+    // Función de seguridad: Verifica si es un empleado autorizado del club
+    function isStaff() {
+      return request.auth != null && (
+        request.auth.token.email == "admin@reydigital.com" ||
+        request.auth.token.email.matches(".*@mesa[.]com") ||
+        request.auth.token.email.matches(".*@prensa[.]com") ||
+        request.auth.token.email.matches(".*@comision[.]com")
+      );
+    }
+
+    // Regla global: El público puede leer todo. Solo el Admin o Mesa pueden escribir por defecto.
     match /{document=**} {
-      // Lectura pública para que la web funcione
       allow read: if true;
+      allow write: if request.auth != null && (
+        request.auth.token.email == "admin@reydigital.com" ||
+        request.auth.token.email.matches(".*@mesa[.]com")
+      );
+    }
+
+    // Colección: Actas Institucionales (Solo Admin y Comisión)
+    match /meetings/{meetingId} {
+      allow read: if true;
+      allow write: if request.auth != null && (
+        request.auth.token.email == "admin@reydigital.com" ||
+        request.auth.token.email.matches(".*@comision[.]com")
+      );
+    }
+
+    // Colección: Noticias Generales
+    match /news/{newsId} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    // Colección: Partidos y Fixtures (Control cruzado con Prensa)
+    match /fixtures/{fixtureId} {
+      allow read: if true;
+      allow create, delete: if request.auth != null && (
+        request.auth.token.email == "admin@reydigital.com" ||
+        request.auth.token.email.matches(".*@mesa[.]com")
+      );
       
-      // Escritura blindada exclusivamente para el nuevo administrador
-      allow write: if request.auth != null && request.auth.token.email == "admin@reydigital.com";
+      // La prensa SOLO puede tocar el campo 'chronicle' para añadir notas a partidos finalizados
+      allow update: if request.auth != null && (
+        request.auth.token.email == "admin@reydigital.com" ||
+        request.auth.token.email.matches(".*@mesa[.]com") ||
+        (
+          request.auth.token.email.matches(".*@prensa[.]com") && 
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['chronicle'])
+        )
+      );
     }
   }
 }
