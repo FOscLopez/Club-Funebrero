@@ -15,19 +15,23 @@
   
   <style>
     /* =========================================
-       LANDING ANIMADA (PANTALLA DE CARGA)
+       LANDING ANIMADA (PANTALLA DE CARGA MAGICA)
        ========================================= */
     #landing-overlay {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        background-color: #050505; z-index: 999999;
+        background-color: #000000; /* Fondo negro puro para que el filtro funcione perfecto */
+        z-index: 999999;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         transition: opacity 0.8s ease, visibility 0.8s;
     }
     #landing-video {
         max-width: 350px; width: 90%;
-        filter: drop-shadow(0 0 20px rgba(220,38,38,0.5));
         outline: none;
-        /* mix-blend-mode: screen; (Se puede descomentar si el MP4 tiene fondo negro puro) */
+        
+        /* EL FILTRO MÁGICO: Borra el fondo negro del MP4 y deja solo la calavera brillando */
+        mix-blend-mode: screen; 
+        
+        filter: drop-shadow(0 0 20px rgba(220,38,38,0.5));
     }
     .landing-title {
         font-family: 'Bebas Neue', cursive; font-size: 3.5rem; color: #ffffff;
@@ -67,13 +71,10 @@
 </head>
 <body>
 
-  <!-- PANTALLA DE CARGA ANIMADA -->
+  <!-- PANTALLA DE CARGA ANIMADA CON FILTRO MÁGICO (MIX-BLEND-MODE) -->
   <div id="landing-overlay">
-    <video id="landing-video" autoplay muted playsinline preload="auto">
-      <!-- Sistema Dual: Buscará primero un WebM transparente, si no existe, cargará el MP4 (ideal con fondo negro puro) -->
-      <source src="/img/animacion.webm" type="video/webm">
-      <source src="/img/animacion.mp4" type="video/mp4">
-    </video>
+    <!-- Solo pide el MP4 (El diseñador debe exportarlo con fondo negro puro) -->
+    <video id="landing-video" src="/img/animacion.mp4" autoplay muted playsinline preload="auto"></video>
     <h1 class="landing-title">CLUB ATLÉTICO <br><span>FUNEBRERO</span></h1>
   </div>
 
