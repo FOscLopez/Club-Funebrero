@@ -19,7 +19,7 @@
        ========================================= */
     #landing-overlay {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        background-color: #000000; /* Fondo negro puro para que el filtro funcione perfecto */
+        background-color: #000000; /* Fondo negro puro */
         z-index: 999999;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         transition: opacity 0.8s ease, visibility 0.8s;
@@ -28,10 +28,10 @@
         max-width: 350px; width: 90%;
         outline: none;
         
-        /* EL FILTRO MÁGICO: Borra el fondo negro del MP4 y deja solo la calavera brillando */
+        /* EL FILTRO MÁGICO: Elimina el fondo negro/gris del video */
         mix-blend-mode: screen; 
         
-        filter: drop-shadow(0 0 20px rgba(220,38,38,0.5));
+        /* Se eliminó el drop-shadow para que no se vea el marco rectangular */
     }
     .landing-title {
         font-family: 'Bebas Neue', cursive; font-size: 3.5rem; color: #ffffff;
@@ -71,9 +71,9 @@
 </head>
 <body>
 
-  <!-- PANTALLA DE CARGA ANIMADA CON FILTRO MÁGICO (MIX-BLEND-MODE) -->
+  <!-- PANTALLA DE CARGA ANIMADA -->
   <div id="landing-overlay">
-    <!-- Solo pide el MP4 (El diseñador debe exportarlo con fondo negro puro) -->
+    <!-- El video reproducirá el archivo mp4 con el filtro blend mode activo -->
     <video id="landing-video" src="/img/animacion.mp4" autoplay muted playsinline preload="auto"></video>
     <h1 class="landing-title">CLUB ATLÉTICO <br><span>FUNEBRERO</span></h1>
   </div>
