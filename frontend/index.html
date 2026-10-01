@@ -19,19 +19,12 @@
        ========================================= */
     #landing-overlay {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        background-color: #000000; /* Fondo negro puro */
-        z-index: 999999;
+        background-color: #000000; z-index: 999999;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         transition: opacity 0.8s ease, visibility 0.8s;
     }
     #landing-video {
-        max-width: 350px; width: 90%;
-        outline: none;
-        
-        /* EL FILTRO MÁGICO: Elimina el fondo negro/gris del video */
-        mix-blend-mode: screen; 
-        
-        /* Se eliminó el drop-shadow para que no se vea el marco rectangular */
+        max-width: 350px; width: 90%; outline: none; mix-blend-mode: screen; 
     }
     .landing-title {
         font-family: 'Bebas Neue', cursive; font-size: 3.5rem; color: #ffffff;
@@ -67,13 +60,24 @@
     .sponsor-card { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.03); padding: 10px 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); text-decoration: none; transition: 0.3s; }
     .sponsor-card:hover { background: rgba(220,38,38,0.1); border-color: rgba(220,38,38,0.4); transform: translateY(-3px); }
     .sponsor-logo { height: 50px; max-width: 120px; object-fit: contain; }
+
+    /* ESTILOS NUEVOS: REDES Y CUMPLEAÑOS */
+    .hero-socials { display: flex; gap: 15px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+    .social-btn { padding: 8px 20px; border-radius: 20px; font-weight: bold; text-decoration: none; color: white; display: flex; align-items: center; gap: 8px; transition: 0.3s; font-size: 0.9rem; }
+    .btn-fb { background: #1877F2; border: 1px solid #1877F2; }
+    .btn-fb:hover { background: transparent; color: #1877F2; }
+    .btn-ig { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); border: 1px solid transparent; }
+    .btn-ig:hover { box-shadow: 0 0 15px rgba(220, 39, 67, 0.5); transform: translateY(-3px); }
+    
+    .birthday-card { background: rgba(15,15,15,0.8); border-left: 4px solid #3b82f6; padding: 15px; border-radius: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .birthday-card.is-today { background: linear-gradient(135deg, rgba(220,38,38,0.2), rgba(15,15,15,0.9)); border-left: 4px solid #dc2626; border: 1px solid rgba(220,38,38,0.5); box-shadow: 0 0 15px rgba(220,38,38,0.3); animation: pulseBd 2s infinite; }
+    @keyframes pulseBd { 0% { box-shadow: 0 0 10px rgba(220,38,38,0.2); } 50% { box-shadow: 0 0 20px rgba(220,38,38,0.6); } 100% { box-shadow: 0 0 10px rgba(220,38,38,0.2); } }
   </style>
 </head>
 <body>
 
   <!-- PANTALLA DE CARGA ANIMADA -->
   <div id="landing-overlay">
-    <!-- El video reproducirá el archivo mp4 con el filtro blend mode activo -->
     <video id="landing-video" src="/img/animacion.mp4" autoplay muted playsinline preload="auto"></video>
     <h1 class="landing-title">CLUB ATLÉTICO <br><span>FUNEBRERO</span></h1>
   </div>
@@ -83,38 +87,26 @@
       const overlay = document.getElementById("landing-overlay");
       const video = document.getElementById("landing-video");
       let isHidden = false;
-      
       const hideOverlay = () => {
         if (isHidden || !overlay) return;
-        isHidden = true;
-        overlay.style.opacity = "0";
-        setTimeout(() => { 
-          overlay.style.visibility = "hidden"; 
-          overlay.style.display = "none"; 
-        }, 800);
+        isHidden = true; overlay.style.opacity = "0";
+        setTimeout(() => { overlay.style.visibility = "hidden"; overlay.style.display = "none"; }, 800);
       };
-
       if (video) {
         let playPromise = video.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            setTimeout(hideOverlay, 3000);
-          });
-        }
+        if (playPromise !== undefined) playPromise.catch(() => setTimeout(hideOverlay, 3000));
         video.addEventListener("ended", hideOverlay);
         setTimeout(hideOverlay, 6000);
-      } else {
-        hideOverlay();
-      }
+      } else { hideOverlay(); }
     });
   </script>
 
   <!-- TICKER -->
   <div class="ticker-wrap">
-    <div class="ticker-move">
+    <div class="ticker-move" id="tickerContent">
       <div class="ticker-item"><span>CLUB FUNEBRERO</span> Bienvenidos a la nueva plataforma oficial.</div>
       <div class="ticker-item"><span>SOCIOS</span> Sumate a nuestra campaña a distancia.</div>
-      <div class="ticker-item"><span>COMPETENCIA</span> Seguí los resultados al instante.</div>
+      <!-- Los cumpleaños de hoy se inyectarán aquí automáticamente por JS -->
     </div>
   </div>
 
@@ -129,8 +121,8 @@
         <a href="#inicio">Inicio</a>
         <a href="#fixture">Competencia</a>
         <a href="#planteles">Planteles</a>
+        <a href="#cumpleanos">Cumpleaños</a>
         <a href="#institucional">Institucional</a>
-        <a href="#socios" style="color: #dc2626;">Socios</a>
         <a href="/login.html" style="margin-left: 30px; padding: 5px 10px; border: 1px solid #333; border-radius: 4px; color: #a3a3a3; font-size: 0.8rem; text-transform: uppercase; text-decoration: none;">⚙️ Admin</a>
       </nav>
     </div>
@@ -141,33 +133,42 @@
     <img src="logo-funebrero_2.png" alt="Escudo Funebrero" class="hero-logo">
     <h1 class="club-title-glow" style="font-size: 4.5rem;">CLUB ATLÉTICO FUNEBRERO</h1>
     <p class="hero-subtitle">Asociación Civil Club Social Cultural y Deportivo</p>
+    
+    <!-- Redes Sociales del Club -->
+    <div class="hero-socials">
+      <a href="https://www.facebook.com/torneo.departamental" target="_blank" class="social-btn btn-fb">📘 Facebook Oficial</a>
+      <a href="https://www.instagram.com/departamentaltorneo/?g=5" target="_blank" class="social-btn btn-ig">📸 Instagram Oficial</a>
+    </div>
   </section>
 
-  <!-- SECCIÓN COMPETENCIA (ACORDEONES) -->
+  <!-- SECCIÓN COMPETENCIA -->
   <section id="fixture" class="section-padding" style="background: linear-gradient(to bottom, #050505, rgba(220, 38, 38, 0.05), #050505);">
     <h2 class="section-title">Campaña <span>Actual</span></h2>
-    <div id="publicFixturesContainer" style="max-width: 900px; margin: 0 auto;">
-      <p style="text-align: center; color: #a3a3a3;">Sincronizando fixture...</p>
-    </div>
+    <div id="publicFixturesContainer" style="max-width: 900px; margin: 0 auto;"></div>
   </section>
 
-  <!-- SECCIÓN PLANTELES (ACORDEONES) -->
+  <!-- SECCIÓN PLANTELES -->
   <section id="planteles" class="section-padding">
     <h2 class="section-title">Nuestros <span>Planteles</span></h2>
-    <div id="rostersContainer" style="max-width: 900px; margin: 0 auto;">
-      <p style="text-align: center; color: #a3a3a3;">Cargando jugadores...</p>
+    <div id="rostersContainer" style="max-width: 900px; margin: 0 auto;"></div>
+  </section>
+
+  <!-- SECCIÓN CUMPLEAÑOS DEL MES -->
+  <section id="cumpleanos" class="section-padding" style="background: linear-gradient(to top, #050505, rgba(59, 130, 246, 0.05), #050505);">
+    <h2 class="section-title">Cumpleaños de <span id="currentMonthName" style="color: #3b82f6;">Este Mes</span></h2>
+    <p style="text-align: center; color: #a3a3a3; max-width: 600px; margin: 0 auto 30px;">Saludamos a todos los integrantes y socios de la familia Funebrera que celebran un año más de vida.</p>
+    <div id="birthdaysContainer" style="max-width: 800px; margin: 0 auto;">
+      <p style="text-align: center; color: #a3a3a3;">Calculando fechas...</p>
     </div>
   </section>
 
-  <!-- SECCIÓN INSTITUCIONAL (ACTAS) -->
+  <!-- SECCIÓN INSTITUCIONAL -->
   <section id="institucional" class="section-padding">
     <h2 class="section-title">Institucional</h2>
     <div style="max-width: 900px; margin: 0 auto;">
       <details class="fune-accordion">
         <summary>📜 Boletín Oficial y Actas</summary>
-        <div class="fune-accordion-content" id="meetingsContainer">
-          <p style="text-align: center; color: #a3a3a3;">Buscando documentos oficiales...</p>
-        </div>
+        <div class="fune-accordion-content" id="meetingsContainer"></div>
       </details>
     </div>
   </section>
@@ -195,10 +196,19 @@
     <div class="sponsors-track" id="sponsorsContainer"></div>
   </div>
 
-  <footer class="main-footer">
+  <footer class="main-footer" style="padding: 40px 20px; background: #000; border-top: 2px solid #dc2626; text-align: center;">
     <img src="logo-funebrero_2.png" alt="Escudo" style="width: 60px; margin-bottom: 15px; filter: grayscale(100%); opacity: 0.5;">
     <p style="color: #ffffff; margin: 0;">© 2026 Club Atlético Funebrero - Todos los derechos reservados.</p>
-    <p style="color: #a3a3a3; font-size: 0.85rem; margin-top: 5px;">Desarrollado por <strong style="color: #dc2626;">Rey Digital del Norte</strong> (Dir. Fabián O. López)</p>
+    
+    <!-- FIRMA DEL DESARROLLADOR Y REDES -->
+    <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); max-width: 600px; margin-left: auto; margin-right: auto;">
+      <p style="color: #a3a3a3; font-size: 0.9rem; margin-bottom: 15px;">Desarrollado por <strong style="color: #dc2626;">Rey Digital del Norte</strong></p>
+      <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+        <a href="https://www.facebook.com/ReyDigitaldelNorte/" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: 0.3s;">📘 Facebook</a>
+        <a href="https://www.instagram.com/digitalesrey/" target="_blank" style="color: #e1306c; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: 0.3s;">📸 Instagram</a>
+        <a href="https://wa.me/message/NWPXJJVFKLHHB1" target="_blank" style="color: #25D366; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: 0.3s;">💬 WhatsApp (@digitalesrey)</a>
+      </div>
+    </div>
   </footer>
 
   <script type="module" src="/js/app.js"></script>
