@@ -14,64 +14,141 @@
   <link rel="stylesheet" href="style.css">
   
   <style>
-    /* =========================================
-       LANDING ANIMADA (PANTALLA DE CARGA MAGICA)
-       ========================================= */
+    /* ====================================================
+       1. EFECTOS VISUALES PREMIUM (FONDO VIVO)
+       ==================================================== */
+    @keyframes dynamicBg {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    body { 
+      background: linear-gradient(-45deg, #050505, #1a0505, #000000, #2b0808);
+      background-size: 400% 400%;
+      animation: dynamicBg 20s ease infinite;
+      color: white; font-family: 'Poppins', sans-serif;
+      margin: 0; padding: 0; overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    /* ====================================================
+       2. LANDING ANIMADA Y TICKER
+       ==================================================== */
     #landing-overlay {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
         background-color: #000000; z-index: 999999;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         transition: opacity 0.8s ease, visibility 0.8s;
     }
-    #landing-video {
-        max-width: 350px; width: 90%; outline: none; mix-blend-mode: screen; 
-    }
-    .landing-title {
-        font-family: 'Bebas Neue', cursive; font-size: 3.5rem; color: #ffffff;
-        margin-top: 20px; letter-spacing: 2px; text-shadow: 2px 2px 0px #000, -1px -1px 0px #dc2626;
-        text-align: center; opacity: 0; animation: fadeInText 1s forwards 0.5s;
-    }
+    #landing-video { max-width: 350px; width: 90%; outline: none; mix-blend-mode: screen; }
+    .landing-title { font-family: 'Bebas Neue', cursive; font-size: 3.5rem; color: #ffffff; margin-top: 20px; letter-spacing: 2px; text-shadow: 2px 2px 0px #000, -1px -1px 0px #dc2626; text-align: center; opacity: 0; animation: fadeInText 1s forwards 0.5s; }
     .landing-title span { color: #dc2626; }
     @keyframes fadeInText { to { opacity: 1; } }
 
-    /* =========================================
-       ACORDEONES Y ESTILOS FUNEBRERO
-       ========================================= */
-    details.fune-accordion { border: 1px solid rgba(220, 38, 38, 0.3); border-radius: 8px; margin-bottom: 15px; transition: 0.3s; }
-    details.fune-accordion summary { background: linear-gradient(135deg, #7f1d1d, #dc2626); color: white; padding: 12px 20px; font-family: 'Bebas Neue', cursive; font-size: 1.5rem; cursor: pointer; border-radius: 8px; list-style: none; display: flex; justify-content: space-between; align-items: center; letter-spacing: 1px; }
+    .ticker-wrap { width: 100%; overflow: hidden; background: linear-gradient(90deg, #991b1b, #dc2626); color: white; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.2); box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4); position: fixed; top: 0; left: 0; z-index: 1000; height: 32px; box-sizing: border-box; }
+    .ticker-move { display: inline-flex; white-space: nowrap; animation: tickerAnim 30s linear infinite; }
+    .ticker-move:hover { animation-play-state: paused; }
+    .ticker-item { padding: 0 2rem; font-size: 0.85rem; display: flex; align-items: center; height: 100%; }
+    .ticker-item span { background: #ffffff; color: #dc2626; padding: 3px 10px; border-radius: 12px; margin-right: 10px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+    @keyframes tickerAnim { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
+
+    /* ====================================================
+       3. NAVEGACIÓN DE CRISTAL (GLASSMORPHISM)
+       ==================================================== */
+    .header { position: fixed; left: 0; width: 100%; background: rgba(5, 5, 5, 0.75); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 900; border-bottom: 1px solid rgba(220, 38, 38, 0.3); padding: 15px 0; top: 32px; transition: 0.3s; }
+    .header:hover { background: rgba(5, 5, 5, 0.9); border-bottom-color: #dc2626; }
+    .header-inner { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 20px; flex-wrap: wrap; gap: 15px; }
+    .nav-links a { color: #e2e8f0; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; position: relative; }
+    .nav-links a::after { content: ''; position: absolute; width: 0; height: 2px; bottom: -5px; left: 0; background-color: #dc2626; transition: width 0.3s; }
+    .nav-links a:hover { color: #ffffff; text-shadow: 0 0 10px rgba(220,38,38,0.5); }
+    .nav-links a:hover::after { width: 100%; }
+    
+    .outline-btn { border: 1px solid #333; border-radius: 20px; text-decoration: none; font-weight: 600; transition: all 0.3s; background: rgba(255,255,255,0.05); padding: 6px 15px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+    .outline-btn:hover { background: #dc2626; color: #fff !important; border-color: #dc2626; box-shadow: 0 0 15px rgba(220,38,38,0.4); transform: translateY(-2px); }
+
+    /* ====================================================
+       4. SECCIÓN HERO Y REDES SOCIALES
+       ==================================================== */
+    .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; background: radial-gradient(circle at center, rgba(220, 38, 38, 0.15) 0%, transparent 70%); position: relative; padding-top: 32px; }
+    .hero-container { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; }
+    .hero-logo-wrapper { position: relative; display: inline-block; margin-bottom: 10px; animation: floatLogo 6s ease-in-out infinite; }
+    #main-logo { width: 180px; position: relative; z-index: 2; filter: drop-shadow(0 0 20px rgba(220, 38, 38, 0.4)); }
+    @keyframes floatLogo { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+    
+    .club-title-glow { font-family: 'Bebas Neue', cursive; font-size: 5.5rem; margin: 0; letter-spacing: 4px; background: linear-gradient(to right, #ffffff, #ffbaba, #ffffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 4px 15px rgba(220,38,38,0.4)); line-height: 1.1; }
+    .hero-subtitle { color: #cbd5e1; font-size: 1.1rem; margin-top: 10px; text-transform: uppercase; letter-spacing: 3px; font-weight: 300; }
+
+    .hero-socials { display: flex; gap: 15px; justify-content: center; margin-top: 25px; flex-wrap: wrap; }
+    .social-btn { padding: 10px 25px; border-radius: 30px; font-weight: 600; text-decoration: none; color: white; display: flex; align-items: center; gap: 8px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+    .btn-fb { background: rgba(24, 119, 242, 0.1); border: 1px solid rgba(24, 119, 242, 0.5); color: #60a5fa; }
+    .btn-fb:hover { background: #1877F2; color: #fff; box-shadow: 0 5px 20px rgba(24, 119, 242, 0.4); transform: translateY(-3px); }
+    .btn-ig { background: rgba(225, 48, 108, 0.1); border: 1px solid rgba(225, 48, 108, 0.5); color: #f472b6; }
+    .btn-ig:hover { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: #fff; box-shadow: 0 5px 20px rgba(225, 48, 108, 0.4); transform: translateY(-3px); border-color: transparent; }
+
+    /* ====================================================
+       5. TARJETAS LEVITANTES NEÓN (CONTENEDORES PRINCIPALES)
+       ==================================================== */
+    .section-padding { padding: 80px 20px; max-width: 1200px; margin: 0 auto; position: relative; }
+    .section-title { text-align: center; font-family: 'Bebas Neue', cursive; font-size: 3.5rem; margin-bottom: 50px; letter-spacing: 2px; color: #ffffff; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+    .section-title span { color: #dc2626; text-shadow: 0 0 15px rgba(220,38,38,0.4); }
+
+    /* Acordeones Dinámicos */
+    details.fune-accordion { background: rgba(15, 15, 15, 0.4); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); border-top: 1px solid rgba(220, 38, 38, 0.3); border-radius: 12px; margin-bottom: 20px; transition: transform 0.3s, box-shadow 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    details.fune-accordion:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(220,38,38,0.15); border-top-color: #dc2626; }
+    details.fune-accordion summary { padding: 18px 25px; font-family: 'Bebas Neue', cursive; font-size: 1.8rem; color: #fff; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; letter-spacing: 1px; transition: 0.3s; }
     details.fune-accordion summary::-webkit-details-marker { display: none; }
-    details.fune-accordion[open] { box-shadow: 0 5px 20px rgba(220, 38, 38, 0.2); }
-    details.fune-accordion[open] summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
-    .fune-accordion-content { background: rgba(15, 15, 15, 0.9); padding: 20px; border-radius: 0 0 8px 8px; border-top: none; }
+    details.fune-accordion[open] summary { border-bottom: 1px solid rgba(255,255,255,0.05); color: #ffbaba; }
+    .fune-accordion-content { padding: 25px; }
 
-    /* ESTILOS DE ACTAS E INSTITUCIONAL */
-    .meeting-card { display: flex; gap: 15px; background: rgba(15,23,42,0.6); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px; align-items: center; flex-wrap: wrap; }
-    .meeting-info { display: flex; flex-direction: column; flex: 1; min-width: 200px; }
-    .meeting-title { color: #dc2626; font-weight: bold; font-size: 1.1rem; margin: 5px 0; font-family: 'Bebas Neue', cursive; letter-spacing: 1px; }
-    .meeting-summary { color: #cbd5e1; font-size: 0.85rem; margin: 0; line-height: 1.4; }
-    .meeting-img { width: 80px; height: 110px; object-fit: cover; border-radius: 6px; border: 1px solid #334155; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.4); cursor: pointer; }
-    .meeting-img:hover { transform: scale(1.1); border-color: #dc2626; box-shadow: 0 6px 15px rgba(220,38,38,0.4); z-index: 10; position: relative; }
+    /* Tarjetas Interiores (Partidos, Actas, Jugadores) */
+    .glass-premium { background: rgba(10, 10, 10, 0.6); border: 1px solid rgba(255,255,255,0.03); border-left: 4px solid #dc2626; border-radius: 8px; padding: 20px; margin-bottom: 15px; transition: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; flex-direction: column; gap: 12px; position: relative; overflow: hidden; }
+    .glass-premium::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.02), transparent); transform: translateX(-100%); transition: 0.5s; }
+    .glass-premium:hover { transform: scale(1.01) translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.6), inset 2px 0 15px rgba(220,38,38,0.1); border-color: rgba(220,38,38,0.2); }
+    .glass-premium:hover::before { transform: translateX(100%); }
 
-    /* CARRUSEL DE SPONSORS */
-    .sponsors-bar { background: #050505; padding: 30px 0; border-top: 2px solid rgba(220, 38, 38, 0.2); overflow: hidden; position: relative; }
-    .sponsors-track { display: flex; gap: 40px; width: max-content; animation: sponsorScroll 30s linear infinite; padding-left: 30px; }
+    /* ====================================================
+       6. CUMPLEAÑOS Y SPONSORS
+       ==================================================== */
+    .birthday-card { background: rgba(15,15,15,0.8); border-left: 3px solid #333; padding: 15px 20px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }
+    .birthday-card:hover { background: rgba(25,25,25,0.9); border-left-color: #64748b; }
+    
+    .birthday-card.is-today { background: linear-gradient(135deg, rgba(220,38,38,0.15), rgba(15,15,15,0.95)); border-left: 4px solid #dc2626; border: 1px solid rgba(220,38,38,0.4); animation: pulseBd 2s infinite; position: relative; overflow: hidden; }
+    .birthday-card.is-today::after { content: '🎂'; position: absolute; right: -10px; bottom: -20px; font-size: 5rem; opacity: 0.1; transform: rotate(-15deg); }
+    @keyframes pulseBd { 0%, 100% { box-shadow: 0 0 15px rgba(220,38,38,0.2); } 50% { box-shadow: 0 0 30px rgba(220,38,38,0.5); } }
+
+    .sponsors-bar { background: #020202; padding: 40px 0; border-top: 1px solid rgba(220, 38, 38, 0.2); border-bottom: 1px solid rgba(220, 38, 38, 0.2); overflow: hidden; position: relative; box-shadow: inset 0 0 50px rgba(0,0,0,0.8); }
+    .sponsors-track { display: flex; gap: 50px; width: max-content; animation: sponsorScroll 35s linear infinite; padding-left: 50px; align-items: center; }
     .sponsors-track:hover { animation-play-state: paused; }
     @keyframes sponsorScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-    .sponsor-card { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.03); padding: 10px 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); text-decoration: none; transition: 0.3s; }
-    .sponsor-card:hover { background: rgba(220,38,38,0.1); border-color: rgba(220,38,38,0.4); transform: translateY(-3px); }
-    .sponsor-logo { height: 50px; max-width: 120px; object-fit: contain; }
+    .sponsor-card { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.02); padding: 15px 25px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); text-decoration: none; transition: 0.4s; min-width: 280px; backdrop-filter: blur(5px); }
+    .sponsor-card:hover { background: rgba(220,38,38,0.05); border-color: rgba(220,38,38,0.3); transform: translateY(-5px); box-shadow: 0 10px 25px rgba(220,38,38,0.15); }
+    .sponsor-logo { height: 55px; max-width: 130px; object-fit: contain; filter: grayscale(20%); transition: 0.3s; }
+    .sponsor-card:hover .sponsor-logo { filter: grayscale(0%); transform: scale(1.05); }
 
-    /* ESTILOS NUEVOS: REDES Y CUMPLEAÑOS */
-    .hero-socials { display: flex; gap: 15px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
-    .social-btn { padding: 8px 20px; border-radius: 20px; font-weight: bold; text-decoration: none; color: white; display: flex; align-items: center; gap: 8px; transition: 0.3s; font-size: 0.9rem; }
-    .btn-fb { background: #1877F2; border: 1px solid #1877F2; }
-    .btn-fb:hover { background: transparent; color: #1877F2; }
-    .btn-ig { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); border: 1px solid transparent; }
-    .btn-ig:hover { box-shadow: 0 0 15px rgba(220, 39, 67, 0.5); transform: translateY(-3px); }
+    /* ====================================================
+       7. BÁSKETBOT OMNISCIENTE
+       ==================================================== */
+    #chatbot-toggle { position: fixed; bottom: 25px; right: 25px; width: 65px; height: 65px; background: transparent; border: none; cursor: pointer; z-index: 9999; transition: 0.3s; padding: 0; outline: none; }
+    #chatbot-toggle:hover { transform: scale(1.15) rotate(10deg); }
+    .robot-basketball { position: relative; width: 55px; height: 55px; background: radial-gradient(circle at 30% 30%, #ff9f43, #ff6b00); border-radius: 50%; border: 2px solid #000; box-shadow: 0 5px 15px rgba(255, 107, 0, 0.4); margin: 0 auto; }
+    .antennas { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; }
+    .antenna { width: 3px; height: 18px; background: #fff; position: relative; border-radius: 2px; }
+    .face { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 10; }
+    .eyes { display: flex; gap: 8px; }
+    .eye { width: 8px; height: 8px; background: #000; border-radius: 50%; }
+    .mouth { width: 16px; height: 6px; border-bottom: 2px solid #000; border-radius: 0 0 8px 8px; }
     
-    .birthday-card { background: rgba(15,15,15,0.8); border-left: 4px solid #3b82f6; padding: 15px; border-radius: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-    .birthday-card.is-today { background: linear-gradient(135deg, rgba(220,38,38,0.2), rgba(15,15,15,0.9)); border-left: 4px solid #dc2626; border: 1px solid rgba(220,38,38,0.5); box-shadow: 0 0 15px rgba(220,38,38,0.3); animation: pulseBd 2s infinite; }
-    @keyframes pulseBd { 0% { box-shadow: 0 0 10px rgba(220,38,38,0.2); } 50% { box-shadow: 0 0 20px rgba(220,38,38,0.6); } 100% { box-shadow: 0 0 10px rgba(220,38,38,0.2); } }
+    #chatbot-container { position: fixed; bottom: 100px; right: 25px; width: 340px; height: 450px; background: rgba(10, 10, 10, 0.95); border: 1px solid rgba(220, 38, 38, 0.4); border-radius: 16px; display: flex; flex-direction: column; z-index: 9999; overflow: hidden; opacity: 1; transform: translateY(0); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 15px 40px rgba(0,0,0,0.7); backdrop-filter: blur(15px); }
+    #chatbot-container.hidden { opacity: 0; transform: translateY(30px) scale(0.95); pointer-events: none; }
+    .chat-header { background: linear-gradient(135deg, #991b1b, #dc2626); color: white; padding: 15px 20px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; font-size: 1rem; letter-spacing: 1px; }
+    #chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; font-size: 0.9rem; scroll-behavior: smooth; }
+    .msg-bot { background: rgba(220, 38, 38, 0.1); border: 1px solid rgba(220,38,38,0.2); color: #f8fafc; padding: 12px 15px; border-radius: 0 16px 16px 16px; align-self: flex-start; max-width: 85%; line-height: 1.5; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); }
+    .msg-user { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 12px 15px; border-radius: 16px 0 16px 16px; align-self: flex-end; max-width: 85%; line-height: 1.5; }
+    .chat-input-area { display: flex; padding: 15px; background: rgba(0,0,0,0.5); border-top: 1px solid rgba(255,255,255,0.05); }
+    #chat-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid #333; border-radius: 25px; color: white; padding: 10px 20px; outline: none; transition: 0.3s; }
+    #chat-input:focus { border-color: #dc2626; background: rgba(255,255,255,0.1); }
+    #send-chat { background: #dc2626; color: white; border: none; font-weight: bold; cursor: pointer; padding: 0 20px; border-radius: 25px; margin-left: 10px; transition: 0.3s; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;}
+    #send-chat:hover { background: #b91c1c; box-shadow: 0 0 15px rgba(220,38,38,0.4); }
   </style>
 </head>
 <body>
@@ -106,16 +183,15 @@
     <div class="ticker-move" id="tickerContent">
       <div class="ticker-item"><span>CLUB FUNEBRERO</span> Bienvenidos a la nueva plataforma oficial.</div>
       <div class="ticker-item"><span>SOCIOS</span> Sumate a nuestra campaña a distancia.</div>
-      <!-- Los cumpleaños de hoy se inyectarán aquí automáticamente por JS -->
     </div>
   </div>
 
   <!-- NAVEGACIÓN CRISTAL -->
   <header class="header">
     <div class="header-inner">
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <img src="logo-funebrero_2.png" alt="Logo" style="height: 35px;">
-        <h2 style="margin:0; font-size:1.5rem; color:#fff; font-family: 'Bebas Neue', cursive; letter-spacing: 2px;">FUNEBRERO</h2>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <img src="logo-funebrero_2.png" alt="Logo" style="height: 38px; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));">
+        <h2 style="margin:0; font-size:1.6rem; color:#fff; font-family: 'Bebas Neue', cursive; letter-spacing: 2px;">FUNEBRERO</h2>
       </div>
       <nav class="nav-links" style="display: flex; align-items: center; flex-wrap: wrap;">
         <a href="#inicio">Inicio</a>
@@ -123,90 +199,78 @@
         <a href="#planteles">Planteles</a>
         <a href="#cumpleanos">Cumpleaños</a>
         <a href="#institucional">Institucional</a>
-        <a href="/login.html" style="margin-left: 30px; padding: 5px 10px; border: 1px solid #333; border-radius: 4px; color: #a3a3a3; font-size: 0.8rem; text-transform: uppercase; text-decoration: none;">⚙️ Admin</a>
+        <a href="/login.html" class="outline-btn" style="margin-left: 20px;">⚙️ Admin</a>
       </nav>
     </div>
   </header>
 
   <!-- HERO -->
   <section id="inicio" class="hero">
-    <img src="logo-funebrero_2.png" alt="Escudo Funebrero" class="hero-logo">
-    <h1 class="club-title-glow" style="font-size: 4.5rem;">CLUB ATLÉTICO FUNEBRERO</h1>
-    <p class="hero-subtitle">Asociación Civil Club Social Cultural y Deportivo</p>
-    
-    <!-- Redes Sociales del Club -->
-    <div class="hero-socials">
-      <a href="https://www.facebook.com/torneo.departamental" target="_blank" class="social-btn btn-fb">📘 Facebook Oficial</a>
-      <a href="https://www.instagram.com/departamentaltorneo/?g=5" target="_blank" class="social-btn btn-ig">📸 Instagram Oficial</a>
-    </div>
-  </section>
-
-  <!-- SECCIÓN COMPETENCIA -->
-  <section id="fixture" class="section-padding" style="background: linear-gradient(to bottom, #050505, rgba(220, 38, 38, 0.05), #050505);">
-    <h2 class="section-title">Campaña <span>Actual</span></h2>
-    <div id="publicFixturesContainer" style="max-width: 900px; margin: 0 auto;"></div>
-  </section>
-
-  <!-- SECCIÓN PLANTELES -->
-  <section id="planteles" class="section-padding">
-    <h2 class="section-title">Nuestros <span>Planteles</span></h2>
-    <div id="rostersContainer" style="max-width: 900px; margin: 0 auto;"></div>
-  </section>
-
-  <!-- SECCIÓN CUMPLEAÑOS DEL MES -->
-  <section id="cumpleanos" class="section-padding" style="background: linear-gradient(to top, #050505, rgba(59, 130, 246, 0.05), #050505);">
-    <h2 class="section-title">Cumpleaños de <span id="currentMonthName" style="color: #3b82f6;">Este Mes</span></h2>
-    <p style="text-align: center; color: #a3a3a3; max-width: 600px; margin: 0 auto 30px;">Saludamos a todos los integrantes y socios de la familia Funebrera que celebran un año más de vida.</p>
-    <div id="birthdaysContainer" style="max-width: 800px; margin: 0 auto;">
-      <p style="text-align: center; color: #a3a3a3;">Calculando fechas...</p>
-    </div>
-  </section>
-
-  <!-- SECCIÓN INSTITUCIONAL -->
-  <section id="institucional" class="section-padding">
-    <h2 class="section-title">Institucional</h2>
-    <div style="max-width: 900px; margin: 0 auto;">
-      <details class="fune-accordion">
-        <summary>📜 Boletín Oficial y Actas</summary>
-        <div class="fune-accordion-content" id="meetingsContainer"></div>
-      </details>
-    </div>
-  </section>
-
-  <!-- SECCIÓN SOCIOS -->
-  <section id="socios" class="section-padding">
-    <h2 class="section-title">Apoyo a <span>Distancia</span></h2>
-    <div class="grid-cards" style="max-width: 900px; margin: 0 auto;">
-      <div class="glass-premium">
-        <h3>Socio Protector</h3>
-        <p>Tu aporte mensual es vital para sostener viajes y materiales.</p>
-        <a href="#" class="btn-neon">Quiero Aportar</a>
-      </div>
-      <div class="glass-premium">
-        <h3 style="color: #ffffff;">Tienda Funebrera</h3>
-        <p>Adquirí la indumentaria oficial con envíos a todo el país.</p>
-        <a href="#" class="btn-neon btn-white">Ver Catálogo</a>
+    <div class="hero-container">
+      <div class="hero-logo-wrapper"><img src="logo-funebrero_2.png" alt="Escudo Funebrero" id="main-logo"></div>
+      <div class="title-container"><h1 class="club-title-glow">CLUB ATLÉTICO FUNEBRERO</h1></div>
+      <p class="hero-subtitle">Asociación Civil Club Social Cultural y Deportivo</p>
+      
+      <!-- Redes Sociales del Club -->
+      <div class="hero-socials">
+        <a href="https://www.facebook.com/torneo.departamental" target="_blank" class="social-btn btn-fb">📘 Facebook Oficial</a>
+        <a href="https://www.instagram.com/departamentaltorneo/?g=5" target="_blank" class="social-btn btn-ig">📸 Instagram Oficial</a>
       </div>
     </div>
   </section>
+
+  <main style="position: relative; z-index: 5;">
+    <!-- SECCIÓN COMPETENCIA -->
+    <section id="fixture" class="section-padding">
+      <h2 class="section-title">Campaña <span>Actual</span></h2>
+      <div id="publicFixturesContainer" style="max-width: 900px; margin: 0 auto;"></div>
+    </section>
+
+    <!-- SECCIÓN PLANTELES -->
+    <section id="planteles" class="section-padding">
+      <h2 class="section-title">Nuestros <span>Planteles</span></h2>
+      <div id="rostersContainer" style="max-width: 900px; margin: 0 auto;"></div>
+    </section>
+
+    <!-- SECCIÓN CUMPLEAÑOS DEL MES -->
+    <section id="cumpleanos" class="section-padding">
+      <h2 class="section-title">Cumpleaños de <span id="currentMonthName">Este Mes</span></h2>
+      <p style="text-align: center; color: #a3a3a3; font-size: 1.1rem; max-width: 600px; margin: 0 auto 40px;">Saludamos a todos los integrantes de la familia Funebrera que celebran un año más de vida junto a nosotros.</p>
+      <div id="birthdaysContainer" style="max-width: 800px; margin: 0 auto;">
+        <p style="text-align: center; color: #a3a3a3;">Calculando fechas...</p>
+      </div>
+    </section>
+
+    <!-- SECCIÓN INSTITUCIONAL -->
+    <section id="institucional" class="section-padding">
+      <h2 class="section-title">Vida <span>Institucional</span></h2>
+      <div style="max-width: 900px; margin: 0 auto;">
+        <details class="fune-accordion" open>
+          <summary>📜 Boletín Oficial y Actas</summary>
+          <div class="fune-accordion-content" id="meetingsContainer"></div>
+        </details>
+      </div>
+    </section>
+  </main>
 
   <!-- CARRUSEL DE SPONSORS -->
   <div class="sponsors-bar">
-    <div style="text-align: center; color: #a3a3a3; font-size: 0.85rem; margin-bottom: 25px; letter-spacing: 3px; text-transform: uppercase; font-weight: 600;">Acompañan al Club</div>
+    <div style="text-align: center; color: #64748b; font-size: 0.85rem; margin-bottom: 30px; letter-spacing: 4px; text-transform: uppercase; font-weight: bold;">Acompañan al Club</div>
     <div class="sponsors-track" id="sponsorsContainer"></div>
   </div>
 
-  <footer class="main-footer" style="padding: 40px 20px; background: #000; border-top: 2px solid #dc2626; text-align: center;">
-    <img src="logo-funebrero_2.png" alt="Escudo" style="width: 60px; margin-bottom: 15px; filter: grayscale(100%); opacity: 0.5;">
-    <p style="color: #ffffff; margin: 0;">© 2026 Club Atlético Funebrero - Todos los derechos reservados.</p>
+  <footer class="main-footer" style="padding: 50px 20px; background: #000; border-top: 2px solid #dc2626; text-align: center;">
+    <img src="logo-funebrero_2.png" alt="Escudo" style="width: 70px; margin-bottom: 20px; filter: grayscale(100%); opacity: 0.3;">
+    <p style="color: #ffffff; margin: 0; font-size: 1.1rem; letter-spacing: 1px;">© 2026 Club Atlético Funebrero</p>
+    <p style="color: #64748b; font-size: 0.85rem; margin-top: 5px;">Todos los derechos reservados.</p>
     
     <!-- FIRMA DEL DESARROLLADOR Y REDES -->
-    <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); max-width: 600px; margin-left: auto; margin-right: auto;">
-      <p style="color: #a3a3a3; font-size: 0.9rem; margin-bottom: 15px;">Desarrollado por <strong style="color: #dc2626;">Rey Digital del Norte</strong></p>
+    <div style="margin-top: 35px; padding-top: 25px; border-top: 1px solid rgba(255,255,255,0.05); max-width: 600px; margin-left: auto; margin-right: auto;">
+      <p style="color: #a3a3a3; font-size: 0.95rem; margin-bottom: 15px;">Diseño y Desarrollo por <strong style="color: #dc2626; font-family: 'Bebas Neue', cursive; font-size: 1.3rem; letter-spacing: 1px;">Rey Digital del Norte</strong></p>
       <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
-        <a href="https://www.facebook.com/ReyDigitaldelNorte/" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: 0.3s;">📘 Facebook</a>
-        <a href="https://www.instagram.com/digitalesrey/" target="_blank" style="color: #e1306c; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: 0.3s;">📸 Instagram</a>
-        <a href="https://wa.me/message/NWPXJJVFKLHHB1" target="_blank" style="color: #25D366; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: 0.3s;">💬 WhatsApp (@digitalesrey)</a>
+        <a href="https://www.facebook.com/ReyDigitaldelNorte/" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: 0.3s;">📘 Facebook</a>
+        <a href="https://www.instagram.com/digitalesrey/" target="_blank" style="color: #f472b6; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: 0.3s;">📸 Instagram</a>
+        <a href="https://wa.me/message/NWPXJJVFKLHHB1" target="_blank" style="color: #10b981; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: 0.3s;">💬 WhatsApp</a>
       </div>
     </div>
   </footer>
