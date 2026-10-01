@@ -2,261 +2,180 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Club Funebrero - Sede Oficial</title>
-  <meta name="description" content="Sitio web oficial del Club Funebrero." />
+  <title>Club Atlético Funebrero - Sitio Oficial</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="/img/logo-funebrero.png">
+  <link rel="icon" type="image/png" href="logo-funebrero_2.png">
   
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
 
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
   
   <style>
     /* =========================================
-       PALETA OFICIAL FUNEBRERA
+       LANDING ANIMADA (PANTALLA DE CARGA)
        ========================================= */
-    :root {
-      --primary: #dc2626; /* Rojo Funebrero */
-      --bg-dark: #050505; /* Negro Profundo */
-      --text-light: #ffffff; /* Blanco */
-      --text-muted: #a3a3a3; 
+    #landing-overlay {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background-color: #050505; z-index: 999999;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        transition: opacity 0.8s ease, visibility 0.8s;
     }
-
-    html { scroll-behavior: smooth; }
-    body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background-color: var(--bg-dark); color: var(--text-light); overflow-x: hidden; }
-
-    /* LANDING ANIMADA (INTRO) */
-    #landing-intro {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: var(--bg-dark);
-      z-index: 999999;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      transition: opacity 0.8s ease-in-out, visibility 0.8s;
+    #landing-video {
+        max-width: 350px; width: 90%;
+        filter: drop-shadow(0 0 20px rgba(220,38,38,0.5));
+        outline: none;
     }
     .landing-title {
-      font-family: 'Bebas Neue', cursive;
-      font-size: 3.5rem;
-      color: var(--text-light);
-      margin-top: 20px;
-      letter-spacing: 3px;
-      text-shadow: 2px 2px 0px #000, -1px -1px 0px var(--primary);
-      text-align: center;
-      opacity: 0;
-      animation: fadeInText 1s forwards 0.5s;
+        font-family: 'Bebas Neue', cursive; font-size: 3.5rem; color: #ffffff;
+        margin-top: 20px; letter-spacing: 2px; text-shadow: 2px 2px 0px #000, -1px -1px 0px #dc2626;
+        text-align: center; opacity: 0; animation: fadeInText 1s forwards 0.5s;
     }
-    .landing-title span { color: var(--primary); }
+    .landing-title span { color: #dc2626; }
     @keyframes fadeInText { to { opacity: 1; } }
 
-    /* NAVEGACIÓN Y CABECERA */
-    .header { position: fixed; left: 0; width: 100%; background: rgba(5, 5, 5, 0.95); backdrop-filter: blur(10px); z-index: 900; border-bottom: 2px solid var(--primary); padding: 15px 0; top: 32px; }
-    .header-inner { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 20px; flex-wrap: wrap; gap: 15px; }
-    .nav-links a { color: var(--text-light); text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: color 0.3s; text-transform: uppercase; letter-spacing: 1px;}
-    .nav-links a:hover { color: var(--primary); }
-    .outline-btn { border: 1px solid; border-radius: 20px; text-decoration: none; font-weight: 600; transition: all 0.3s; background: transparent; padding: 6px 12px; font-size: 0.75rem; }
-    .outline-btn:hover { background: currentColor; color: #fff !important; }
+    /* =========================================
+       ACORDEONES Y ESTILOS FUNEBRERO
+       ========================================= */
+    details.fune-accordion { border: 1px solid rgba(220, 38, 38, 0.3); border-radius: 8px; margin-bottom: 15px; transition: 0.3s; }
+    details.fune-accordion summary { background: linear-gradient(135deg, #7f1d1d, #dc2626); color: white; padding: 12px 20px; font-family: 'Bebas Neue', cursive; font-size: 1.5rem; cursor: pointer; border-radius: 8px; list-style: none; display: flex; justify-content: space-between; align-items: center; letter-spacing: 1px; }
+    details.fune-accordion summary::-webkit-details-marker { display: none; }
+    details.fune-accordion[open] { box-shadow: 0 5px 20px rgba(220, 38, 38, 0.2); }
+    details.fune-accordion[open] summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+    .fune-accordion-content { background: rgba(15, 15, 15, 0.9); padding: 20px; border-radius: 0 0 8px 8px; border-top: none; }
 
-    /* TICKER NOTICIAS */
-    .ticker-wrap { width: 100%; overflow: hidden; background: linear-gradient(90deg, #991b1b, #dc2626); color: white; padding: 6px 0; border-bottom: 2px solid rgba(255,255,255,0.2); box-shadow: 0 4px 10px rgba(0,0,0,0.5); position: fixed; top: 0; left: 0; z-index: 1000; height: 32px; box-sizing: border-box; }
-    .ticker-move { display: inline-flex; white-space: nowrap; animation: tickerAnim 25s linear infinite; }
-    .ticker-move:hover { animation-play-state: paused; }
-    .ticker-item { padding: 0 2rem; font-size: 0.85rem; display: flex; align-items: center; height: 100%; }
-    .ticker-item span { background: #ffffff; color: #dc2626; padding: 2px 8px; border-radius: 4px; margin-right: 8px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
-    @keyframes tickerAnim { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
-
-    /* SECCIÓN HERO */
-    .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; background: radial-gradient(circle at center, rgba(220, 38, 38, 0.15) 0%, var(--bg-dark) 70%); position: relative; padding-top: 32px; }
-    .hero-container { position: relative; z-index: 2; }
-    .hero-logo-wrapper { position: relative; display: inline-block; margin-bottom: 20px; }
-    #main-logo { width: 160px; position: relative; z-index: 2; filter: drop-shadow(0 0 15px rgba(220, 38, 38, 0.4)); }
-    .title-container { position: relative; display: inline-block; }
-    #particle-canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
-    #animated-title { font-family: 'Bebas Neue', cursive; font-size: 5.5rem; margin: 0; letter-spacing: 5px; color: #ffffff; text-shadow: 2px 2px 0 #000, -1px -1px 0 var(--primary); }
-    .subtitle { color: var(--text-light); font-size: 1.2rem; margin-top: 5px; text-transform: uppercase; letter-spacing: 2px; font-weight: 300;}
-
-    /* SECCIONES Y CONTENEDORES */
-    .section-padding { padding: 80px 20px; max-width: 1200px; margin: 0 auto; }
-    h2 { text-align: center; font-family: 'Bebas Neue', cursive; font-size: 3rem; margin-bottom: 40px; letter-spacing: 2px; color: #ffffff;}
-    h2 span { color: var(--primary); }
-
-    .cat-accordion { margin-bottom: 15px; border: 1px solid rgba(220, 38, 38, 0.5); border-radius: 8px; }
-    .cat-accordion summary { cursor: pointer; padding: 15px; font-weight: bold; font-size: 1.1rem; color: #ffffff; background: linear-gradient(135deg, #991b1b, #dc2626); list-style: none; outline: none; border-radius: 8px; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px;}
-    .cat-accordion summary::-webkit-details-marker { display: none; }
-    .cat-accordion-content { padding: 20px; border-radius: 0 0 8px 8px; background: rgba(0, 0, 0, 0.8); }
-
-    /* CLUBES Y SPONSORS */
-    .club-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-    .club-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; text-align: center; display: block; text-decoration: none; color: white; transition: 0.3s; }
-    .club-card:hover { transform: translateY(-5px); border-color: var(--primary); background: rgba(220, 38, 38, 0.05); box-shadow: 0 10px 20px rgba(220,38,38,0.3); }
-    
-    .sponsors-bar { background: #000000; padding: 30px 0; border-top: 2px solid rgba(220, 38, 38, 0.2); overflow: hidden; position: relative; }
-    .sponsors-track { display: flex; gap: 30px; width: max-content; animation: sponsorScroll 40s linear infinite; padding-left: 30px; }
+    /* CARRUSEL DE SPONSORS */
+    .sponsors-bar { background: #050505; padding: 30px 0; border-top: 2px solid rgba(220, 38, 38, 0.2); overflow: hidden; position: relative; }
+    .sponsors-track { display: flex; gap: 40px; width: max-content; animation: sponsorScroll 30s linear infinite; padding-left: 30px; }
     .sponsors-track:hover { animation-play-state: paused; }
     @keyframes sponsorScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-    .sponsor-card { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.05); padding: 12px 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.3s; text-decoration: none; min-width: 280px; }
-    .sponsor-card:hover { transform: translateY(-5px); background: rgba(220, 38, 38, 0.1); border-color: rgba(220, 38, 38, 0.5); }
-    .sponsor-logo-container { width: 65px; height: 65px; display: flex; justify-content: center; align-items: center; background: white; border-radius: 8px; padding: 5px; }
-    .sponsor-logo { max-width: 100%; max-height: 100%; object-fit: contain; }
-    
-    /* BÁSKETBOT */
-    #chatbot-toggle { position: fixed; bottom: 20px; right: 20px; width: 65px; height: 65px; background: transparent; border: none; cursor: pointer; z-index: 9999; transition: 0.3s; padding: 0; outline: none; }
-    #chatbot-toggle:hover { transform: scale(1.1) rotate(5deg); }
-    .robot-basketball { position: relative; width: 50px; height: 50px; background: radial-gradient(circle at 30% 30%, #ff9f43, #ff6b00); border-radius: 50%; border: 2px solid #000; margin: 0 auto; }
-    .antennas { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; }
-    .antenna { width: 3px; height: 18px; background: #ffffff; position: relative; border-radius: 2px; }
-    .face { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 10; }
-    .eyes { display: flex; gap: 8px; }
-    .eye { width: 8px; height: 8px; background: #000; border-radius: 50%; }
-    .mouth { width: 16px; height: 6px; border-bottom: 2px solid #000; border-radius: 0 0 8px 8px; }
-    #chatbot-container { position: fixed; bottom: 95px; right: 20px; width: 320px; height: 400px; background: rgba(5, 5, 5, 0.98); border: 2px solid #dc2626; border-radius: 12px; display: flex; flex-direction: column; z-index: 9999; overflow: hidden; opacity: 1; transform: translateY(0); transition: all 0.3s ease-in-out;}
-    #chatbot-container.hidden { opacity: 0; transform: translateY(20px); pointer-events: none; }
-    .chat-header { background: linear-gradient(135deg, #991b1b, #dc2626); color: white; padding: 12px 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; }
-    #chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem; }
-    .msg-bot { background: rgba(220, 38, 38, 0.15); color: #ffffff; padding: 10px; border-radius: 0 12px 12px 12px; align-self: flex-start; max-width: 85%; }
-    .msg-user { background: rgba(255, 255, 255, 0.1); color: #fff; padding: 10px; border-radius: 12px 0 12px 12px; align-self: flex-end; max-width: 85%; }
-    .chat-input-area { display: flex; padding: 10px; background: #000000; border-top: 1px solid rgba(220, 38, 38, 0.4); }
-    #chat-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid #333; border-radius: 20px; color: white; padding: 8px 15px; outline: none; }
-    #send-chat { background: #dc2626; color: white; border: none; font-weight: bold; cursor: pointer; padding: 0 15px; border-radius: 20px; margin-left: 8px; }
-
-    .main-footer { text-align: center; padding: 40px 20px; background: #000000; border-top: 2px solid var(--primary); }
+    .sponsor-card { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.03); padding: 10px 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); text-decoration: none; transition: 0.3s; }
+    .sponsor-card:hover { background: rgba(220,38,38,0.1); border-color: rgba(220,38,38,0.4); transform: translateY(-3px); }
+    .sponsor-logo { height: 50px; max-width: 120px; object-fit: contain; }
   </style>
 </head>
 <body>
 
-  <!-- ==========================================
-       PANTALLA DE CARGA (LANDING ANIMADA)
-       ========================================== -->
-  <div id="landing-intro">
-    <!-- El video de la calavera -->
-    <video id="intro-video" src="/img/animacion.mp4" autoplay muted playsinline style="max-width: 350px; width: 90%; outline: none; filter: drop-shadow(0 0 20px rgba(220,38,38,0.3));"></video>
-    <!-- El Título -->
+  <!-- PANTALLA DE CARGA ANIMADA -->
+  <div id="landing-overlay">
+    <video id="landing-video" src="animacion.mp4" autoplay muted playsinline></video>
     <h1 class="landing-title">CLUB ATLÉTICO <br><span>FUNEBRERO</span></h1>
   </div>
 
   <script>
-    // Lógica para desvanecer la intro cuando el video termina
     document.addEventListener("DOMContentLoaded", () => {
-      const introOverlay = document.getElementById("landing-intro");
-      const video = document.getElementById("intro-video");
-
-      const hideIntro = () => {
-        introOverlay.style.opacity = "0";
-        setTimeout(() => {
-          introOverlay.style.visibility = "hidden";
-          introOverlay.style.display = "none";
-        }, 800); // Tiempo de la transición CSS
+      const overlay = document.getElementById("landing-overlay");
+      const video = document.getElementById("landing-video");
+      const hideOverlay = () => {
+        overlay.style.opacity = "0";
+        setTimeout(() => { overlay.style.visibility = "hidden"; overlay.style.display = "none"; }, 800);
       };
-
       if (video) {
-        // Escucha el evento "ended" del video para ocultar el overlay
-        video.addEventListener("ended", hideIntro);
-        
-        // Respaldo de seguridad: si por alguna razón el video no carga o se bloquea,
-        // lo forzamos a desaparecer después de 10 segundos.
-        setTimeout(() => {
-          if (introOverlay.style.visibility !== "hidden") hideIntro();
-        }, 10000);
+        video.addEventListener("ended", hideOverlay);
+        // Respaldo por si el video falla en cargar
+        setTimeout(() => { if (overlay.style.visibility !== "hidden") hideOverlay(); }, 8000);
       } else {
-        hideIntro();
+        hideOverlay();
       }
     });
   </script>
 
-  <!-- ==========================================
-       INTERFAZ PRINCIPAL DE LA PÁGINA
-       ========================================== -->
-  <button id="chatbot-toggle" title="FuneBot">
-    <div class="robot-basketball">
-      <div class="antennas"><div class="antenna"></div><div class="antenna"></div></div>
-      <div class="face"><div class="eyes"><div class="eye"></div><div class="eye"></div></div><div class="mouth"></div></div>
-    </div>
-  </button>
-
-  <div id="chatbot-container" class="hidden">
-    <div class="chat-header"><span>🤖 FuneBot Asistente</span><span id="close-chat" style="cursor:pointer;">&times;</span></div>
-    <div id="chat-messages"><div class="msg-bot">¡Hola! Soy el FuneBot. Preguntame sobre el torneo.</div></div>
-    <div class="chat-input-area">
-      <input type="text" id="chat-input" placeholder="Escribe tu consulta...">
-      <button id="send-chat">Enviar</button>
+  <!-- TICKER -->
+  <div class="ticker-wrap">
+    <div class="ticker-move">
+      <div class="ticker-item"><span>CLUB FUNEBRERO</span> Bienvenidos a la nueva plataforma oficial.</div>
+      <div class="ticker-item"><span>SOCIOS</span> Sumate a nuestra campaña a distancia.</div>
+      <div class="ticker-item"><span>COMPETENCIA</span> Seguí los resultados al instante.</div>
     </div>
   </div>
 
-  <div class="ticker-wrap"><div class="ticker-move"></div></div>
-
+  <!-- NAVEGACIÓN CRISTAL -->
   <header class="header">
     <div class="header-inner">
-      <h2 style="margin:0; font-size:1.8rem; color:#fff;">CLUB FUNEBRERO</h2>
-      <nav class="nav" style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
-        <div class="nav-links" style="display: flex; gap: 15px; flex-wrap: wrap;">
-          <a href="#inicio">Inicio</a>
-          <a href="#resultados">Liga</a>
-          <a href="#institucional">Institucional</a>
-          <a href="#posiciones">Posiciones</a>
-        </div>
-        <div class="access-buttons" style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <a href="/press-login.html" class="outline-btn" style="border-color: #3b82f6; color: #3b82f6;">Prensa</a>
-          <a href="/editor-login.html" class="outline-btn" style="border-color: #10b981; color: #10b981;">Mesa</a>
-          <a href="/login.html" class="outline-btn" style="border-color: #dc2626; color: #dc2626;">Admin Funebrero</a>
-        </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <img src="logo-funebrero_2.png" alt="Logo" style="height: 35px;">
+        <h2 style="margin:0; font-size:1.5rem; color:#fff; font-family: 'Bebas Neue', cursive; letter-spacing: 2px;">FUNEBRERO</h2>
+      </div>
+      <nav class="nav-links" style="display: flex; align-items: center; flex-wrap: wrap;">
+        <a href="#inicio">Inicio</a>
+        <a href="#fixture">Competencia</a>
+        <a href="#planteles">Planteles</a>
+        <a href="#institucional">Institucional</a>
+        <a href="#socios" style="color: #dc2626;">Socios</a>
+        <a href="/login.html" style="margin-left: 30px; padding: 5px 10px; border: 1px solid #333; border-radius: 4px; color: #a3a3a3; font-size: 0.8rem; text-transform: uppercase; text-decoration: none;">⚙️ Admin</a>
       </nav>
     </div>
   </header>
 
+  <!-- HERO -->
   <section id="inicio" class="hero">
-    <div class="hero-container">
-      <div class="hero-logo-wrapper"><img src="/img/logo-funebrero.png" alt="Logo Funebrero" id="main-logo"></div>
-      <div class="hero-text">
-        <div class="title-container"><canvas id="particle-canvas"></canvas><h1 id="animated-title">FUNEBRERO</h1></div>
-        <p class="subtitle">La Sede Digital del Básquetbol de la Región</p>
+    <img src="logo-funebrero_2.png" alt="Escudo Funebrero" class="hero-logo">
+    <h1 class="club-title-glow" style="font-size: 4.5rem;">CLUB ATLÉTICO FUNEBRERO</h1>
+    <p class="hero-subtitle">Asociación Civil Club Social Cultural y Deportivo</p>
+  </section>
+
+  <!-- SECCIÓN COMPETENCIA (ACORDEONES) -->
+  <section id="fixture" class="section-padding" style="background: linear-gradient(to bottom, #050505, rgba(220, 38, 38, 0.05), #050505);">
+    <h2 class="section-title">Campaña <span>Actual</span></h2>
+    <!-- Este es el ID vital que rompí antes y ahora está restaurado -->
+    <div id="publicFixturesContainer" style="max-width: 900px; margin: 0 auto;">
+      <p style="text-align: center; color: #a3a3a3;">Sincronizando fixture...</p>
+    </div>
+  </section>
+
+  <!-- SECCIÓN PLANTELES (ACORDEONES) -->
+  <section id="planteles" class="section-padding">
+    <h2 class="section-title">Nuestros <span>Planteles</span></h2>
+    <!-- Este es el ID vital para las listas de jugadores -->
+    <div id="rostersContainer" style="max-width: 900px; margin: 0 auto;">
+      <p style="text-align: center; color: #a3a3a3;">Cargando jugadores...</p>
+    </div>
+  </section>
+
+  <!-- SECCIÓN INSTITUCIONAL (ACTAS) -->
+  <section id="institucional" class="section-padding">
+    <h2 class="section-title">Comisión <span>Directiva</span></h2>
+    <div style="max-width: 900px; margin: 0 auto;">
+      <details class="fune-accordion">
+        <summary>📜 Boletín Oficial y Actas</summary>
+        <div class="fune-accordion-content" id="meetingsContainer">
+          <p style="text-align: center; color: #a3a3a3;">Buscando documentos oficiales...</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- SECCIÓN SOCIOS -->
+  <section id="socios" class="section-padding">
+    <h2 class="section-title">Apoyo a <span>Distancia</span></h2>
+    <div class="grid-cards" style="max-width: 900px; margin: 0 auto;">
+      <div class="glass-premium">
+        <h3>Socio Protector</h3>
+        <p>Tu aporte mensual es vital para sostener viajes y materiales.</p>
+        <a href="#" class="btn-neon">Quiero Aportar</a>
+      </div>
+      <div class="glass-premium">
+        <h3 style="color: #ffffff;">Tienda Funebrera</h3>
+        <p>Adquirí la indumentaria oficial con envíos a todo el país.</p>
+        <a href="#" class="btn-neon btn-white">Ver Catálogo</a>
       </div>
     </div>
   </section>
 
-  <main>
-    <section id="resultados" class="section-padding">
-      <h2>Resultados y <span>Fixture General</span></h2>
-      <div id="results-container"></div>
-    </section>
-
-    <section id="institucional" class="section-padding" style="background: linear-gradient(to bottom, #050505, rgba(220, 38, 38, 0.08), #050505);">
-      <h2 style="color: #ffffff;">Vida <span>Institucional</span></h2>
-      <details class="cat-accordion" open>
-        <summary>📜 Boletín Oficial</summary>
-        <div class="cat-accordion-content">
-          <div id="meetings-container"><p style="text-align:center; color:#a3a3a3;">Cargando boletines...</p></div>
-        </div>
-      </details>
-    </section>
-
-    <section id="posiciones" class="section-padding">
-      <h2>Tabla de <span>Posiciones</span></h2>
-      <div id="standings-container"></div>
-    </section>
-
-    <section id="clubes" class="section-padding">
-      <h2>Clubes <span>Invitados a la Liga</span></h2>
-      <div class="club-grid" id="clubs-container"></div>
-    </section>
-  </main>
-
+  <!-- CARRUSEL DE SPONSORS -->
   <div class="sponsors-bar">
-    <div style="text-align: center; color: #a3a3a3; font-size: 0.85rem; margin-bottom: 25px; letter-spacing: 3px; text-transform: uppercase; font-weight: 600;">Acompañan al Funebrero</div>
-    <div class="sponsors-track" id="sponsors-container"></div>
+    <div style="text-align: center; color: #a3a3a3; font-size: 0.85rem; margin-bottom: 25px; letter-spacing: 3px; text-transform: uppercase; font-weight: 600;">Acompañan al Club</div>
+    <div class="sponsors-track" id="sponsorsContainer">
+      <!-- Se inyectan por JS -->
+    </div>
   </div>
 
   <footer class="main-footer">
-    <div class="footer-content">
-      <p class="copyright" style="color: #ffffff;">© 2026 Club Funebrero - Todos los derechos reservados</p>
-      <p style="font-size: 0.85rem; color: #a3a3a3; margin-top: 5px;">Desarrollado por <strong style="color: #dc2626;">Rey Digital del Norte</strong></p>
-    </div>
+    <img src="logo-funebrero_2.png" alt="Escudo" style="width: 60px; margin-bottom: 15px; filter: grayscale(100%); opacity: 0.5;">
+    <p style="color: #ffffff; margin: 0;">© 2026 Club Atlético Funebrero - Todos los derechos reservados.</p>
+    <p style="color: #a3a3a3; font-size: 0.85rem; margin-top: 5px;">Desarrollado por <strong style="color: #dc2626;">Rey Digital del Norte</strong></p>
   </footer>
 
   <script type="module" src="/js/app.js"></script>
