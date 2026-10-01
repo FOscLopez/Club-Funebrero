@@ -54,7 +54,7 @@ async function initApp() {
     });
     globalData.players = await getPlayers();
     renderRosters(globalData.players);
-    renderBirthdays(globalData.players); // Motor de cumpleaños
+    renderBirthdays(globalData.players);
 
     globalData.meetings = await getMeetings();
     renderMeetings(globalData.meetings);
@@ -64,7 +64,7 @@ async function initApp() {
 }
 
 // ==========================================
-// RENDER: FIXTURES Y PLANTELES
+// RENDER: FIXTURES (AUTOMATIZADO CON FOTOS)
 // ==========================================
 function renderFixtures(fixtures) {
     const container = document.getElementById("publicFixturesContainer");
@@ -83,10 +83,26 @@ function renderFixtures(fixtures) {
             const getNum = (r) => { const m = r?.match(/\d+/); return m ? parseInt(m[0]) : 999; };
             return getNum(a.round) - getNum(b.round);
         });
-        finalHtml += `<details class="fune-accordion"><summary>🏆 CATEGORÍA ${cat}</summary><div class="fune-accordion-content">`;
+        finalHtml += `<details class="fune-accordion" open><summary>🏆 CATEGORÍA ${cat}</summary><div class="fune-accordion-content">`;
         finalHtml += grouped[cat].map(f => {
             const isFinished = f.status === "finished";
-            const scoreHtml = isFinished ? `<strong style="color:#ffffff; font-size:1.8rem; margin: 0 15px; background: rgba(220,38,38,0.2); padding: 5px 15px; border-radius: 8px;">${f.scoreLocal || 0} - ${f.scoreAway || 0}</strong>` : `<strong style="color:#dc2626; font-size:1.5rem; margin: 0 15px;">VS</strong>`;
+            const hasScore = f.scoreLocal !== null && f.scoreLocal !== undefined && f.scoreAway !== null && f.scoreAway !== undefined;
+            
+            // Renderizado inteligente de marcador
+            const scoreHtml = (isFinished || hasScore) 
+                ? `<strong style="color:#ffffff; font-size:1.8rem; margin: 0 15px; background: rgba(220,38,38,0.2); padding: 5px 15px; border-radius: 8px; border: 1px solid rgba(220,38,38,0.4); box-shadow: 0 0 15px rgba(220,38,38,0.2);">${f.scoreLocal || 0} - ${f.scoreAway || 0}</strong>` 
+                : `<strong style="color:#dc2626; font-size:1.5rem; margin: 0 15px;">VS</strong>`;
+
+            // Renderizado dinámico de botones de fotos
+            let photosHtml = "";
+            if (f.planilla || f.photoHome || f.photoAway) {
+                photosHtml = `<div style="display:flex; gap:10px; justify-content:center; margin-top:15px; flex-wrap:wrap; width: 100%; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">`;
+                if (f.planilla) photosHtml += `<a href="${f.planilla}" target="_blank" class="outline-btn" style="border-color:#3b82f6; color:#3b82f6;"><i style="font-style:normal;">📄</i> Planilla Oficial</a>`;
+                if (f.photoHome) photosHtml += `<a href="${f.photoHome}" target="_blank" class="outline-btn" style="border-color:#10b981; color:#10b981;"><i style="font-style:normal;">📸</i> Foto Local</a>`;
+                if (f.photoAway) photosHtml += `<a href="${f.photoAway}" target="_blank" class="outline-btn" style="border-color:#f59e0b; color:#f59e0b;"><i style="font-style:normal;">📸</i> Foto Visita</a>`;
+                photosHtml += `</div>`;
+            }
+
             return `
                 <div class="glass-premium" style="padding: 15px; margin-bottom: 15px; border-left: 4px solid #dc2626; display: flex; flex-direction: column; gap: 10px; background: rgba(10, 10, 10, 0.8);">
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
@@ -98,6 +114,7 @@ function renderFixtures(fixtures) {
                         <div style="text-align: center; min-width: 90px;">${scoreHtml}</div>
                         <div style="flex: 1; display: flex; align-items: center; justify-content: flex-start; gap: 10px;"><img src="${getLogoSrc(f.awayClubId)}" style="width: 40px; height: 40px; object-fit: contain;"><span style="font-size: 1.3rem; font-family: 'Bebas Neue', cursive; font-weight: 600; color: #fff;">${f.awayClubId}</span></div>
                     </div>
+                    ${photosHtml}
                 </div>`;
         }).join("");
         finalHtml += `</div></details>`;
@@ -105,6 +122,9 @@ function renderFixtures(fixtures) {
     container.innerHTML = finalHtml;
 }
 
+// ==========================================
+// RENDER: PLANTELES
+// ==========================================
 function renderRosters(players) {
     const container = document.getElementById("rostersContainer");
     if (!container) return;
@@ -124,7 +144,7 @@ function renderRosters(players) {
 }
 
 // ==========================================
-// LÓGICA DE CUMPLEAÑOS (AUTOMATIZADO)
+// LÓGICA DE CUMPLEAÑOS
 // ==========================================
 function renderBirthdays(players) {
     const container = document.getElementById("birthdaysContainer");
@@ -132,13 +152,12 @@ function renderBirthdays(players) {
     const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
     
     const today = new Date();
-    const currentMonth = today.getMonth() + 1; // 1 a 12
+    const currentMonth = today.getMonth() + 1; 
     const currentDay = today.getDate();
     
     document.getElementById("currentMonthName").textContent = monthNames[today.getMonth()];
     if (!container) return;
 
-    // Filtrar los que cumplen en este mes. (Asume formato DD/MM/YYYY)
     let birthdaysThisMonth = players.filter(p => {
         if (!p.birthdate) return false;
         let parts = p.birthdate.split(/[-/]/);
@@ -154,7 +173,6 @@ function renderBirthdays(players) {
         return;
     }
 
-    // Ordenar por día
     birthdaysThisMonth.sort((a, b) => {
         let dayA = parseInt(a.birthdate.split(/[-/]/)[0], 10);
         let dayB = parseInt(b.birthdate.split(/[-/]/)[0], 10);
@@ -162,15 +180,11 @@ function renderBirthdays(players) {
     });
 
     let html = "";
-    let todayBirthdayCount = 0;
-
     birthdaysThisMonth.forEach(p => {
         let pDay = parseInt(p.birthdate.split(/[-/]/)[0], 10);
         let isToday = (pDay === currentDay);
         
         if (isToday) {
-            todayBirthdayCount++;
-            // Inyectar al Ticker si cumple hoy
             if (ticker) {
                 ticker.innerHTML += `<div class="ticker-item"><span style="background: #dc2626; color: white;">🎉 ¡FELIZ CUMPLEAÑOS!</span> Hoy celebramos a ${p.name} (Cat. ${p.categoryId}). ¡La familia Funebrera te desea lo mejor!</div>`;
             }
@@ -235,7 +249,7 @@ function renderSponsors(sponsors) {
 }
 
 // ==========================================
-// FUNEBOT OMNISCIENTE (ASISTENTE IA)
+// FUNEBOT OMNISCIENTE
 // ==========================================
 function initFuneBot() {
   const toggleBtn = document.getElementById("chatbot-toggle");
