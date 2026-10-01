@@ -18,6 +18,9 @@ const CLUB_LOGOS = {
 };
 
 const DEFAULT_LOGO = "https://i.ibb.co/Cpw4zbBv/571425287-18303994912267310-8920899741855718292-n.jpg";
+const GEMINI_API_KEY = "AIzaSyDvsq3fg1nEOQxR8wVcZW8rEX2lcc_xC8U";
+
+let globalFixtures = [];
 
 function getLogoSrc(clubName) {
     if (!clubName) return DEFAULT_LOGO;
@@ -43,10 +46,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     initApp();
+    initFuneBot();
 });
 
 async function initApp() {
     listenToFixtures((fixtures) => {
+        globalFixtures = fixtures;
         renderFixtures(fixtures);
     });
 
@@ -87,7 +92,6 @@ function renderFixtures(fixtures) {
             return getNum(a.round) - getNum(b.round);
         });
 
-        // NOTA: Se quitó el atributo 'open' para que inicie cerrado
         finalHtml += `
             <details class="fune-accordion">
                 <summary>🏆 CATEGORÍA ${cat}</summary>
@@ -169,7 +173,7 @@ function renderRosters(players) {
 }
 
 // ==========================================
-// RENDER: ACTAS DE COMISIÓN
+// RENDER: ACTAS DE COMISIÓN (INSTITUCIONAL)
 // ==========================================
 function renderMeetings(meetings) {
     const container = document.getElementById("meetingsContainer");
@@ -180,13 +184,27 @@ function renderMeetings(meetings) {
         return;
     }
 
-    container.innerHTML = meetings.map(m => `
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #3b82f6;">
-            <span style="color:#a3a3a3; font-size:0.8rem;">📅 REUNIÓN DEL ${m.date}</span>
-            <h4 style="margin: 5px 0; color: #fff; font-size: 1.1rem;">${m.title}</h4>
-            <p style="margin: 0; font-size: 0.9rem; color: #cbd5e1;">${m.summary || 'Sin reseña adjunta.'}</p>
-        </div>
-    `).join("");
+    container.innerHTML = meetings.map(m => {
+        let imgsHtml = "";
+        if (m.images && Array.isArray(m.images)) {
+            imgsHtml = `<div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">` + 
+                m.images.map(url => `<a href="${url}" target="_blank"><img src="${url}" class="meeting-img" alt="Acta"></a>`).join("") + 
+                `</div>`;
+        } else if (m.imageUrl) {
+            imgsHtml = `<div style="margin-top:10px;"><a href="${m.imageUrl}" target="_blank"><img src="${m.imageUrl}" class="meeting-img" alt="Acta"></a></div>`;
+        }
+
+        return `
+            <div class="meeting-card">
+                <div class="meeting-info">
+                    <span style="color:#a3a3a3; font-size:0.75rem;">📅 REUNIÓN DEL ${m.date}</span>
+                    <h4 class="meeting-title">${m.title}</h4>
+                    <p class="meeting-summary">${m.summary || 'Sin reseña adjunta.'}</p>
+                    ${imgsHtml}
+                </div>
+            </div>
+        `;
+    }).join("");
 }
 
 // ==========================================
@@ -212,4 +230,63 @@ function renderSponsors(sponsors) {
             </div>
         </a>
     `).join("");
+}
+
+// ==========================================
+// FUNEBOT (ASISTENTE IA)
+// ==========================================
+function initFuneBot() {
+  const toggleBtn = document.getElementById("chatbot-toggle");
+  const chatContainer = document.getElementById("chatbot-container");
+  const closeBtn = document.getElementById("close-chat");
+  const sendBtn = document.getElementById("send-chat");
+  const inputEl = document.getElementById("chat-input");
+  const messagesEl = document.getElementById("chat-messages");
+
+  if(!toggleBtn || !chatContainer) return;
+
+  toggleBtn.addEventListener("click", () => {
+    chatContainer.classList.toggle("hidden");
+    if(!chatContainer.classList.contains("hidden")) inputEl.focus();
+  });
+
+  if (closeBtn) closeBtn.addEventListener("click", () => chatContainer.classList.add("hidden"));
+
+  const appendMsg = (text, sender) => {
+    const div = document.createElement("div");
+    div.className = sender === "user" ? "msg-user" : "msg-bot";
+    div.textContent = text;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  };
+
+  const processMessage = async () => {
+    const userText = inputEl.value.trim();
+    if(!userText) return;
+
+    appendMsg(userText, "user");
+    inputEl.value = "";
+
+    const scheduledMatches = globalFixtures.filter(f => f.status === "scheduled").slice(0, 3);
+    
+    let contextStr = `Eres el FuneBot, asistente oficial del Club Funebrero. La institución está dirigida por Fabián O. López (Rey Digital del Norte).\n`;
+    contextStr += `Próximos partidos: ${JSON.stringify(scheduledMatches)}.\nPregunta del usuario: ${userText}`;
+
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+        method: "POST", 
+        headers: { "Content-Type": "application/json" }, 
+        body: JSON.stringify({ contents: [{ parts: [{ text: contextStr }] }] })
+      });
+      if (!res.ok) throw new Error("Error servidor");
+      const data = await res.json();
+      const botReply = data.candidates[0].content.parts[0].text;
+      appendMsg(botReply, "model");
+    } catch(e) {
+      appendMsg("Uf, tuve un pequeño problema de conexión en la cancha. ¿Me repetís la jugada?", "model");
+    }
+  };
+
+  if (sendBtn) sendBtn.addEventListener("click", processMessage);
+  if (inputEl) inputEl.addEventListener("keypress", (e) => { if(e.key === "Enter") processMessage(); });
 }

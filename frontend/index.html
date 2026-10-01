@@ -46,6 +46,14 @@
     details.fune-accordion[open] summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
     .fune-accordion-content { background: rgba(15, 15, 15, 0.9); padding: 20px; border-radius: 0 0 8px 8px; border-top: none; }
 
+    /* ESTILOS DE ACTAS E INSTITUCIONAL */
+    .meeting-card { display: flex; gap: 15px; background: rgba(15,23,42,0.6); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px; align-items: center; flex-wrap: wrap; }
+    .meeting-info { display: flex; flex-direction: column; flex: 1; min-width: 200px; }
+    .meeting-title { color: #dc2626; font-weight: bold; font-size: 1.1rem; margin: 5px 0; font-family: 'Bebas Neue', cursive; letter-spacing: 1px; }
+    .meeting-summary { color: #cbd5e1; font-size: 0.85rem; margin: 0; line-height: 1.4; }
+    .meeting-img { width: 80px; height: 110px; object-fit: cover; border-radius: 6px; border: 1px solid #334155; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.4); cursor: pointer; }
+    .meeting-img:hover { transform: scale(1.1); border-color: #dc2626; box-shadow: 0 6px 15px rgba(220,38,38,0.4); z-index: 10; position: relative; }
+
     /* CARRUSEL DE SPONSORS */
     .sponsors-bar { background: #050505; padding: 30px 0; border-top: 2px solid rgba(220, 38, 38, 0.2); overflow: hidden; position: relative; }
     .sponsors-track { display: flex; gap: 40px; width: max-content; animation: sponsorScroll 30s linear infinite; padding-left: 30px; }
@@ -69,13 +77,13 @@
       const overlay = document.getElementById("landing-overlay");
       const video = document.getElementById("landing-video");
       const hideOverlay = () => {
+        if (!overlay) return;
         overlay.style.opacity = "0";
         setTimeout(() => { overlay.style.visibility = "hidden"; overlay.style.display = "none"; }, 800);
       };
       if (video) {
         video.addEventListener("ended", hideOverlay);
-        // Respaldo por si el video falla en cargar
-        setTimeout(() => { if (overlay.style.visibility !== "hidden") hideOverlay(); }, 8000);
+        setTimeout(() => { if (overlay && overlay.style.visibility !== "hidden") hideOverlay(); }, 8000);
       } else {
         hideOverlay();
       }
@@ -119,7 +127,6 @@
   <!-- SECCIÓN COMPETENCIA (ACORDEONES) -->
   <section id="fixture" class="section-padding" style="background: linear-gradient(to bottom, #050505, rgba(220, 38, 38, 0.05), #050505);">
     <h2 class="section-title">Campaña <span>Actual</span></h2>
-    <!-- Este es el ID vital que rompí antes y ahora está restaurado -->
     <div id="publicFixturesContainer" style="max-width: 900px; margin: 0 auto;">
       <p style="text-align: center; color: #a3a3a3;">Sincronizando fixture...</p>
     </div>
@@ -128,7 +135,6 @@
   <!-- SECCIÓN PLANTELES (ACORDEONES) -->
   <section id="planteles" class="section-padding">
     <h2 class="section-title">Nuestros <span>Planteles</span></h2>
-    <!-- Este es el ID vital para las listas de jugadores -->
     <div id="rostersContainer" style="max-width: 900px; margin: 0 auto;">
       <p style="text-align: center; color: #a3a3a3;">Cargando jugadores...</p>
     </div>
@@ -136,7 +142,7 @@
 
   <!-- SECCIÓN INSTITUCIONAL (ACTAS) -->
   <section id="institucional" class="section-padding">
-    <h2 class="section-title">Comisión <span>Directiva</span></h2>
+    <h2 class="section-title">Institucional</h2>
     <div style="max-width: 900px; margin: 0 auto;">
       <details class="fune-accordion">
         <summary>📜 Boletín Oficial y Actas</summary>
@@ -167,15 +173,13 @@
   <!-- CARRUSEL DE SPONSORS -->
   <div class="sponsors-bar">
     <div style="text-align: center; color: #a3a3a3; font-size: 0.85rem; margin-bottom: 25px; letter-spacing: 3px; text-transform: uppercase; font-weight: 600;">Acompañan al Club</div>
-    <div class="sponsors-track" id="sponsorsContainer">
-      <!-- Se inyectan por JS -->
-    </div>
+    <div class="sponsors-track" id="sponsorsContainer"></div>
   </div>
 
   <footer class="main-footer">
     <img src="logo-funebrero_2.png" alt="Escudo" style="width: 60px; margin-bottom: 15px; filter: grayscale(100%); opacity: 0.5;">
     <p style="color: #ffffff; margin: 0;">© 2026 Club Atlético Funebrero - Todos los derechos reservados.</p>
-    <p style="color: #a3a3a3; font-size: 0.85rem; margin-top: 5px;">Desarrollado por <strong style="color: #dc2626;">Rey Digital del Norte</strong></p>
+    <p style="color: #a3a3a3; font-size: 0.85rem; margin-top: 5px;">Desarrollado por <strong style="color: #dc2626;">Rey Digital del Norte</strong> (Dir. Fabián O. López)</p>
   </footer>
 
   <script type="module" src="/js/app.js"></script>
