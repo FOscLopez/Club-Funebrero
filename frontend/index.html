@@ -76,14 +76,23 @@
     document.addEventListener("DOMContentLoaded", () => {
       const overlay = document.getElementById("landing-overlay");
       const video = document.getElementById("landing-video");
+      
       const hideOverlay = () => {
         if (!overlay) return;
         overlay.style.opacity = "0";
-        setTimeout(() => { overlay.style.visibility = "hidden"; overlay.style.display = "none"; }, 800);
+        setTimeout(() => { 
+          overlay.style.visibility = "hidden"; 
+          overlay.style.display = "none"; 
+        }, 800);
       };
+
       if (video) {
+        // Se oculta exactamente cuando termina la animación del video
         video.addEventListener("ended", hideOverlay);
-        setTimeout(() => { if (overlay && overlay.style.visibility !== "hidden") hideOverlay(); }, 8000);
+        // Respaldo de seguridad por si el navegador bloquea el autoplay del video
+        setTimeout(() => { 
+          if (overlay && overlay.style.visibility !== "hidden") hideOverlay(); 
+        }, 8000);
       } else {
         hideOverlay();
       }
