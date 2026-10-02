@@ -1,5 +1,10 @@
 import { auth, db } from "./services/firebase.config.js";
-import { addPlayersBulk, getPlayers, updatePlayer, deletePlayer, getFixtures, updateFixture, deleteFixture } from "./services/firestore.service.js";
+import { 
+    addPlayersBulk, getPlayers, updatePlayer, deletePlayer, 
+    getFixtures, updateFixture, deleteFixture,
+    getMeetings, createMeeting, deleteMeeting, // <-- Nuevas importaciones Institucionales
+    getSponsors, createSponsor, deleteSponsor   // <-- Nuevas importaciones Sponsors
+} from "./services/firestore.service.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { collection, addDoc, getDocs, doc, query, orderBy, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -9,6 +14,9 @@ const IMGBB_API_KEY = "4b6599a15cc7870198cb96ee95df9905";
 let allFixturesCache = [];
 let currentEditTarget = { id: null, type: null }; 
 let currentSort = { column: 'createdAt', direction: 'desc' };
+
+// Variable para temporal de logos de sponsors
+let pendingSponsorData = null;
 
 window.setSort = (column) => {
     if (currentSort.column === column) {
@@ -36,6 +44,8 @@ onAuthStateChanged(auth, (user) => {
     } else {
         loadFixtures();
         loadPlayers();
+        loadMeetingsAdmin(); // <-- Carga Institucional
+        loadSponsorsAdmin(); // <-- Carga Sponsors
     }
 });
 
@@ -366,7 +376,6 @@ async function loadPlayers() {
 
         let html = "";
         Object.keys(grouped).sort().forEach(cat => {
-            // El Botón del pánico para borrar la categoría entera
             html += `<div style="display:flex; justify-content:space-between; align-items:center; margin-top:25px; margin-bottom:10px; border-bottom: 1px solid #333; padding-bottom:5px;">
                         <h4 class="cat-header" style="margin:0; border:none; padding:0;">Categoría ${cat} <span style="color:#a3a3a3; font-size:0.8rem;">(${grouped[cat].length} jugadores)</span></h4>
                         <button class="danger delete-btn" style="padding: 5px 15px; font-size: 0.8rem; background: transparent; border: 1px solid #ef4444; color: #ef4444; border-radius: 4px; cursor: pointer;" onclick="deleteAllPlayersInCategory('${cat}')">🗑️ Borrar Categoría</button>
@@ -490,4 +499,117 @@ document.getElementById('modalSaveBtn').onclick = async () => {
         document.getElementById('editModal').style.display = 'none';
     } catch (e) { alert("Error al guardar los cambios."); } 
     finally { btn.textContent = "Guardar Cambios"; btn.disabled = false; }
+};
+
+// ==========================================
+// MÓDULO 4: GESTIÓN INSTITUCIONAL (ACTAS/PDF)
+// ==========================================
+document.getElementById("meetingForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById("saveMeetBtn");
+    btn.textContent = "Guardando..."; btn.disabled = true;
+
+    const data = {
+        title: document.getElementById("meetTitle").value.trim(),
+        date: document.getElementById("meetDate").value,
+        summary: document.getElementById("meetSummary").value.trim(),
+        pdfUrl: document.getElementById("meetPdf").value.trim()
+    };
+
+    try {
+        await createMeeting(data);
+        document.getElementById("meetingForm").reset();
+        await loadMeetingsAdmin();
+        alert("Documento guardado con éxito.");
+    } catch(err) { alert("Error al guardar documento."); }
+    finally { btn.textContent = "Guardar Documento"; btn.disabled = false; }
+});
+
+async function loadMeetingsAdmin() {
+    const tbody = document.getElementById("meetingsList");
+    try {
+        const meetings = await getMeetings();
+        if(meetings.length === 0) { tbody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>No hay documentos</td></tr>"; return; }
+        
+        meetings.sort((a,b) => new Date(b.date) - new Date(a.date));
+        
+        tbody.innerHTML = meetings.map(m => `
+            <tr>
+                <td>${m.date}</td>
+                <td><strong>${m.title}</strong></td>
+                <td style="text-align:center;"><button onclick="deleteMeetAdmin('${m.id}')" class="delete-btn">Borrar</button></td>
+            </tr>
+        `).join("");
+    } catch(e) { tbody.innerHTML = "<tr><td colspan='3'>Error al cargar</td></tr>"; }
+}
+
+window.deleteMeetAdmin = async (id) => {
+    if(confirm("¿Eliminar este documento institucional?")) {
+        await deleteMeeting(id);
+        loadMeetingsAdmin();
+    }
+};
+
+// ==========================================
+// MÓDULO 5: GESTIÓN SPONSORS (CARRUSEL)
+// ==========================================
+document.getElementById("sponsorForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    pendingSponsorData = {
+        name: document.getElementById("spName").value.trim(),
+        link: document.getElementById("spLink").value.trim()
+    };
+    document.getElementById("sponsorFileUploader").click();
+});
+
+document.getElementById("sponsorFileUploader").onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !pendingSponsorData) return;
+    
+    const btn = document.getElementById("saveSpBtn");
+    btn.textContent = "⏳ Subiendo..."; btn.disabled = true;
+
+    const formData = new FormData();
+    formData.append("image", file);
+    
+    try {
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
+        const data = await res.json();
+        if (data.success) {
+            pendingSponsorData.logoUrl = data.data.url;
+            await createSponsor(pendingSponsorData);
+            document.getElementById("sponsorForm").reset();
+            loadSponsorsAdmin();
+            alert("Sponsor añadido al carrusel.");
+        } else throw new Error();
+    } catch(err) {
+        alert("Error al subir el logo.");
+    } finally { 
+        e.target.value = ""; 
+        pendingSponsorData = null;
+        btn.textContent = "Guardar y Subir Logo"; btn.disabled = false;
+    }
+};
+
+async function loadSponsorsAdmin() {
+    const tbody = document.getElementById("sponsorsList");
+    try {
+        const sponsors = await getSponsors();
+        if(sponsors.length === 0) { tbody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>No hay sponsors</td></tr>"; return; }
+        
+        tbody.innerHTML = sponsors.map(s => `
+            <tr>
+                <td><img src="${s.logoUrl}" style="height:30px; object-fit:contain; border-radius:4px; background:white; padding:2px;"></td>
+                <td><strong>${s.name}</strong></td>
+                <td style="text-align:center;"><button onclick="deleteSpAdmin('${s.id}')" class="delete-btn">Borrar</button></td>
+            </tr>
+        `).join("");
+    } catch(e) { tbody.innerHTML = "<tr><td colspan='3'>Error al cargar</td></tr>"; }
+}
+
+window.deleteSpAdmin = async (id) => {
+    if(confirm("¿Quitar este sponsor del carrusel?")) {
+        await deleteSponsor(id);
+        loadSponsorsAdmin();
+    }
 };

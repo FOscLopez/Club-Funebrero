@@ -64,7 +64,7 @@ async function initApp() {
 }
 
 // ==========================================
-// RENDER: FIXTURES (AUTOMATIZADO CON FOTOS Y CERRADO POR DEFECTO)
+// RENDER: FIXTURES
 // ==========================================
 function renderFixtures(fixtures) {
     const container = document.getElementById("publicFixturesContainer");
@@ -84,18 +84,12 @@ function renderFixtures(fixtures) {
             return getNum(a.round) - getNum(b.round);
         });
         
-        // CORRECCIÓN AQUÍ: Se eliminó el atributo "open" para que nazcan cerrados.
         finalHtml += `<details class="fune-accordion"><summary>🏆 CATEGORÍA ${cat}</summary><div class="fune-accordion-content">`;
         finalHtml += grouped[cat].map(f => {
             const isFinished = f.status === "finished";
             const hasScore = f.scoreLocal !== null && f.scoreLocal !== undefined && f.scoreAway !== null && f.scoreAway !== undefined;
+            const scoreHtml = (isFinished || hasScore) ? `<strong style="color:#ffffff; font-size:1.8rem; margin: 0 15px; background: rgba(220,38,38,0.2); padding: 5px 15px; border-radius: 8px; border: 1px solid rgba(220,38,38,0.4); box-shadow: 0 0 15px rgba(220,38,38,0.2);">${f.scoreLocal || 0} - ${f.scoreAway || 0}</strong>` : `<strong style="color:#dc2626; font-size:1.5rem; margin: 0 15px;">VS</strong>`;
             
-            // Renderizado inteligente de marcador
-            const scoreHtml = (isFinished || hasScore) 
-                ? `<strong style="color:#ffffff; font-size:1.8rem; margin: 0 15px; background: rgba(220,38,38,0.2); padding: 5px 15px; border-radius: 8px; border: 1px solid rgba(220,38,38,0.4); box-shadow: 0 0 15px rgba(220,38,38,0.2);">${f.scoreLocal || 0} - ${f.scoreAway || 0}</strong>` 
-                : `<strong style="color:#dc2626; font-size:1.5rem; margin: 0 15px;">VS</strong>`;
-
-            // Renderizado dinámico de botones de fotos
             let photosHtml = "";
             if (f.planilla || f.photoHome || f.photoAway) {
                 photosHtml = `<div style="display:flex; gap:10px; justify-content:center; margin-top:15px; flex-wrap:wrap; width: 100%; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">`;
@@ -146,7 +140,7 @@ function renderRosters(players) {
 }
 
 // ==========================================
-// LÓGICA DE CUMPLEAÑOS
+// RENDER: CUMPLEAÑOS
 // ==========================================
 function renderBirthdays(players) {
     const container = document.getElementById("birthdaysContainer");
@@ -192,29 +186,12 @@ function renderBirthdays(players) {
             }
             html += `
                 <div class="birthday-card is-today">
-                    <div>
-                        <strong style="color: #fff; font-size: 1.1rem; display: block;">${p.name}</strong>
-                        <span style="color: #a3a3a3; font-size: 0.8rem;">Categoría: ${p.categoryId}</span>
-                    </div>
-                    <div style="text-align: right;">
-                        <span style="color: #dc2626; font-weight: bold; font-size: 0.8rem; text-transform: uppercase;">¡ES HOY! 🎂</span>
-                        <div style="color: #fff; font-size: 1.5rem; font-family: 'Bebas Neue', cursive;">${pDay} DE ${monthNames[today.getMonth()].toUpperCase()}</div>
-                    </div>
-                </div>
-            `;
+                    <div><strong style="color: #fff; font-size: 1.1rem; display: block;">${p.name}</strong><span style="color: #a3a3a3; font-size: 0.8rem;">Categoría: ${p.categoryId}</span></div>
+                    <div style="text-align: right;"><span style="color: #dc2626; font-weight: bold; font-size: 0.8rem; text-transform: uppercase;">¡ES HOY! 🎂</span><div style="color: #fff; font-size: 1.5rem; font-family: 'Bebas Neue', cursive;">${pDay} DE ${monthNames[today.getMonth()].toUpperCase()}</div></div>
+                </div>`;
         } else {
             let passClass = pDay < currentDay ? 'opacity: 0.5;' : '';
-            html += `
-                <div class="birthday-card" style="${passClass}">
-                    <div>
-                        <strong style="color: #e2e8f0; font-size: 1rem; display: block;">${p.name}</strong>
-                        <span style="color: #64748b; font-size: 0.8rem;">Categoría: ${p.categoryId}</span>
-                    </div>
-                    <div style="color: #3b82f6; font-size: 1.2rem; font-family: 'Bebas Neue', cursive;">
-                        DÍA ${pDay}
-                    </div>
-                </div>
-            `;
+            html += `<div class="birthday-card" style="${passClass}"><div><strong style="color: #e2e8f0; font-size: 1rem; display: block;">${p.name}</strong><span style="color: #64748b; font-size: 0.8rem;">Categoría: ${p.categoryId}</span></div><div style="color: #3b82f6; font-size: 1.2rem; font-family: 'Bebas Neue', cursive;">DÍA ${pDay}</div></div>`;
         }
     });
 
@@ -222,31 +199,64 @@ function renderBirthdays(players) {
 }
 
 // ==========================================
-// RENDER: ACTAS INSTITUCIONALES Y SPONSORS
+// RENDER: ACTAS INSTITUCIONALES (PDF EN DRIVE)
 // ==========================================
 function renderMeetings(meetings) {
     const container = document.getElementById("meetingsContainer");
     if (!container) return;
-    if (meetings.length === 0) { container.innerHTML = `<p style="text-align: center; color: #a3a3a3; padding: 20px;">No hay actas subidas por el momento.</p>`; return; }
-    container.innerHTML = meetings.map(m => `
-        <div class="meeting-card">
-            <div class="meeting-info">
-                <span style="color:#a3a3a3; font-size:0.75rem;">📅 REUNIÓN DEL ${m.date}</span>
-                <h4 class="meeting-title">${m.title}</h4>
-                <p class="meeting-summary">${m.summary || 'Sin reseña adjunta.'}</p>
-            </div>
-        </div>`).join("");
+    if (meetings.length === 0) { 
+        container.innerHTML = `<p style="text-align: center; color: #a3a3a3; padding: 20px;">No hay documentos institucionales subidos por el momento.</p>`; 
+        return; 
+    }
+
+    // Ordenar de más nuevo a más viejo
+    meetings.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    container.innerHTML = meetings.map(m => {
+        let pdfHtml = "";
+        
+        // Conversión a IFRAME si es Link de Google Drive
+        if (m.pdfUrl && m.pdfUrl.includes("drive.google.com")) {
+            let previewLink = m.pdfUrl.replace('/view', '/preview').split('?')[0];
+            pdfHtml = `
+                <div style="margin-top: 15px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(220,38,38,0.3);">
+                    <iframe src="${previewLink}" width="100%" height="450px" style="border: none;" allow="autoplay"></iframe>
+                </div>
+                <div style="text-align: right; margin-top: 8px;">
+                    <a href="${m.pdfUrl}" target="_blank" style="color: #3b82f6; font-size: 0.8rem; font-weight: bold; text-decoration: none; transition: 0.3s;">📄 Descargar desde Drive</a>
+                </div>
+            `;
+        } else if (m.pdfUrl) {
+            // Si es un link externo cualquiera
+            pdfHtml = `<div style="margin-top: 10px;"><a href="${m.pdfUrl}" target="_blank" style="color: #3b82f6; font-size: 0.85rem; font-weight: bold; text-decoration: none;">📄 Ver Documento Adjunto</a></div>`;
+        }
+
+        return `
+            <div class="meeting-card" style="display: flex; flex-direction: column; background: rgba(15,23,42,0.6); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">
+                <div style="width: 100%;">
+                    <span style="color:#a3a3a3; font-size:0.8rem;">📅 FECHA DEL ACTA: ${m.date}</span>
+                    <h4 style="color: #dc2626; font-family: 'Bebas Neue', cursive; font-size: 1.5rem; letter-spacing: 1px; margin: 5px 0;">${m.title}</h4>
+                    <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; margin: 10px 0;">${m.summary || ''}</p>
+                    ${pdfHtml}
+                </div>
+            </div>`;
+    }).join("");
 }
 
+// ==========================================
+// RENDER: SPONSORS (CARRUSEL PUBLICITARIO)
+// ==========================================
 function renderSponsors(sponsors) {
     const container = document.getElementById("sponsorsContainer");
     if (!container) return;
     if (sponsors.length === 0) { document.querySelector('.sponsors-bar').style.display = 'none'; return; }
+    
+    // Duplicamos el arreglo para que el efecto visual del carrusel sea continuo e infinito
     const duplicated = [...sponsors, ...sponsors, ...sponsors];
     container.innerHTML = duplicated.map(s => `
         <a href="${s.link || '#'}" target="_blank" class="sponsor-card">
-            <img src="${s.logoUrl || DEFAULT_LOGO}" class="sponsor-logo">
-            <div><h4 style="margin:0; font-size: 1rem; color: #fff;">${s.name}</h4>${s.address ? `<p style="color: #a3a3a3; font-size: 0.75rem; margin: 0;">${s.address}</p>` : ''}</div>
+            <img src="${s.logoUrl || DEFAULT_LOGO}" class="sponsor-logo" alt="${s.name}">
+            <div><h4 style="margin:0; font-size: 1rem; color: #fff;">${s.name}</h4></div>
         </a>`).join("");
 }
 
@@ -281,11 +291,7 @@ function initFuneBot() {
       patrocinadores: globalData.sponsors
     };
     
-    let contextStr = `Eres el FuneBot, el asistente inteligente oficial y fanático del Club Atlético Funebrero. 
-    REGLA 1: La plataforma y tu inteligencia fueron desarrolladas y creadas por la agencia "Rey Digital del Norte", dirigida por Fabián O. López. 
-    REGLA 2: Conoces absolutamente todo lo que pasa en el club. Responde con orgullo usando esta base de datos: ${JSON.stringify(dataContext)}. 
-    REGLA 3: Si te preguntan de códigos, programación o lenguajes, di que esos son secretos tácticos del director Fabián O. López y Rey Digital del Norte. 
-    PREGUNTA DEL USUARIO: ${userText}`;
+    let contextStr = `Eres el FuneBot, el asistente oficial del Club Funebrero. Creado por Rey Digital del Norte (Fabián O. López). Base de datos: ${JSON.stringify(dataContext)}. PREGUNTA: ${userText}`;
 
     try {
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
@@ -294,7 +300,7 @@ function initFuneBot() {
       if (!res.ok) throw new Error();
       const data = await res.json();
       appendMsg(data.candidates[0].content.parts[0].text, "model");
-    } catch(e) { appendMsg("Uf, la cancha se quedó sin señal por un segundo. ¿Me repetís la jugada?", "model"); }
+    } catch(e) { appendMsg("Uf, la cancha se quedó sin señal por un segundo. ¿Me repetís?", "model"); }
   };
 
   if (sendBtn) sendBtn.addEventListener("click", processMessage);
