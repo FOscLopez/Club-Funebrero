@@ -66,7 +66,7 @@ async function initApp() {
         globalData.sponsors = sponsors;
         renderSponsors(sponsors);
     });
-    
+
     initSociosPortal();
 }
 
@@ -316,59 +316,111 @@ function initFuneBot() {
 function initSociosPortal() {
     const btnBuscar = document.getElementById("btnBuscarSocio");
     const dniInput = document.getElementById("socioDniInput");
+    const passInput = document.getElementById("socioPassInput");
+    const togglePass = document.getElementById("toggleSocioPass");
     const errorMsg = document.getElementById("socioError");
+    const wpMsg = document.getElementById("socioWpLink");
+    
     const boxLogin = document.getElementById("login-socio-box");
     const boxDash = document.getElementById("socio-dashboard");
     const btnSalir = document.getElementById("btnSalirSocio");
     const btnPagarMP = document.getElementById("btnPagarMP");
     const btnDescargarPdf = document.getElementById("btnDescargarPdf");
+    const pagoMonto = document.getElementById("pagoMonto");
 
     if(!btnBuscar) return;
 
+    // Mostrar/Ocultar contraseña
+    togglePass.addEventListener("click", () => {
+        if (passInput.type === "password") {
+            passInput.type = "text";
+            togglePass.textContent = "🙈";
+        } else {
+            passInput.type = "password";
+            togglePass.textContent = "👁️";
+        }
+    });
+
     btnBuscar.addEventListener("click", async () => {
         const dni = dniInput.value.trim();
-        if(!dni) return;
+        const pass = passInput.value.trim();
+        
+        if(!dni || !pass) {
+            errorMsg.textContent = "Por favor completa tu DNI y tu contraseña.";
+            errorMsg.style.display = "block";
+            wpMsg.style.display = "none";
+            return;
+        }
+
         btnBuscar.textContent = "Buscando...";
         errorMsg.style.display = "none";
+        wpMsg.style.display = "none";
         
         let socio = await getSocioByDni(dni);
-        
-        // MODO PRUEBA PARA VALIDAR (Si no encuentra el DNI, le crea uno virtual. Luego lo borras)
-        if(!socio) { socio = { nombre: "Socio de Prueba Funebrero", dni: dni }; }
 
         if (socio) {
-            globalData.currentSocio = socio;
-            document.getElementById("dash-nombre").textContent = socio.nombre;
-            document.getElementById("pdf-nombre").textContent = socio.nombre;
-            document.getElementById("pdf-dni").textContent = socio.dni;
-            const hoy = new Date();
-            document.getElementById("pdf-fecha").textContent = hoy.toLocaleDateString();
+            // Limpia la fecha de nacimiento para usarla como contraseña (quita / y -)
+            const cleanBirth = socio.birthdate.replace(/[^0-9]/g, '');
+            
+            if (pass !== cleanBirth) {
+                errorMsg.textContent = "Contraseña incorrecta. (Recuerda: fecha de nacimiento sin barras, ej: 19061984)";
+                errorMsg.style.display = "block";
+            } else {
+                globalData.currentSocio = socio;
+                document.getElementById("dash-nombre").textContent = socio.name;
+                document.getElementById("pdf-nombre").textContent = socio.name;
+                document.getElementById("pdf-dni").textContent = socio.dni;
+                document.getElementById("pdf-monto").textContent = pagoMonto.value;
+                const hoy = new Date();
+                document.getElementById("pdf-fecha").textContent = hoy.toLocaleDateString();
 
-            boxLogin.style.display = "none";
-            boxDash.style.display = "block";
+                boxLogin.style.display = "none";
+                boxDash.style.display = "block";
+            }
         } else {
+            errorMsg.textContent = "DNI no registrado en el sistema.";
             errorMsg.style.display = "block";
+            wpMsg.style.display = "block"; // Muestra el link a WhatsApp
         }
         btnBuscar.textContent = "Ver Estado de Cuenta";
+    });
+
+    // Validar monto mínimo ($5000)
+    pagoMonto.addEventListener("blur", () => {
+        if (parseInt(pagoMonto.value) < 5000 || isNaN(pagoMonto.value)) {
+            pagoMonto.value = 5000;
+        }
+        document.getElementById("pdf-monto").textContent = pagoMonto.value;
     });
 
     btnSalir.addEventListener("click", () => {
         globalData.currentSocio = null;
         dniInput.value = "";
+        passInput.value = "";
         boxDash.style.display = "none";
         boxLogin.style.display = "block";
     });
 
     btnPagarMP.addEventListener("click", async () => {
         if(globalData.currentSocio) {
-            await registerPaymentIntent({ socioDni: globalData.currentSocio.dni, socioNombre: globalData.currentSocio.nombre, monto: 3500 });
+            await registerPaymentIntent({ 
+                socioDni: globalData.currentSocio.dni, 
+                socioNombre: globalData.currentSocio.name, 
+                monto: parseInt(pagoMonto.value) 
+            });
         }
     });
 
     btnDescargarPdf.addEventListener("click", () => {
         const comp = document.getElementById("comprobante-imprimir");
         comp.style.display = "block"; 
-        const opt = { margin: 1, filename: `Comprobante_Funebrero_${globalData.currentSocio.dni}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } };
+        const opt = { 
+            margin: 1, 
+            filename: `Comprobante_Funebrero_${globalData.currentSocio.dni}.pdf`, 
+            image: { type: 'jpeg', quality: 0.98 }, 
+            html2canvas: { scale: 2 }, 
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } 
+        };
         html2pdf().set(opt).from(comp).save().then(() => { comp.style.display = "none"; });
     });
 }

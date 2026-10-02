@@ -122,8 +122,28 @@ import {
   }
 
   // ==============================
-  // PORTAL SOCIOS Y PAGOS
+  // SOCIOS Y PAGOS
   // ==============================
+  export async function getSocios() {
+    try {
+      const snapshot = await getDocs(query(collection(db, "socios"), orderBy("name", "asc")));
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) { return []; }
+  }
+
+  export async function addSociosBulk(sociosArray) {
+    const batch = writeBatch(db);
+    sociosArray.forEach(s => {
+      const newRef = doc(collection(db, "socios"));
+      batch.set(newRef, s);
+    });
+    await batch.commit();
+  }
+
+  export async function deleteSocio(id) {
+    await deleteDoc(doc(db, "socios", id));
+  }
+
   export async function getSocioByDni(dni) {
     try {
         const q = query(collection(db, "socios"), where("dni", "==", dni));
