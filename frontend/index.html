@@ -32,22 +32,23 @@
     }
 
     /* ====================================================
-       2. LANDING ANIMADA CON RELOJ CENTRADO
+       2. LANDING ANIMADA CON RELOJ Y EFECTO SOLDADURA
        ==================================================== */
     #landing-overlay {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
         background-color: #000000; z-index: 999999;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         transition: opacity 0.8s ease, visibility 0.8s;
+        box-sizing: border-box;
     }
-    #landing-video { max-width: 350px; width: 90%; outline: none; mix-blend-mode: screen; }
+    #landing-video { max-width: 350px; width: 90%; outline: none; mix-blend-mode: screen; position: relative; z-index: 2; }
     
     /* Contador estilo reloj de básquetbol CENTRADO */
     #shot-clock {
         position: absolute;
-        top: 40px; /* Separación desde el borde superior */
+        top: 40px; 
         left: 50%;
-        transform: translateX(-50%); /* Centrado matemático absoluto */
+        transform: translateX(-50%); 
         font-family: 'Bebas Neue', cursive;
         font-size: 3.5rem;
         color: #dc2626;
@@ -58,11 +59,56 @@
         background: rgba(0,0,0,0.8);
         box-shadow: 0 0 15px rgba(220, 38, 38, 0.3) inset;
         letter-spacing: 2px;
+        z-index: 2;
     }
 
-    .landing-title { font-family: 'Bebas Neue', cursive; font-size: 3.5rem; color: #ffffff; margin-top: 20px; letter-spacing: 2px; text-shadow: 2px 2px 0px #000, -1px -1px 0px #dc2626; text-align: center; opacity: 0; animation: fadeInText 1s forwards 0.5s; }
+    .landing-title { font-family: 'Bebas Neue', cursive; font-size: 3.5rem; color: #ffffff; margin-top: 20px; letter-spacing: 2px; text-shadow: 2px 2px 0px #000, -1px -1px 0px #dc2626; text-align: center; opacity: 0; animation: fadeInText 1s forwards 0.5s; position: relative; z-index: 2;}
     .landing-title span { color: #dc2626; }
     @keyframes fadeInText { to { opacity: 1; } }
+
+    /* ---- INICIO EFECTO SOLDADURA (8 SEGUNDOS) ---- */
+    .weld-spark {
+        position: absolute;
+        width: 6px; height: 6px;
+        background: #ffffff;
+        border-radius: 50%;
+        box-shadow: 0 0 15px 8px #dc2626, 0 0 30px 15px #ffbaba;
+        z-index: 10;
+        /* Viaja por el contorno en 8 seg exactos y parpadea como fuego */
+        animation: sparkPath 8s linear forwards, sparkFlicker 0.1s infinite alternate;
+    }
+    
+    @keyframes sparkFlicker {
+        0% { transform: scale(1); opacity: 0.8; }
+        100% { transform: scale(1.8); opacity: 1; box-shadow: 0 0 25px 12px #dc2626, 0 0 45px 20px #ffffff; }
+    }
+
+    @keyframes sparkPath {
+        0%   { top: 0; left: 0; }
+        25%  { top: 0; left: calc(100% - 6px); }
+        50%  { top: calc(100% - 6px); left: calc(100% - 6px); }
+        75%  { top: calc(100% - 6px); left: 0; }
+        100% { top: 0; left: 0; }
+    }
+
+    .weld-line {
+        position: absolute;
+        background: #dc2626;
+        box-shadow: 0 0 12px #dc2626, 0 0 20px #dc2626;
+        z-index: 5;
+    }
+    
+    /* Cada lado se dibuja en 2 segundos, en cadena */
+    .weld-top    { top: 0; left: 0; height: 3px; width: 0; animation: drawTop 2s linear forwards; }
+    .weld-right  { top: 0; right: 0; width: 3px; height: 0; animation: drawRight 2s linear 2s forwards; }
+    .weld-bottom { bottom: 0; right: 0; height: 3px; width: 0; animation: drawBottom 2s linear 4s forwards; }
+    .weld-left   { bottom: 0; left: 0; width: 3px; height: 0; animation: drawLeft 2s linear 6s forwards; }
+
+    @keyframes drawTop    { to { width: 100%; } }
+    @keyframes drawRight  { to { height: 100%; } }
+    @keyframes drawBottom { to { width: 100%; } }
+    @keyframes drawLeft   { to { height: 100%; } }
+    /* ---- FIN EFECTO SOLDADURA ---- */
 
     /* ====================================================
        3. TICKER
@@ -80,7 +126,6 @@
     .header { position: fixed; left: 0; width: 100%; background: rgba(5, 5, 5, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 900; border-bottom: 1px solid rgba(220, 38, 38, 0.3); padding: 12px 0; top: 32px; transition: 0.3s; }
     .header:hover { background: rgba(5, 5, 5, 0.95); border-bottom-color: #dc2626; }
     
-    /* Disposición base (Móviles) */
     .header-inner { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 15px; flex-wrap: wrap; gap: 10px; }
     .nav-links { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; width: 100%; margin-top: 10px; }
     .nav-links a { color: #e2e8f0; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; position: relative; }
@@ -91,19 +136,11 @@
     .outline-btn { border: 1px solid #333; border-radius: 20px; text-decoration: none; font-weight: 600; transition: all 0.3s; background: rgba(255,255,255,0.05); padding: 5px 12px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px;}
     .outline-btn:hover { background: #dc2626; color: #fff !important; border-color: #dc2626; box-shadow: 0 0 15px rgba(220,38,38,0.4); transform: translateY(-2px); }
 
-    /* Media Query para Header Responsivo (PC y Tablets) */
     @media (min-width: 992px) {
-        /* En PC todo va en una sola línea bien distribuida */
         .header-inner { flex-wrap: nowrap; padding: 0 30px; justify-content: space-between;}
-        
-        /* El logo a la izquierda */
         .header-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 0; width: auto; flex-shrink: 0; }
-        
-        /* Los links centrados y con espacio para respirar */
         .nav-links { width: auto; margin-top: 0; justify-content: center; gap: 30px; flex: 1; }
         .nav-links a { font-size: 0.95rem; }
-        
-        /* El botón admin a la derecha */
         .admin-nav { width: auto; flex-shrink: 0; }
         .outline-btn { margin-top: 0; padding: 8px 18px; font-size: 0.8rem; }
     }
@@ -201,8 +238,16 @@
 </head>
 <body>
 
-  <!-- PANTALLA DE CARGA ANIMADA CON RELOJ CENTRADO -->
+  <!-- PANTALLA DE CARGA ANIMADA CON SOLDADURA DE 8 SEGUNDOS -->
   <div id="landing-overlay">
+    
+    <!-- Efecto Soldadura Borde Perimetral -->
+    <div class="weld-spark"></div>
+    <div class="weld-line weld-top"></div>
+    <div class="weld-line weld-right"></div>
+    <div class="weld-line weld-bottom"></div>
+    <div class="weld-line weld-left"></div>
+
     <div id="shot-clock">08</div>
     <video id="landing-video" src="/img/animacion.mp4" autoplay muted playsinline preload="auto"></video>
     <h1 class="landing-title">CLUB ATLÉTICO <br><span>FUNEBRERO</span></h1>
