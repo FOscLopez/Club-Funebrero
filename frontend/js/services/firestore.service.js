@@ -3,7 +3,11 @@ import {
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"; 
   import { app } from "./firebase.config.js";
   
-  const db = getFirestore(app);
+  // ==========================================
+  // ¡AQUÍ ESTÁ LA SOLUCIÓN AL ERROR!
+  // Conectamos a tu base de datos llamada "funebrero" 
+  // ==========================================
+  export const db = getFirestore(app, "funebrero");
   
   // ==============================
   // FIXTURES (PARTIDOS)

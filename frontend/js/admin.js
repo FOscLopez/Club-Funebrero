@@ -1,5 +1,6 @@
-import { auth, db } from "./services/firebase.config.js";
+import { auth } from "./services/firebase.config.js";
 import { 
+    db, // Importamos la conexión corregida
     addPlayersBulk, getPlayers, updatePlayer, deletePlayer, 
     getFixtures, updateFixture, deleteFixture,
     getMeetings, createMeeting, updateMeeting, deleteMeeting,
