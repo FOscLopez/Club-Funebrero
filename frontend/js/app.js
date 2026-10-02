@@ -1,4 +1,4 @@
-import { listenToFixtures, getPlayers, listenToMeetings, listenToSponsors } from "./services/firestore.service.js";
+import { listenToFixtures, getPlayers, listenToMeetings, listenToSponsors, getSocioByDni, registerPaymentIntent } from "./services/firestore.service.js";
 
 // ==========================================
 // DICCIONARIO DE LOGOS (IMGBB)
@@ -20,7 +20,7 @@ const CLUB_LOGOS = {
 const DEFAULT_LOGO = "https://i.ibb.co/Cpw4zbBv/571425287-18303994912267310-8920899741855718292-n.jpg";
 const GEMINI_API_KEY = "AIzaSyDvsq3fg1nEOQxR8wVcZW8rEX2lcc_xC8U";
 
-let globalData = { fixtures: [], players: [], meetings: [], sponsors: [] };
+let globalData = { fixtures: [], players: [], meetings: [], sponsors: [], currentSocio: null };
 
 function getLogoSrc(clubName) {
     if (!clubName) return DEFAULT_LOGO;
@@ -33,6 +33,8 @@ function getLogoSrc(clubName) {
 
 document.addEventListener("DOMContentLoaded", () => {
     console.log("🏀 Plataforma del Club Atlético Funebrero inicializada.");
+    
+    // CONTROL DE NAVEGACIÓN SUAVE
     document.querySelectorAll('.nav-links a').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             const targetId = this.getAttribute('href');
@@ -43,8 +45,84 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
+
+    // CONTROL DE AUDIO Y LANDING PAGE (NUEVO)
+    const btnEnter = document.getElementById("btn-enter-stadium");
+    const enterScreen = document.getElementById("enter-stadium-screen");
+    const overlay = document.getElementById("landing-overlay");
+    const video = document.getElementById("landing-video");
+    const clockElement = document.getElementById("shot-clock");
+    const audioLanding = document.getElementById("audio-landing");
+    const audioFondo = document.getElementById("audio-fondo");
+    
+    let isHidden = false;
+    let timeLeft = 8;
+
+    const endLandingScreen = () => {
+        if (isHidden) return;
+        isHidden = true;
+        overlay.style.opacity = "0";
+        setTimeout(() => { 
+            overlay.style.visibility = "hidden"; 
+            overlay.style.display = "none"; 
+            if(audioLanding) audioLanding.pause(); // Frena el sonido de carga
+            if(audioFondo) {
+                audioFondo.volume = 0.5; // Sonido de fondo más suave
+                audioFondo.play().catch(e => console.log("Fondo autoplay prev.")); // Inicia sonido principal
+            }
+        }, 800);
+    };
+
+    if (btnEnter) {
+        btnEnter.addEventListener("click", () => {
+            enterScreen.style.opacity = "0";
+            setTimeout(() => {
+                enterScreen.style.display = "none";
+                overlay.style.display = "flex"; // Muestra la soldadura
+                
+                // Inicia Sonido y Video Principal
+                if(audioLanding) {
+                    audioLanding.volume = 1.0;
+                    audioLanding.play().catch(e => console.log("Landing Audio bloq"));
+                }
+                if (video) { video.play().catch(e => console.log("Vid prev")); }
+
+                // Lógica de Chispas CSS
+                const sparkInterval = setInterval(() => {
+                    if (isHidden) { clearInterval(sparkInterval); return; }
+                    const mainSpark = document.querySelector('.weld-spark');
+                    if (!mainSpark) return;
+                    const rect = mainSpark.getBoundingClientRect();
+                    const particle = document.createElement('div');
+                    particle.className = 'flying-spark';
+                    particle.style.left = rect.left + 'px';
+                    particle.style.top = rect.top + 'px';
+                    overlay.appendChild(particle);
+
+                    const centerX = window.innerWidth / 2; const centerY = window.innerHeight / 2;
+                    const destX = centerX + (Math.random() - 0.5) * 600; const destY = centerY + (Math.random() - 0.5) * 600;
+
+                    particle.animate([ { transform: `translate(0, 0) scale(1.5)`, opacity: 1 }, { transform: `translate(${destX - rect.left}px, ${destY - rect.top}px) scale(0)`, opacity: 0 } ], { duration: 600 + Math.random() * 600, easing: 'ease-out' });
+                    setTimeout(() => { if(particle.parentNode) particle.remove(); }, 1200);
+                }, 40);
+
+                // Reloj de 8s
+                const countdown = setInterval(() => {
+                    timeLeft--;
+                    if (timeLeft >= 0) clockElement.textContent = timeLeft.toString().padStart(2, '0');
+                    if (timeLeft <= 0) { clearInterval(countdown); endLandingScreen(); }
+                }, 1000);
+
+            }, 500);
+        });
+    } else {
+        // Fallback por si acaso
+        if(overlay) overlay.style.display = "none";
+    }
+
     initApp();
     initFuneBot();
+    initSociosPortal(); // Inicia el portal de socios
 });
 
 async function initApp() {
@@ -156,7 +234,9 @@ function renderBirthdays(players) {
     const currentMonth = today.getMonth() + 1; 
     const currentDay = today.getDate();
     
-    document.getElementById("currentMonthName").textContent = monthNames[today.getMonth()];
+    const currentMonthEl = document.getElementById("currentMonthName");
+    if(currentMonthEl) currentMonthEl.textContent = monthNames[today.getMonth()];
+    
     if (!container) return;
 
     let birthdaysThisMonth = players.filter(p => {
@@ -259,6 +339,86 @@ function renderSponsors(sponsors) {
             <img src="${s.logoUrl || DEFAULT_LOGO}" class="sponsor-logo" alt="${s.name}">
             <div><h4 style="margin:0; font-size: 1rem; color: #fff;">${s.name}</h4></div>
         </a>`).join("");
+}
+
+// ==========================================
+// PORTAL DE SOCIOS Y PAGOS
+// ==========================================
+function initSociosPortal() {
+    const btnBuscar = document.getElementById("btnBuscarSocio");
+    const dniInput = document.getElementById("socioDniInput");
+    const errorMsg = document.getElementById("socioError");
+    
+    const boxLogin = document.getElementById("login-socio-box");
+    const boxDash = document.getElementById("socio-dashboard");
+    const btnSalir = document.getElementById("btnSalirSocio");
+    const btnPagarMP = document.getElementById("btnPagarMP");
+    const btnDescargarPdf = document.getElementById("btnDescargarPdf");
+
+    if(!btnBuscar) return;
+
+    btnBuscar.addEventListener("click", async () => {
+        const dni = dniInput.value.trim();
+        if(!dni) return;
+        btnBuscar.textContent = "Buscando...";
+        errorMsg.style.display = "none";
+        
+        let socio = await getSocioByDni(dni);
+        
+        // MODO PRUEBA: Si no existe, creamos uno virtual para que puedas ver y probar el sistema.
+        // Cuando subas tus socios reales a la BD, borras estas 3 lineas:
+        if(!socio) {
+            socio = { nombre: "Socio de Prueba Funebrero", dni: dni }; 
+        }
+
+        if (socio) {
+            globalData.currentSocio = socio;
+            document.getElementById("dash-nombre").textContent = socio.nombre;
+            document.getElementById("pdf-nombre").textContent = socio.nombre;
+            document.getElementById("pdf-dni").textContent = socio.dni;
+            
+            const hoy = new Date();
+            document.getElementById("pdf-fecha").textContent = hoy.toLocaleDateString();
+
+            boxLogin.style.display = "none";
+            boxDash.style.display = "block";
+        } else {
+            errorMsg.style.display = "block";
+        }
+        btnBuscar.textContent = "Ver Estado de Cuenta";
+    });
+
+    btnSalir.addEventListener("click", () => {
+        globalData.currentSocio = null;
+        dniInput.value = "";
+        boxDash.style.display = "none";
+        boxLogin.style.display = "block";
+    });
+
+    // Acción de Pagar en Mercado Pago
+    btnPagarMP.addEventListener("click", async () => {
+        if(globalData.currentSocio) {
+            await registerPaymentIntent({ socioDni: globalData.currentSocio.dni, socioNombre: globalData.currentSocio.nombre, monto: 3500 });
+        }
+    });
+
+    // Generar PDF
+    btnDescargarPdf.addEventListener("click", () => {
+        const comp = document.getElementById("comprobante-imprimir");
+        comp.style.display = "block"; 
+        
+        const opt = {
+            margin:       1,
+            filename:     `Comprobante_Funebrero_${globalData.currentSocio.dni}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(comp).save().then(() => {
+            comp.style.display = "none"; 
+        });
+    });
 }
 
 // ==========================================

@@ -120,3 +120,29 @@ import {
   export async function deleteSponsor(id) {
     await deleteDoc(doc(db, "sponsors", id));
   }
+
+  // ==============================
+  // PORTAL SOCIOS Y PAGOS (NUEVO)
+  // ==============================
+  export async function getSocioByDni(dni) {
+      try {
+          const q = query(collection(db, "socios"), where("dni", "==", dni));
+          const snapshot = await getDocs(q);
+          if (snapshot.empty) return null;
+          return { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
+      } catch (e) {
+          return null;
+      }
+  }
+
+  export async function registerPaymentIntent(data) {
+      try {
+          data.createdAt = new Date().toISOString();
+          data.status = "pendiente";
+          const docRef = await addDoc(collection(db, "pagos_socios"), data);
+          return docRef.id;
+      } catch (e) {
+          console.error("Error registrando pago", e);
+          return null;
+      }
+  }
