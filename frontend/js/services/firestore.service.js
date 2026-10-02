@@ -67,9 +67,20 @@ import {
     } catch(e) { return []; }
   }
   
+  export function listenToMeetings(callback) {
+    return onSnapshot(collection(db, "meetings"), (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      callback(data);
+    });
+  }
+  
   export async function createMeeting(data) {
     data.createdAt = new Date().toISOString();
     await addDoc(collection(db, "meetings"), data);
+  }
+  
+  export async function updateMeeting(id, data) {
+    await updateDoc(doc(db, "meetings", id), data);
   }
   
   export async function deleteMeeting(id) {
@@ -86,9 +97,20 @@ import {
     } catch (error) { return []; }
   }
   
+  export function listenToSponsors(callback) {
+    return onSnapshot(collection(db, "sponsors"), (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      callback(data);
+    });
+  }
+  
   export async function createSponsor(data) {
     data.createdAt = new Date().toISOString();
     await addDoc(collection(db, "sponsors"), data);
+  }
+  
+  export async function updateSponsor(id, data) {
+    await updateDoc(doc(db, "sponsors", id), data);
   }
   
   export async function deleteSponsor(id) {

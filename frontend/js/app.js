@@ -1,4 +1,4 @@
-import { listenToFixtures, getPlayers, getMeetings, getSponsors } from "./services/firestore.service.js";
+import { listenToFixtures, getPlayers, listenToMeetings, listenToSponsors } from "./services/firestore.service.js";
 
 // ==========================================
 // DICCIONARIO DE LOGOS (IMGBB)
@@ -47,20 +47,31 @@ document.addEventListener("DOMContentLoaded", () => {
     initFuneBot();
 });
 
+
+
 async function initApp() {
+    // 1. Partidos en tiempo real
     listenToFixtures((fixtures) => {
         globalData.fixtures = fixtures;
         renderFixtures(fixtures);
     });
+
+    // 2. Jugadores (Carga normal)
     globalData.players = await getPlayers();
     renderRosters(globalData.players);
     renderBirthdays(globalData.players);
 
-    globalData.meetings = await getMeetings();
-    renderMeetings(globalData.meetings);
+    // 3. Actas Institucionales en TIEMPO REAL (NUEVO)
+    listenToMeetings((meetings) => {
+        globalData.meetings = meetings;
+        renderMeetings(meetings);
+    });
 
-    globalData.sponsors = await getSponsors();
-    renderSponsors(globalData.sponsors);
+    // 4. Sponsors en TIEMPO REAL (NUEVO)
+    listenToSponsors((sponsors) => {
+        globalData.sponsors = sponsors;
+        renderSponsors(sponsors);
+    });
 }
 
 // ==========================================
