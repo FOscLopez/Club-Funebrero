@@ -1,6 +1,6 @@
 import { auth } from "./services/firebase.config.js";
 import { 
-    db, // Importamos la conexión corregida
+    db, 
     addPlayersBulk, getPlayers, updatePlayer, deletePlayer, 
     getFixtures, updateFixture, deleteFixture,
     getMeetings, createMeeting, updateMeeting, deleteMeeting,
@@ -9,7 +9,14 @@ import {
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { collection, addDoc, getDocs, doc, query, orderBy, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-const allowedAdmins = ["mecinfotec@gmail.com", "admin@abnch.com", "admin@reydigital.com"];
+// ==========================================
+// SEGURIDAD: DEFINICIÓN DE ROLES
+// ==========================================
+const superAdmins = ["mecinfotec@gmail.com", "admin@abnch.com", "admin@reydigital.com"];
+const editores = ["editor@funebrero.com", "prensa@funebrero.com"];
+const allowedUsers = [...superAdmins, ...editores];
+let isSuperAdmin = false;
+
 const IMGBB_API_KEY = "4b6599a15cc7870198cb96ee95df9905";
 
 let allFixturesCache = [];
@@ -40,13 +47,30 @@ window.setSort = (column) => {
 };
 
 onAuthStateChanged(auth, (user) => {
-    if (!user || !allowedAdmins.includes(user.email)) {
+    if (!user || !allowedUsers.includes(user.email)) {
         window.location.replace("index.html");
     } else {
+        isSuperAdmin = superAdmins.includes(user.email);
+        
+        // Aplica seguridad visual en el panel
+        const badge = document.getElementById("userRoleBadge");
+        if(isSuperAdmin) {
+            badge.textContent = "⚙️ Super Admin";
+            badge.style.borderColor = "#dc2626";
+            badge.style.color = "#dc2626";
+        } else {
+            badge.textContent = "✍️ Editor";
+            const style = document.createElement('style');
+            style.innerHTML = '.super-admin-only { display: none !important; }';
+            document.head.appendChild(style);
+        }
+
         loadFixtures();
         loadPlayers();
-        loadMeetingsAdmin();
-        loadSponsorsAdmin();
+        if(isSuperAdmin) {
+            loadMeetingsAdmin();
+            loadSponsorsAdmin();
+        }
     }
 });
 
@@ -202,9 +226,6 @@ document.getElementById("playerForm").addEventListener("submit", async (e) => {
     finally { btn.textContent = "Procesar Plantel"; btn.disabled = false; }
 });
 
-// =========================================
-// TABLA DE FIXTURES (EDICIÓN EN LÍNEA)
-// =========================================
 async function loadFixtures() {
     const tbody = document.getElementById("fixturesList");
     try {
@@ -268,6 +289,8 @@ function renderFixturesTable() {
             ? `<button onclick="toggleStatusAdmin('${f.id}', 'finished')" style="width: 100%; padding: 6px; margin-bottom: 5px; font-size: 0.7rem; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">🏁 Finalizar</button>`
             : `<button onclick="toggleStatusAdmin('${f.id}', 'scheduled')" style="width: 100%; padding: 6px; margin-bottom: 5px; font-size: 0.7rem; background: #334155; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">⏪ Reabrir</button>`;
 
+        const deleteBtnHtml = isSuperAdmin ? `<button style="flex:1; padding: 4px; font-size: 0.7rem; background: transparent; border: 1px solid #ef4444; color: #ef4444; border-radius: 4px; cursor: pointer;" onclick="deleteFixtureAdmin('${f.id}')">X</button>` : '';
+
         return `
             <tr>
                 <td><span style="background: rgba(220,38,38,0.2); color: #dc2626; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">${f.categoryId}</span></td>
@@ -293,7 +316,7 @@ function renderFixturesTable() {
                     ${actionBtn}
                     <div style="display:flex; gap: 5px;">
                         <button style="flex:1; padding: 4px; font-size: 0.7rem; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="openEditInfo('${f.id}')">✏️ Info</button>
-                        <button style="flex:1; padding: 4px; font-size: 0.7rem; background: transparent; border: 1px solid #ef4444; color: #ef4444; border-radius: 4px; cursor: pointer;" onclick="deleteFixtureAdmin('${f.id}')">X</button>
+                        ${deleteBtnHtml}
                     </div>
                 </td>
             </tr>`;
@@ -314,15 +337,13 @@ window.toggleStatusAdmin = async (id, newStatus) => {
 };
 
 window.deleteFixtureAdmin = async (id) => {
+    if(!isSuperAdmin) { alert("Solo Super Admin puede borrar definitivamente."); return; }
     if (confirm("¿Eliminar este partido permanentemente?")) {
         await deleteFixture(id);
         loadFixtures();
     }
 };
 
-// ==========================================
-// SUBIDA DE FOTOS EN LÍNEA (IMGBB)
-// ==========================================
 let inlineUploadId = null;
 let inlineUploadType = null;
 
@@ -360,9 +381,6 @@ document.getElementById('adminFileUploader').onchange = async (e) => {
     }
 };
 
-// =========================================
-// RENDERIZADO DE JUGADORES Y CATEGORÍAS
-// =========================================
 async function loadPlayers() {
     const container = document.getElementById("playersListContainer");
     try {
@@ -377,21 +395,23 @@ async function loadPlayers() {
 
         let html = "";
         Object.keys(grouped).sort().forEach(cat => {
+            const delCatBtn = isSuperAdmin ? `<button class="danger delete-btn super-admin-only" style="padding: 5px 15px; font-size: 0.8rem; background: transparent; border: 1px solid #ef4444; color: #ef4444; border-radius: 4px; cursor: pointer;" onclick="deleteAllPlayersInCategory('${cat}')">🗑️ Borrar Categoría</button>` : '';
             html += `<div style="display:flex; justify-content:space-between; align-items:center; margin-top:25px; margin-bottom:10px; border-bottom: 1px solid #333; padding-bottom:5px;">
                         <h4 class="cat-header" style="margin:0; border:none; padding:0;">Categoría ${cat} <span style="color:#a3a3a3; font-size:0.8rem;">(${grouped[cat].length} jugadores)</span></h4>
-                        <button class="danger delete-btn" style="padding: 5px 15px; font-size: 0.8rem; background: transparent; border: 1px solid #ef4444; color: #ef4444; border-radius: 4px; cursor: pointer;" onclick="deleteAllPlayersInCategory('${cat}')">🗑️ Borrar Categoría</button>
+                        ${delCatBtn}
                      </div>`;
                      
             html += `<table>
                         <thead><tr><th>Nombre Completo</th><th>Fecha Nac.</th><th style="text-align:right;">Acción</th></tr></thead>
                         <tbody>`;
             grouped[cat].sort((a, b) => a.name.localeCompare(b.name)).forEach(p => {
+                const delPlayerBtn = isSuperAdmin ? `<button class="delete-btn super-admin-only" onclick="deletePlayerAdmin('${p.id}')">Borrar</button>` : '';
                 html += `<tr>
                             <td style="font-weight:600;">${p.name}</td>
                             <td style="color:#a3a3a3;">${p.birthdate}</td>
                             <td style="text-align:right; width: 140px;">
                                 <button class="action-btn" style="background:#3b82f6; padding: 4px 8px; font-size: 0.7rem; margin-right: 5px;" onclick="openEditPlayer('${p.id}', '${p.name}', '${p.birthdate}', '${p.categoryId}')">✏️ Editar</button>
-                                <button class="delete-btn" onclick="deletePlayerAdmin('${p.id}')">Borrar</button>
+                                ${delPlayerBtn}
                             </td>
                          </tr>`;
             });
@@ -402,6 +422,7 @@ async function loadPlayers() {
 }
 
 window.deletePlayerAdmin = async (id) => {
+    if(!isSuperAdmin) return;
     if(confirm("¿Eliminar este jugador individualmente?")) {
         await deletePlayer(id);
         loadPlayers();
@@ -409,6 +430,7 @@ window.deletePlayerAdmin = async (id) => {
 };
 
 window.deleteAllPlayersInCategory = async (cat) => {
+    if(!isSuperAdmin) return;
     if(confirm(`⚠️ PELIGRO: ¿Estás seguro de borrar TODOS los jugadores de la categoría ${cat}? Esta acción no se puede deshacer.`)) {
         try {
             const q = query(collection(db, "players"), where("categoryId", "==", cat));
@@ -426,9 +448,6 @@ window.deleteAllPlayersInCategory = async (cat) => {
     }
 };
 
-// ==========================================
-// MÓDULO INSTITUCIONAL (ACTAS/PDF EN DRIVE)
-// ==========================================
 document.getElementById("meetingForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const btn = document.getElementById("saveMeetBtn");
@@ -479,9 +498,6 @@ window.deleteMeetAdmin = async (id) => {
     }
 };
 
-// ==========================================
-// MÓDULO SPONSORS (CARRUSEL)
-// ==========================================
 document.getElementById("sponsorForm").addEventListener("submit", (e) => {
     e.preventDefault();
     pendingSponsorData = {
@@ -547,9 +563,6 @@ window.deleteSpAdmin = async (id) => {
     }
 };
 
-// ==========================================
-// VENTANA MODAL MAESTRA (REPARACIÓN DE ERRORES)
-// ==========================================
 const catsOptions = `
     <option value="Mosquito">Mosquito</option><option value="Mini">Mini</option><option value="Pre Mini">Pre Mini</option>
     <option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option>
