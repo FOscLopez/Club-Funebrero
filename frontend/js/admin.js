@@ -453,7 +453,7 @@ async function loadMeetingsAdmin() {
     const tbody = document.getElementById("meetingsList");
     try {
         const meetings = await getMeetings();
-        allMeetingsCache = meetings; // Guardamos en caché para poder Editar
+        allMeetingsCache = meetings; 
         if(meetings.length === 0) { tbody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>No hay documentos</td></tr>"; return; }
         
         meetings.sort((a,b) => new Date(b.date) - new Date(a.date));
@@ -523,7 +523,7 @@ async function loadSponsorsAdmin() {
     const tbody = document.getElementById("sponsorsList");
     try {
         const sponsors = await getSponsors();
-        allSponsorsCache = sponsors; // Guardamos en caché para poder Editar
+        allSponsorsCache = sponsors; 
         if(sponsors.length === 0) { tbody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>No hay sponsors</td></tr>"; return; }
         
         tbody.innerHTML = sponsors.map(s => `
@@ -545,7 +545,6 @@ window.deleteSpAdmin = async (id) => {
         loadSponsorsAdmin();
     }
 };
-
 
 // ==========================================
 // VENTANA MODAL MAESTRA (REPARACIÓN DE ERRORES)

@@ -47,27 +47,21 @@ document.addEventListener("DOMContentLoaded", () => {
     initFuneBot();
 });
 
-
-
 async function initApp() {
-    // 1. Partidos en tiempo real
     listenToFixtures((fixtures) => {
         globalData.fixtures = fixtures;
         renderFixtures(fixtures);
     });
 
-    // 2. Jugadores (Carga normal)
     globalData.players = await getPlayers();
     renderRosters(globalData.players);
     renderBirthdays(globalData.players);
 
-    // 3. Actas Institucionales en TIEMPO REAL (NUEVO)
     listenToMeetings((meetings) => {
         globalData.meetings = meetings;
         renderMeetings(meetings);
     });
 
-    // 4. Sponsors en TIEMPO REAL (NUEVO)
     listenToSponsors((sponsors) => {
         globalData.sponsors = sponsors;
         renderSponsors(sponsors);
@@ -220,13 +214,10 @@ function renderMeetings(meetings) {
         return; 
     }
 
-    // Ordenar de más nuevo a más viejo
     meetings.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     container.innerHTML = meetings.map(m => {
         let pdfHtml = "";
-        
-        // Conversión a IFRAME si es Link de Google Drive
         if (m.pdfUrl && m.pdfUrl.includes("drive.google.com")) {
             let previewLink = m.pdfUrl.replace('/view', '/preview').split('?')[0];
             pdfHtml = `
@@ -238,7 +229,6 @@ function renderMeetings(meetings) {
                 </div>
             `;
         } else if (m.pdfUrl) {
-            // Si es un link externo cualquiera
             pdfHtml = `<div style="margin-top: 10px;"><a href="${m.pdfUrl}" target="_blank" style="color: #3b82f6; font-size: 0.85rem; font-weight: bold; text-decoration: none;">📄 Ver Documento Adjunto</a></div>`;
         }
 
@@ -262,7 +252,7 @@ function renderSponsors(sponsors) {
     if (!container) return;
     if (sponsors.length === 0) { document.querySelector('.sponsors-bar').style.display = 'none'; return; }
     
-    // Duplicamos el arreglo para que el efecto visual del carrusel sea continuo e infinito
+    document.querySelector('.sponsors-bar').style.display = 'block';
     const duplicated = [...sponsors, ...sponsors, ...sponsors];
     container.innerHTML = duplicated.map(s => `
         <a href="${s.link || '#'}" target="_blank" class="sponsor-card">
