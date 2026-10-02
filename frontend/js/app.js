@@ -64,7 +64,7 @@ async function initApp() {
 }
 
 // ==========================================
-// RENDER: FIXTURES (AUTOMATIZADO CON FOTOS)
+// RENDER: FIXTURES (AUTOMATIZADO CON FOTOS Y CERRADO POR DEFECTO)
 // ==========================================
 function renderFixtures(fixtures) {
     const container = document.getElementById("publicFixturesContainer");
@@ -83,7 +83,9 @@ function renderFixtures(fixtures) {
             const getNum = (r) => { const m = r?.match(/\d+/); return m ? parseInt(m[0]) : 999; };
             return getNum(a.round) - getNum(b.round);
         });
-        finalHtml += `<details class="fune-accordion" open><summary>🏆 CATEGORÍA ${cat}</summary><div class="fune-accordion-content">`;
+        
+        // CORRECCIÓN AQUÍ: Se eliminó el atributo "open" para que nazcan cerrados.
+        finalHtml += `<details class="fune-accordion"><summary>🏆 CATEGORÍA ${cat}</summary><div class="fune-accordion-content">`;
         finalHtml += grouped[cat].map(f => {
             const isFinished = f.status === "finished";
             const hasScore = f.scoreLocal !== null && f.scoreLocal !== undefined && f.scoreAway !== null && f.scoreAway !== undefined;
