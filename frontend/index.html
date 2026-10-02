@@ -40,6 +40,7 @@
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         transition: opacity 0.8s ease, visibility 0.8s;
         box-sizing: border-box;
+        overflow: hidden;
     }
     #landing-video { max-width: 350px; width: 90%; outline: none; mix-blend-mode: screen; position: relative; z-index: 2; }
     
@@ -69,12 +70,11 @@
     /* ---- INICIO EFECTO SOLDADURA (8 SEGUNDOS) ---- */
     .weld-spark {
         position: absolute;
-        width: 6px; height: 6px;
+        width: 8px; height: 8px;
         background: #ffffff;
         border-radius: 50%;
         box-shadow: 0 0 15px 8px #dc2626, 0 0 30px 15px #ffbaba;
         z-index: 10;
-        /* Viaja por el contorno en 8 seg exactos y parpadea como fuego */
         animation: sparkPath 8s linear forwards, sparkFlicker 0.1s infinite alternate;
     }
     
@@ -85,29 +85,39 @@
 
     @keyframes sparkPath {
         0%   { top: 0; left: 0; }
-        25%  { top: 0; left: calc(100% - 6px); }
-        50%  { top: calc(100% - 6px); left: calc(100% - 6px); }
-        75%  { top: calc(100% - 6px); left: 0; }
+        25%  { top: 0; left: calc(100% - 8px); }
+        50%  { top: calc(100% - 8px); left: calc(100% - 8px); }
+        75%  { top: calc(100% - 8px); left: 0; }
         100% { top: 0; left: 0; }
     }
 
     .weld-line {
         position: absolute;
         background: #dc2626;
-        box-shadow: 0 0 12px #dc2626, 0 0 20px #dc2626;
+        box-shadow: 0 0 15px #dc2626, 0 0 25px #dc2626;
         z-index: 5;
     }
     
-    /* Cada lado se dibuja en 2 segundos, en cadena */
-    .weld-top    { top: 0; left: 0; height: 3px; width: 0; animation: drawTop 2s linear forwards; }
-    .weld-right  { top: 0; right: 0; width: 3px; height: 0; animation: drawRight 2s linear 2s forwards; }
-    .weld-bottom { bottom: 0; right: 0; height: 3px; width: 0; animation: drawBottom 2s linear 4s forwards; }
-    .weld-left   { bottom: 0; left: 0; width: 3px; height: 0; animation: drawLeft 2s linear 6s forwards; }
+    .weld-top    { top: 0; left: 0; height: 4px; width: 0; animation: drawTop 2s linear forwards; }
+    .weld-right  { top: 0; right: 0; width: 4px; height: 0; animation: drawRight 2s linear 2s forwards; }
+    .weld-bottom { bottom: 0; right: 0; height: 4px; width: 0; animation: drawBottom 2s linear 4s forwards; }
+    .weld-left   { bottom: 0; left: 0; width: 4px; height: 0; animation: drawLeft 2s linear 6s forwards; }
 
     @keyframes drawTop    { to { width: 100%; } }
     @keyframes drawRight  { to { height: 100%; } }
     @keyframes drawBottom { to { width: 100%; } }
     @keyframes drawLeft   { to { height: 100%; } }
+
+    /* Partículas voladoras inyectadas por JS */
+    .flying-spark {
+        position: absolute;
+        width: 3px; height: 3px;
+        background: #ffffff;
+        border-radius: 50%;
+        box-shadow: 0 0 8px 3px #dc2626, 0 0 12px 5px #ffbaba;
+        pointer-events: none;
+        z-index: 9;
+    }
     /* ---- FIN EFECTO SOLDADURA ---- */
 
     /* ====================================================
@@ -238,7 +248,7 @@
 </head>
 <body>
 
-  <!-- PANTALLA DE CARGA ANIMADA CON SOLDADURA DE 8 SEGUNDOS -->
+  <!-- PANTALLA DE CARGA ANIMADA CON SOLDADURA Y MOTOR DE CHISPAS -->
   <div id="landing-overlay">
     
     <!-- Efecto Soldadura Borde Perimetral -->
@@ -271,7 +281,7 @@
         }, 800);
       };
 
-      // Contador estilo reloj de posesión restando desde 8 a 0
+      // 1. Reloj de 8 segundos
       const countdown = setInterval(() => {
           timeLeft--;
           if (timeLeft >= 0) {
@@ -283,6 +293,47 @@
           }
       }, 1000);
 
+      // 2. Motor JS de Chispas hacia el centro
+      const sparkInterval = setInterval(() => {
+          if (isHidden) {
+              clearInterval(sparkInterval);
+              return;
+          }
+          
+          const mainSpark = document.querySelector('.weld-spark');
+          if (!mainSpark) return;
+          const rect = mainSpark.getBoundingClientRect();
+          
+          // Crear pequeña chispa que salta
+          const particle = document.createElement('div');
+          particle.className = 'flying-spark';
+          particle.style.left = rect.left + 'px';
+          particle.style.top = rect.top + 'px';
+          overlay.appendChild(particle);
+
+          // Calcular el centro de la pantalla con una dispersión explosiva
+          const centerX = window.innerWidth / 2;
+          const centerY = window.innerHeight / 2;
+          const destX = centerX + (Math.random() - 0.5) * 600; 
+          const destY = centerY + (Math.random() - 0.5) * 600;
+
+          // Animar hacia el centro, achicándose y desvaneciéndose
+          particle.animate([
+              { transform: `translate(0, 0) scale(1.5)`, opacity: 1 },
+              { transform: `translate(${destX - rect.left}px, ${destY - rect.top}px) scale(0)`, opacity: 0 }
+          ], {
+              duration: 600 + Math.random() * 600, // entre 0.6 y 1.2 segundos de vuelo
+              easing: 'ease-out'
+          });
+
+          // Limpiar la chispa para no sobrecargar el celular
+          setTimeout(() => {
+              if(particle.parentNode) particle.remove();
+          }, 1200);
+
+      }, 40); // Dispara una chispa cada 40 milisegundos
+
+      // 3. Reproducción del video
       if (video) {
         let playPromise = video.play();
         if (playPromise !== undefined) playPromise.catch(() => console.log("Autoplay prevent"));
