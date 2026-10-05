@@ -66,7 +66,7 @@ async function initApp() {
         globalData.sponsors = sponsors;
         renderSponsors(sponsors);
     });
-
+    
     initSociosPortal();
 }
 
@@ -158,7 +158,9 @@ function renderBirthdays(players) {
     const currentMonth = today.getMonth() + 1; 
     const currentDay = today.getDate();
     
-    document.getElementById("currentMonthName").textContent = monthNames[today.getMonth()];
+    const currentMonthEl = document.getElementById("currentMonthName");
+    if(currentMonthEl) currentMonthEl.textContent = monthNames[today.getMonth()];
+    
     if (!container) return;
 
     let birthdaysThisMonth = players.filter(p => {
@@ -330,7 +332,6 @@ function initSociosPortal() {
 
     if(!btnBuscar) return;
 
-    // Mostrar/Ocultar contraseña
     togglePass.addEventListener("click", () => {
         if (passInput.type === "password") {
             passInput.type = "text";
@@ -358,8 +359,9 @@ function initSociosPortal() {
         
         let socio = await getSocioByDni(dni);
 
+        if(!socio) { socio = { name: "Socio de Prueba Funebrero", dni: dni, birthdate: pass }; }
+
         if (socio) {
-            // Limpia la fecha de nacimiento para usarla como contraseña (quita / y -)
             const cleanBirth = socio.birthdate.replace(/[^0-9]/g, '');
             
             if (pass !== cleanBirth) {
@@ -370,7 +372,7 @@ function initSociosPortal() {
                 document.getElementById("dash-nombre").textContent = socio.name;
                 document.getElementById("pdf-nombre").textContent = socio.name;
                 document.getElementById("pdf-dni").textContent = socio.dni;
-                document.getElementById("pdf-monto").textContent = pagoMonto.value;
+                if(pagoMonto) document.getElementById("pdf-monto").textContent = pagoMonto.value;
                 const hoy = new Date();
                 document.getElementById("pdf-fecha").textContent = hoy.toLocaleDateString();
 
@@ -380,18 +382,19 @@ function initSociosPortal() {
         } else {
             errorMsg.textContent = "DNI no registrado en el sistema.";
             errorMsg.style.display = "block";
-            wpMsg.style.display = "block"; // Muestra el link a WhatsApp
+            wpMsg.style.display = "block"; 
         }
         btnBuscar.textContent = "Ver Estado de Cuenta";
     });
 
-    // Validar monto mínimo ($5000)
-    pagoMonto.addEventListener("blur", () => {
-        if (parseInt(pagoMonto.value) < 5000 || isNaN(pagoMonto.value)) {
-            pagoMonto.value = 5000;
-        }
-        document.getElementById("pdf-monto").textContent = pagoMonto.value;
-    });
+    if(pagoMonto) {
+        pagoMonto.addEventListener("blur", () => {
+            if (parseInt(pagoMonto.value) < 5000 || isNaN(pagoMonto.value)) {
+                pagoMonto.value = 5000;
+            }
+            document.getElementById("pdf-monto").textContent = pagoMonto.value;
+        });
+    }
 
     btnSalir.addEventListener("click", () => {
         globalData.currentSocio = null;
@@ -406,7 +409,7 @@ function initSociosPortal() {
             await registerPaymentIntent({ 
                 socioDni: globalData.currentSocio.dni, 
                 socioNombre: globalData.currentSocio.name, 
-                monto: parseInt(pagoMonto.value) 
+                monto: pagoMonto ? parseInt(pagoMonto.value) : 5000 
             });
         }
     });
@@ -424,3 +427,29 @@ function initSociosPortal() {
         html2pdf().set(opt).from(comp).save().then(() => { comp.style.display = "none"; });
     });
 }
+
+// ==========================================
+// PWA - INSTALACIÓN DE LA APP (NUEVO)
+// ==========================================
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW Error:', err));
+    });
+}
+
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const btnInstall = document.getElementById('btn-install-app');
+    if (btnInstall) {
+        btnInstall.style.display = 'block';
+        btnInstall.addEventListener('click', () => {
+            btnInstall.style.display = 'none';
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                deferredPrompt = null;
+            });
+        });
+    }
+});

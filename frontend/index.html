@@ -4,7 +4,12 @@
   <meta charset="UTF-8" />
   <title>Club Atlético Funebrero - Sitio Oficial</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  
+  <!-- ETIQUETAS PWA Y BARRA DEL NAVEGADOR -->
   <link rel="icon" type="image/png" href="logo-funebrero_2.png">
+  <link rel="apple-touch-icon" href="logo-funebrero_2.png">
+  <meta name="theme-color" content="#dc2626"> <!-- Pinta la barra superior del celular de Rojo Funebrero -->
+  <link rel="manifest" href="manifest.json">
   
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
@@ -44,7 +49,7 @@
     #landing-overlay {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
         background-color: #000000; z-index: 999999;
-        display: none; /* Oculto hasta apretar ingresar */
+        display: none; 
         flex-direction: column; align-items: center; justify-content: center;
         transition: opacity 0.8s ease, visibility 0.8s;
         box-sizing: border-box;
@@ -52,7 +57,6 @@
     }
     #landing-video { max-width: 350px; width: 90%; outline: none; mix-blend-mode: screen; position: relative; z-index: 2; }
     
-    /* Contador estilo reloj de básquetbol CENTRADO */
     #shot-clock {
         position: absolute;
         top: 40px; 
@@ -75,7 +79,7 @@
     .landing-title span { color: #dc2626; }
     @keyframes fadeInText { to { opacity: 1; } }
 
-    /* ---- INICIO EFECTO SOLDADURA (8 SEGUNDOS) ---- */
+    /* ---- INICIO EFECTO SOLDADURA ---- */
     .weld-spark {
         position: absolute;
         width: 8px; height: 8px;
@@ -85,12 +89,10 @@
         z-index: 10;
         animation: sparkPath 8s linear forwards, sparkFlicker 0.1s infinite alternate;
     }
-    
     @keyframes sparkFlicker {
         0% { transform: scale(1); opacity: 0.8; }
         100% { transform: scale(1.8); opacity: 1; box-shadow: 0 0 25px 12px #dc2626, 0 0 45px 20px #ffffff; }
     }
-
     @keyframes sparkPath {
         0%   { top: 0; left: 0; }
         25%  { top: 0; left: calc(100% - 8px); }
@@ -98,14 +100,12 @@
         75%  { top: calc(100% - 8px); left: 0; }
         100% { top: 0; left: 0; }
     }
-
     .weld-line {
         position: absolute;
         background: #dc2626;
         box-shadow: 0 0 15px #dc2626, 0 0 25px #dc2626;
         z-index: 5;
     }
-    
     .weld-top    { top: 0; left: 0; height: 4px; width: 0; animation: drawTop 2s linear forwards; }
     .weld-right  { top: 0; right: 0; width: 4px; height: 0; animation: drawRight 2s linear 2s forwards; }
     .weld-bottom { bottom: 0; right: 0; height: 4px; width: 0; animation: drawBottom 2s linear 4s forwards; }
@@ -116,7 +116,6 @@
     @keyframes drawBottom { to { width: 100%; } }
     @keyframes drawLeft   { to { height: 100%; } }
 
-    /* Partículas voladoras inyectadas por JS */
     .flying-spark {
         position: absolute;
         width: 3px; height: 3px;
@@ -126,7 +125,6 @@
         pointer-events: none;
         z-index: 9;
     }
-    /* ---- FIN EFECTO SOLDADURA ---- */
 
     /* ====================================================
        3. TICKER
@@ -151,7 +149,7 @@
     .nav-links a:hover { color: #ffffff; text-shadow: 0 0 10px rgba(220,38,38,0.5); }
     .nav-links a:hover::after { width: 100%; }
     
-    .outline-btn { border: 1px solid #333; border-radius: 20px; text-decoration: none; font-weight: 600; transition: all 0.3s; background: rgba(255,255,255,0.05); padding: 5px 12px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px;}
+    .outline-btn { border: 1px solid #333; border-radius: 20px; text-decoration: none; font-weight: 600; transition: all 0.3s; background: rgba(255,255,255,0.05); padding: 5px 12px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; color:#fff;}
     .outline-btn:hover { background: #dc2626; color: #fff !important; border-color: #dc2626; box-shadow: 0 0 15px rgba(220,38,38,0.4); transform: translateY(-2px); }
 
     @media (min-width: 992px) {
@@ -210,6 +208,11 @@
     details.fune-accordion[open] summary { border-bottom: 1px solid rgba(255,255,255,0.05); color: #ffbaba; }
     .fune-accordion-content { padding: 15px; }
 
+    @media (min-width: 768px) {
+        details.fune-accordion summary { padding: 18px 25px; font-size: 1.8rem; }
+        .fune-accordion-content { padding: 25px; }
+    }
+
     /* Tarjetas Interiores */
     .glass-premium { background: rgba(10, 10, 10, 0.6); border: 1px solid rgba(255,255,255,0.03); border-left: 4px solid #dc2626; border-radius: 8px; padding: 15px; margin-bottom: 15px; transition: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; flex-direction: column; gap: 10px; position: relative; overflow: hidden; }
     .glass-premium::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.02), transparent); transform: translateX(-100%); transition: 0.5s; }
@@ -221,12 +224,6 @@
     .form-input:focus { border-color: #dc2626; }
     .action-btn { background: #dc2626; color: #fff; border: none; border-radius: 6px; padding: 12px 25px; font-family: 'Bebas Neue', cursive; font-size: 1.2rem; cursor: pointer; transition: 0.3s; letter-spacing: 1px; width: 100%; }
     .action-btn:hover { background: #ff3b3b; transform: translateY(-2px); }
-
-    @media (min-width: 768px) {
-        details.fune-accordion summary { padding: 18px 25px; font-size: 1.8rem; }
-        .fune-accordion-content { padding: 25px; }
-        .glass-premium { padding: 20px; gap: 12px;}
-    }
 
     /* ====================================================
        7. CUMPLEAÑOS Y SPONSORS
@@ -274,14 +271,11 @@
 
   <!-- PANTALLA DE CARGA ANIMADA CON SOLDADURA Y MOTOR DE CHISPAS -->
   <div id="landing-overlay">
-    
-    <!-- Efecto Soldadura Borde Perimetral -->
     <div class="weld-spark"></div>
     <div class="weld-line weld-top"></div>
     <div class="weld-line weld-right"></div>
     <div class="weld-line weld-bottom"></div>
     <div class="weld-line weld-left"></div>
-
     <div id="shot-clock">08</div>
     <video id="landing-video" src="/img/animacion.mp4" muted playsinline preload="auto"></video>
     <h1 class="landing-title">CLUB ATLÉTICO <br><span>FUNEBRERO</span></h1>
@@ -295,7 +289,7 @@
     </div>
   </div>
 
-  <!-- NAVEGACIÓN CRISTAL -->
+  <!-- NAVEGACIÓN CRISTAL (ACTUALIZADA CON BOTÓN PWA) -->
   <header class="header">
     <div class="header-inner">
       <div class="header-brand" style="display: flex; align-items: center; gap: 12px; justify-content: center;">
@@ -312,7 +306,9 @@
         <a href="#institucional">Institucional</a>
       </nav>
 
-      <div class="admin-nav" style="text-align: center;">
+      <div class="admin-nav" style="text-align: center; display: flex; gap: 10px; align-items: center; justify-content: center;">
+        <!-- BOTÓN DE INSTALACIÓN PWA -->
+        <button id="btn-install-app" class="outline-btn" style="background: #10b981; border-color: #10b981; color: #fff; cursor: pointer; display: none;">📲 Instalar App</button>
         <a href="/login.html" class="outline-btn">⚙️ Admin</a>
       </div>
     </div>
@@ -325,6 +321,7 @@
       <div class="title-container"><h1 class="club-title-glow">CLUB ATLÉTICO FUNEBRERO</h1></div>
       <p class="hero-subtitle">Asociación Civil Club Social Cultural y Deportivo</p>
       
+      <!-- Redes Sociales Oficiales del Club -->
       <div class="hero-socials">
         <a href="https://www.facebook.com/profile.php?id=61558452983433" target="_blank" class="social-btn btn-fb">📘 Facebook Club</a>
         <a href="https://www.facebook.com/profile.php?id=61592882245302" target="_blank" class="social-btn btn-fb">🏀 Escuelita de Básquet</a>
@@ -372,7 +369,7 @@
             <input type="password" id="socioPassInput" class="form-input" placeholder="Contraseña" style="text-align: center; font-size: 1.1rem; padding-right: 40px; margin-bottom: 0;">
             <span id="toggleSocioPass" style="position: absolute; right: 15px; top: 12px; cursor: pointer; font-size: 1.2rem;">👁️</span>
         </div>
-        <p style="color: #64748b; font-size: 0.75rem; margin-top: 5px; margin-bottom: 20px;">(Coloca tu contraseña fecha de nacimiento completo sin barras ni guiones, ej: 14031990)</p>
+        <p style="color: #64748b; font-size: 0.75rem; margin-top: 5px; margin-bottom: 20px;">(Coloca tu contraseña fecha de nacimiento completo sin barras ni guiones, ej: 19061984)</p>
         
         <button id="btnBuscarSocio" class="action-btn">Ver Estado de Cuenta</button>
         <p id="socioError" style="color: #ff3b3b; font-size: 0.85rem; margin-top: 15px; display: none;"></p>
