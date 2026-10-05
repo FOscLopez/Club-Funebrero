@@ -4,12 +4,7 @@
   <meta charset="UTF-8" />
   <title>Club Atlético Funebrero - Sitio Oficial</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  
-  <!-- ETIQUETAS PWA Y BARRA DEL NAVEGADOR -->
   <link rel="icon" type="image/png" href="logo-funebrero_2.png">
-  <link rel="apple-touch-icon" href="logo-funebrero_2.png">
-  <meta name="theme-color" content="#dc2626"> <!-- Pinta la barra superior del celular de Rojo Funebrero -->
-  <link rel="manifest" href="manifest.json">
   
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
@@ -40,7 +35,7 @@
     }
 
     /* ====================================================
-       2. BOTÓN INGRESO Y LANDING ANIMADA
+       2. BOTÓN INGRESO Y LANDING ANIMADA CON RELOJ Y EFECTO SOLDADURA
        ==================================================== */
     #enter-stadium-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #050505; z-index: 2000000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
     .btn-enter { background: #dc2626; color: #fff; border: 2px solid #ffbaba; padding: 15px 40px; font-family: 'Bebas Neue', cursive; font-size: 2rem; letter-spacing: 2px; border-radius: 8px; cursor: pointer; box-shadow: 0 0 20px rgba(220,38,38,0.6); transition: 0.3s; animation: pulseBd 2s infinite; text-transform: uppercase; }
@@ -57,6 +52,7 @@
     }
     #landing-video { max-width: 350px; width: 90%; outline: none; mix-blend-mode: screen; position: relative; z-index: 2; }
     
+    /* Contador estilo reloj de básquetbol CENTRADO */
     #shot-clock {
         position: absolute;
         top: 40px; 
@@ -79,7 +75,7 @@
     .landing-title span { color: #dc2626; }
     @keyframes fadeInText { to { opacity: 1; } }
 
-    /* ---- INICIO EFECTO SOLDADURA ---- */
+    /* ---- INICIO EFECTO SOLDADURA (8 SEGUNDOS) ---- */
     .weld-spark {
         position: absolute;
         width: 8px; height: 8px;
@@ -89,10 +85,12 @@
         z-index: 10;
         animation: sparkPath 8s linear forwards, sparkFlicker 0.1s infinite alternate;
     }
+    
     @keyframes sparkFlicker {
         0% { transform: scale(1); opacity: 0.8; }
         100% { transform: scale(1.8); opacity: 1; box-shadow: 0 0 25px 12px #dc2626, 0 0 45px 20px #ffffff; }
     }
+
     @keyframes sparkPath {
         0%   { top: 0; left: 0; }
         25%  { top: 0; left: calc(100% - 8px); }
@@ -100,12 +98,14 @@
         75%  { top: calc(100% - 8px); left: 0; }
         100% { top: 0; left: 0; }
     }
+
     .weld-line {
         position: absolute;
         background: #dc2626;
         box-shadow: 0 0 15px #dc2626, 0 0 25px #dc2626;
         z-index: 5;
     }
+    
     .weld-top    { top: 0; left: 0; height: 4px; width: 0; animation: drawTop 2s linear forwards; }
     .weld-right  { top: 0; right: 0; width: 4px; height: 0; animation: drawRight 2s linear 2s forwards; }
     .weld-bottom { bottom: 0; right: 0; height: 4px; width: 0; animation: drawBottom 2s linear 4s forwards; }
@@ -116,6 +116,7 @@
     @keyframes drawBottom { to { width: 100%; } }
     @keyframes drawLeft   { to { height: 100%; } }
 
+    /* Partículas voladoras inyectadas por JS */
     .flying-spark {
         position: absolute;
         width: 3px; height: 3px;
@@ -125,6 +126,7 @@
         pointer-events: none;
         z-index: 9;
     }
+    /* ---- FIN EFECTO SOLDADURA ---- */
 
     /* ====================================================
        3. TICKER
@@ -180,12 +182,18 @@
     .btn-ig { background: rgba(225, 48, 108, 0.1); border: 1px solid rgba(225, 48, 108, 0.5); color: #f472b6; }
     .btn-ig:hover { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: #fff; box-shadow: 0 5px 20px rgba(225, 48, 108, 0.4); transform: translateY(-3px); border-color: transparent; }
 
+    /* ESTILOS DEL NUEVO CARRUSEL PRINCIPAL */
+    .main-carousel { width: 100%; max-width: 600px; height: 250px; margin: 30px auto 0; position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(220,38,38,0.2); border: 1px solid rgba(255,255,255,0.1); background: #000; }
+    .carousel-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1s ease-in-out; object-fit: cover; }
+    .carousel-slide.active { opacity: 1; }
+
     @media (min-width: 768px) {
         #main-logo { width: 160px; }
         .club-title-glow { font-size: 5.5rem; letter-spacing: 4px; }
         .hero-subtitle { font-size: 1.1rem; letter-spacing: 3px; }
         .hero-socials { flex-direction: row; max-width: 800px; width: auto;}
         .social-btn { width: auto; padding: 10px 25px; font-size: 0.9rem;}
+        .main-carousel { height: 350px; } /* Más grande en PC */
     }
 
     /* ====================================================
@@ -256,9 +264,7 @@
 </head>
 <body>
 
-  <!-- =====================================
-       ETIQUETAS DE AUDIO 
-       ===================================== -->
+  <!-- ETIQUETAS DE AUDIO -->
   <audio id="audio-landing" src="/audio/landing.mp3"></audio>
   <audio id="audio-fondo" src="/audio/fondo.mp3" loop></audio>
 
@@ -271,11 +277,14 @@
 
   <!-- PANTALLA DE CARGA ANIMADA CON SOLDADURA Y MOTOR DE CHISPAS -->
   <div id="landing-overlay">
+    
+    <!-- Efecto Soldadura Borde Perimetral -->
     <div class="weld-spark"></div>
     <div class="weld-line weld-top"></div>
     <div class="weld-line weld-right"></div>
     <div class="weld-line weld-bottom"></div>
     <div class="weld-line weld-left"></div>
+
     <div id="shot-clock">08</div>
     <video id="landing-video" src="/img/animacion.mp4" muted playsinline preload="auto"></video>
     <h1 class="landing-title">CLUB ATLÉTICO <br><span>FUNEBRERO</span></h1>
@@ -289,7 +298,7 @@
     </div>
   </div>
 
-  <!-- NAVEGACIÓN CRISTAL (ACTUALIZADA CON BOTÓN PWA) -->
+  <!-- NAVEGACIÓN CRISTAL (ADAPTADA A PC Y MÓVIL) -->
   <header class="header">
     <div class="header-inner">
       <div class="header-brand" style="display: flex; align-items: center; gap: 12px; justify-content: center;">
@@ -327,6 +336,12 @@
         <a href="https://www.facebook.com/profile.php?id=61592882245302" target="_blank" class="social-btn btn-fb">🏀 Escuelita de Básquet</a>
         <a href="https://www.instagram.com/clubfunebreroo/" target="_blank" class="social-btn btn-ig">📸 Instagram Oficial</a>
       </div>
+
+      <!-- NUEVO: CARRUSEL PRINCIPAL DE FOTOS -->
+      <div id="main-carousel-container" class="main-carousel" style="display: none;">
+        <!-- Las imágenes rotativas se inyectarán aquí vía JS -->
+      </div>
+
     </div>
   </section>
 
@@ -352,9 +367,7 @@
       </div>
     </section>
 
-    <!-- =====================================
-         SECCIÓN: PORTAL DE SOCIOS
-         ===================================== -->
+    <!-- SECCIÓN PORTAL DE SOCIOS -->
     <section id="socios-portal" class="section-padding">
       <h2 class="section-title">Portal de <span>Socios</span></h2>
       <p style="text-align: center; color: #a3a3a3; font-size: 1rem; max-width: 600px; margin: 0 auto 30px;">Ingresa para abonar tu cuota social o imprimir comprobantes.</p>
@@ -374,7 +387,6 @@
         <button id="btnBuscarSocio" class="action-btn">Ver Estado de Cuenta</button>
         <p id="socioError" style="color: #ff3b3b; font-size: 0.85rem; margin-top: 15px; display: none;"></p>
         
-        <!-- Link de WhatsApp para no registrados -->
         <div id="socioWpLink" style="display: none; margin-top: 15px; border-top: 1px solid #333; padding-top: 15px;">
             <p style="color: #a3a3a3; font-size: 0.85rem; margin-bottom: 10px;">¿No estás registrado o tienes problemas?</p>
             <a href="https://wa.me/message/NWPXJJVFKLHHB1" target="_blank" style="color: #10b981; text-decoration: none; font-weight: bold; font-size: 0.9rem;">📲 Contáctanos por WhatsApp</a>
@@ -384,7 +396,6 @@
       <!-- DASHBOARD DEL SOCIO -->
       <div id="socio-dashboard" class="glass-premium" style="display:none; max-width: 600px; margin: 0 auto; padding: 30px;">
          
-         <!-- Lo que se imprime en el PDF -->
          <div id="comprobante-imprimir" style="background: #ffffff; padding: 20px; border-radius: 8px; color: #000; display: none;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #dc2626; padding-bottom: 10px; margin-bottom: 20px;">
                 <h2 style="margin: 0; font-family: 'Bebas Neue', cursive; font-size: 2rem; color: #dc2626;">CLUB FUNEBRERO</h2>
@@ -398,11 +409,9 @@
             <p style="font-size: 0.8rem; color: #666; margin-top: 30px; text-align: center; border-top: 1px solid #ccc; padding-top: 10px;">Este comprobante es generado automáticamente por el sistema de Club Funebrero.</p>
          </div>
 
-         <!-- Interfaz interactiva oscura -->
          <h3 style="color: #fff; font-family: 'Bebas Neue', cursive; font-size: 2.2rem; margin-top: 0; text-align: center;">Hola, <span id="dash-nombre" style="color: #dc2626;">Socio</span></h3>
          <p style="text-align: center; color: #a3a3a3;">Aquí puedes gestionar tu cuota del mes en curso.</p>
          
-         <!-- Monto Editable -->
          <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
             <div style="font-size: 0.9rem; color: #a3a3a3; text-transform: uppercase;">Monto a Abonar (Mínimo $5.000)</div>
             <p style="font-size: 0.75rem; color: #64748b; margin: 5px 0 10px;">Puedes aportar como donativo o adelantar cuotas modificando el monto.</p>
@@ -457,9 +466,6 @@
     </div>
   </footer>
 
-  <!-- =====================================
-       LÓGICA DE AUDIO, BOTÓN INGRESO Y LANDING
-       ===================================== -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const btnEnter = document.getElementById("btn-enter-stadium");
@@ -492,13 +498,11 @@
 
       if (btnEnter) {
           btnEnter.addEventListener("click", () => {
-              // 1. Desaparece pantalla de ingreso
               enterScreen.style.opacity = "0";
               setTimeout(() => {
                   enterScreen.style.display = "none";
                   overlay.style.display = "flex";
                   
-                  // 2. Play video y audio landing
                   if(audioLanding) {
                       audioLanding.volume = 1.0;
                       audioLanding.play().catch(e=>console.log(e));
@@ -507,7 +511,6 @@
                       video.play().catch(e=>console.log(e));
                   }
 
-                  // 3. Reloj de 8 segundos
                   const countdown = setInterval(() => {
                       timeLeft--;
                       if (timeLeft >= 0) {
@@ -519,7 +522,6 @@
                       }
                   }, 1000);
 
-                  // 4. Motor de Chispas JS
                   const sparkInterval = setInterval(() => {
                       if (isHidden) {
                           clearInterval(sparkInterval);
@@ -554,9 +556,31 @@
 
                   }, 40);
 
-              }, 400); // Tiempo fade out
+              }, 400);
           });
       }
+    });
+
+    // PWA: Instalar la aplicación
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW Error:', err));
+        });
+    }
+
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        const btnInstall = document.getElementById('btn-install-app');
+        if (btnInstall) {
+            btnInstall.style.display = 'block'; // Muestra el botón solo si es instalable
+            btnInstall.addEventListener('click', () => {
+                btnInstall.style.display = 'none';
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+            });
+        }
     });
   </script>
 

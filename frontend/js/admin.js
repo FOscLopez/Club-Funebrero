@@ -5,7 +5,8 @@ import {
     getFixtures, updateFixture, deleteFixture,
     getMeetings, createMeeting, updateMeeting, deleteMeeting,
     getSponsors, createSponsor, updateSponsor, deleteSponsor,
-    addSociosBulk, getSocios, deleteSocio // NUEVOS IMPORTS SOCIOS
+    addSociosBulk, getSocios, deleteSocio, // NUEVOS IMPORTS SOCIOS
+    getCarouselImages, createCarouselImage, deleteCarouselImage // NUEVOS IMPORTS CARRUSEL
 } from "./services/firestore.service.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { collection, addDoc, getDocs, doc, query, orderBy, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -49,6 +50,7 @@ onAuthStateChanged(auth, (user) => {
         loadMeetingsAdmin();
         loadSponsorsAdmin();
         loadSociosAdmin(); // CARGA NUEVA TABLA DE SOCIOS
+        loadMainCarouselAdmin(); // CARGA TABLA DE CARRUSEL
     }
 });
 
@@ -620,6 +622,67 @@ window.deleteSpAdmin = async (id) => {
         loadSponsorsAdmin();
     }
 };
+
+// ==========================================
+// NUEVO: GESTIÓN DEL CARRUSEL PRINCIPAL DE FOTOS
+// ==========================================
+document.getElementById("triggerMainCarouselUploadBtn").addEventListener("click", () => {
+    document.getElementById("mainCarouselFileUploader").click();
+});
+
+document.getElementById("mainCarouselFileUploader").onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const btn = document.getElementById("triggerMainCarouselUploadBtn");
+    const originalText = btn.textContent;
+    btn.textContent = "⏳ Subiendo a ImgBB..."; 
+    btn.disabled = true;
+
+    const formData = new FormData();
+    formData.append("image", file);
+    
+    try {
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
+        const data = await res.json();
+        if (data.success) {
+            await createCarouselImage({ imageUrl: data.data.url });
+            loadMainCarouselAdmin();
+            alert("Foto agregada al carrusel principal.");
+        } else throw new Error();
+    } catch(err) {
+        alert("Error al subir la imagen al carrusel.");
+    } finally { 
+        e.target.value = ""; 
+        btn.textContent = originalText; 
+        btn.disabled = false;
+    }
+};
+
+async function loadMainCarouselAdmin() {
+    const tbody = document.getElementById("mainCarouselList");
+    try {
+        const images = await getCarouselImages();
+        if(images.length === 0) { tbody.innerHTML = "<tr><td colspan='2' style='text-align:center;'>No hay fotos en el carrusel</td></tr>"; return; }
+        
+        tbody.innerHTML = images.map(img => `
+            <tr>
+                <td><img src="${img.imageUrl}" style="height:60px; object-fit:cover; border-radius:4px; border: 1px solid #333;"></td>
+                <td style="text-align:right;">
+                    <button onclick="deleteMainCarouselImgAdmin('${img.id}')" class="delete-btn">Borrar</button>
+                </td>
+            </tr>
+        `).join("");
+    } catch(e) { tbody.innerHTML = "<tr><td colspan='2'>Error al cargar</td></tr>"; }
+}
+
+window.deleteMainCarouselImgAdmin = async (id) => {
+    if(confirm("¿Quitar esta foto del carrusel de inicio?")) {
+        await deleteCarouselImage(id);
+        loadMainCarouselAdmin();
+    }
+};
+
 
 // ==========================================
 // VENTANA MODAL MAESTRA (REPARACIÓN DE ERRORES)
