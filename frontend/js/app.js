@@ -271,6 +271,39 @@ function renderSponsors(sponsors) {
 }
 
 // ==========================================
+// RENDER CARRUSEL PRINCIPAL DE FOTOS
+// ==========================================
+let carouselInterval = null;
+function renderMainCarousel(images) {
+    const container = document.getElementById("main-carousel-container");
+    if (!container) return;
+    
+    if (images.length === 0) {
+        container.style.display = 'none';
+        if (carouselInterval) clearInterval(carouselInterval);
+        return;
+    }
+
+    container.style.display = 'block';
+    
+    container.innerHTML = images.map((img, idx) => `
+        <img src="${img.imageUrl}" class="carousel-slide ${idx === 0 ? 'active' : ''}" alt="Club Funebrero">
+    `).join("");
+
+    if (carouselInterval) clearInterval(carouselInterval);
+
+    if (images.length > 1) {
+        let currentIndex = 0;
+        const slides = container.querySelectorAll('.carousel-slide');
+        carouselInterval = setInterval(() => {
+            slides[currentIndex].classList.remove('active');
+            currentIndex = (currentIndex + 1) % slides.length;
+            slides[currentIndex].classList.add('active');
+        }, 4000); 
+    }
+}
+
+// ==========================================
 // PORTAL DE SOCIOS
 // ==========================================
 function initSociosPortal() {
@@ -286,6 +319,7 @@ function initSociosPortal() {
     const btnSalir = document.getElementById("btnSalirSocio");
     const btnPagarMP = document.getElementById("btnPagarMP");
     const btnDescargarPdf = document.getElementById("btnDescargarPdf");
+    const btnEnviarWhatsApp = document.getElementById("btnEnviarWhatsApp");
     const pagoMonto = document.getElementById("pagoMonto");
 
     if(!btnBuscar) return;
@@ -342,7 +376,7 @@ function initSociosPortal() {
             errorMsg.style.display = "block";
             wpMsg.style.display = "block"; 
         }
-        btnBuscar.textContent = "Ver Estado de Cuenta";
+        btnBuscar.textContent = "Ingresar al Portal";
     });
 
     if(pagoMonto) {
@@ -371,6 +405,23 @@ function initSociosPortal() {
             });
         }
     });
+
+    // Nuevo: Lógica para enviar WhatsApp
+    if(btnEnviarWhatsApp) {
+        btnEnviarWhatsApp.addEventListener("click", () => {
+            if(globalData.currentSocio) {
+                const monto = pagoMonto ? pagoMonto.value : "5000";
+                const mensaje = `Hola Club Funebrero 👋.\n\nSoy el socio/a *${globalData.currentSocio.name}* (DNI: ${globalData.currentSocio.dni}). \n\nTe envío adjunto el comprobante de mi pago de la cuota o aporte por el monto de *$${monto}*.\n\n¡Abrazo Funebrero!`;
+                
+                // IMPORTANTE: REEMPLAZA EL NUMERO DE ABAJO CON TU CELULAR DE REY DIGITAL O EL DEL CLUB
+                // Formato internacional sin el + (Ejemplo: 5493624123456)
+                const telefonoClub = "5491100000000"; // <--- PON TU NÚMERO AQUÍ
+                
+                const url = `https://wa.me/${telefonoClub}?text=${encodeURIComponent(mensaje)}`;
+                window.open(url, "_blank");
+            }
+        });
+    }
 
     btnDescargarPdf.addEventListener("click", () => {
         const comp = document.getElementById("comprobante-imprimir");
@@ -431,37 +482,4 @@ function initFuneBot() {
 
   if (sendBtn) sendBtn.addEventListener("click", processMessage);
   if (inputEl) inputEl.addEventListener("keypress", (e) => { if(e.key === "Enter") processMessage(); });
-}
-
-// ==========================================
-// NUEVO: RENDER CARRUSEL PRINCIPAL DE FOTOS
-// ==========================================
-let carouselInterval = null;
-function renderMainCarousel(images) {
-    const container = document.getElementById("main-carousel-container");
-    if (!container) return;
-    
-    if (images.length === 0) {
-        container.style.display = 'none';
-        if (carouselInterval) clearInterval(carouselInterval);
-        return;
-    }
-
-    container.style.display = 'block';
-    
-    container.innerHTML = images.map((img, idx) => `
-        <img src="${img.imageUrl}" class="carousel-slide ${idx === 0 ? 'active' : ''}" alt="Club Funebrero">
-    `).join("");
-
-    if (carouselInterval) clearInterval(carouselInterval);
-
-    if (images.length > 1) {
-        let currentIndex = 0;
-        const slides = container.querySelectorAll('.carousel-slide');
-        carouselInterval = setInterval(() => {
-            slides[currentIndex].classList.remove('active');
-            currentIndex = (currentIndex + 1) % slides.length;
-            slides[currentIndex].classList.add('active');
-        }, 4000); // Rota cada 4 segundos
-    }
 }
