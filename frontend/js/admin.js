@@ -217,23 +217,40 @@ document.getElementById("socioForm").addEventListener("submit", async (e) => {
 
     lines.forEach(line => {
         let cleanLine = line.trim();
-        if (!cleanLine) return;
+        if (!cleanLine || cleanLine.toLowerCase().includes("nombre y apellido") || cleanLine.toLowerCase().includes("cantid")) return;
         
-        const dniMatch = cleanLine.match(/\b\d{7,8}\b/);
-        const dateMatch = cleanLine.match(/\b\d{2}[/-]\d{2}[/-]\d{4}\b/);
-
-        if (dniMatch && dateMatch) {
-            const dni = dniMatch[0];
-            const birthdate = dateMatch[0];
-            let name = cleanLine.replace(dni, '').replace(birthdate, '').trim();
-            name = name.replace(/\s{2,}/g, ' '); 
+        let parts = cleanLine.split('\t');
+        if(parts.length >= 4) {
+            let name = parts[1].trim();
+            let dni = parts[2].replace(/\./g, '').trim(); 
+            let birthdate = parts[3].trim();
+            let numSocio = parts[4] ? parts[4].trim() : "S/N";
+            sociosToSave.push({ name, dni, birthdate, numSocio, createdAt: new Date().toISOString() });
+        } else {
+            const dniMatch = cleanLine.match(/\b\d{1,2}\.?\d{3}\.?\d{3}\b/);
+            const dateMatch = cleanLine.match(/\b\d{2}[/-]\d{2}[/-]\d{4}\b/);
             
-            sociosToSave.push({ name, dni, birthdate, createdAt: new Date().toISOString() });
+            if (dniMatch && dateMatch) {
+                const dniRaw = dniMatch[0];
+                const dni = dniRaw.replace(/\./g, '');
+                const birthdate = dateMatch[0];
+                
+                let remainder = cleanLine.replace(dniRaw, '').replace(birthdate, '').trim();
+                
+                let numSocioMatch = remainder.match(/\b\d{1,4}$/);
+                let numSocio = numSocioMatch ? numSocioMatch[0] : "S/N";
+                
+                let name = remainder.replace(numSocio, '').trim().replace(/\s{2,}/g, ' ');
+                name = name.replace(/^\d+\s*/, ''); 
+                name = name.replace(/^,|,$/g, '').trim(); 
+                
+                sociosToSave.push({ name, dni, birthdate, numSocio, createdAt: new Date().toISOString() });
+            }
         }
     });
 
     if (sociosToSave.length === 0) {
-        alert("Formato no reconocido. Asegurate de incluir Nombre, Fecha de Nacimiento y DNI (ej: Juan Perez 15/05/1984 35123456).");
+        alert("Formato no reconocido. Asegurate de incluir Nombre, Fecha de Nacimiento y DNI (ej: Juan Perez 15/05/1984 35123456) o pegar la tabla de Word.");
         btn.textContent = "Procesar Socios"; btn.disabled = false;
         return;
     }
@@ -251,10 +268,11 @@ async function loadSociosAdmin() {
     const tbody = document.getElementById("sociosListContainer");
     try {
         const socios = await getSocios();
-        if(socios.length === 0) { tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>No hay socios registrados.</td></tr>"; return; }
+        if(socios.length === 0) { tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No hay socios registrados.</td></tr>"; return; }
         
         tbody.innerHTML = socios.map(s => `
             <tr>
+                <td style="color:#f59e0b; font-weight:bold;">${s.numSocio || 'S/N'}</td>
                 <td style="font-weight:600;">${s.name}</td>
                 <td style="color:#3b82f6;">${s.dni}</td>
                 <td style="color:#a3a3a3;">${s.birthdate}</td>
@@ -263,7 +281,7 @@ async function loadSociosAdmin() {
                 </td>
             </tr>
         `).join("");
-    } catch(e) { tbody.innerHTML = "<tr><td colspan='4'>Error al cargar socios</td></tr>"; }
+    } catch(e) { tbody.innerHTML = "<tr><td colspan='5'>Error al cargar socios</td></tr>"; }
 }
 
 window.deleteSocioAdmin = async (id) => {
@@ -471,7 +489,7 @@ window.deletePlayerAdmin = async (id) => {
 };
 
 window.deleteAllPlayersInCategory = async (cat) => {
-    if(confirm(`⚠️️ PELIGRO: ¿Estás seguro de borrar TODOS los jugadores de la categoría ${cat}? Esta acción no se puede deshacer.`)) {
+    if(confirm(`⚠️ PELIGRO: ¿Estás seguro de borrar TODOS los jugadores de la categoría ${cat}? Esta acción no se puede deshacer.`)) {
         try {
             const q = query(collection(db, "players"), where("categoryId", "==", cat));
             const snap = await getDocs(q);

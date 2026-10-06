@@ -57,7 +57,6 @@
     }
     #landing-video { max-width: 350px; width: 90%; outline: none; mix-blend-mode: screen; position: relative; z-index: 2; }
     
-    /* Contador estilo reloj de básquetbol CENTRADO */
     #shot-clock {
         position: absolute;
         top: 40px; 
@@ -363,7 +362,7 @@
     </section>
 
     <!-- =====================================
-         NUEVA SECCIÓN: PORTAL DE SOCIOS AMIGABLE
+         SECCIÓN: PORTAL DE SOCIOS AMIGABLE
          ===================================== -->
     <section id="socios-portal" class="section-padding">
       <h2 class="section-title">Portal de <span>Socios</span></h2>
@@ -385,8 +384,8 @@
         <p id="socioError" style="color: #ff3b3b; font-size: 0.85rem; margin-top: 15px; display: none;"></p>
         
         <div id="socioWpLink" style="display: none; margin-top: 15px; border-top: 1px solid #333; padding-top: 15px;">
-            <p style="color: #a3a3a3; font-size: 0.85rem; margin-bottom: 10px;">¿No estás registrado o tienes problemas?</p>
-            <a href="https://wa.me/message/NWPXJJVFKLHHB1" target="_blank" style="color: #10b981; text-decoration: none; font-weight: bold; font-size: 0.9rem;">📲 Contáctanos por WhatsApp</a>
+            <p style="color: #a3a3a3; font-size: 0.85rem; margin-bottom: 10px;">¿No estás registrado o tienes problemas para ingresar?</p>
+            <a href="https://wa.me/message/NWPXJJVFKLHHB1" target="_blank" style="color: #10b981; text-decoration: none; font-weight: bold; font-size: 0.9rem;">📲 Contáctanos por WhatsApp para ayudarte</a>
         </div>
       </div>
 
@@ -399,7 +398,7 @@
                 <span style="font-weight: bold;">Comprobante de Aporte</span>
             </div>
             <p><strong>Nombre:</strong> <span id="pdf-nombre"></span></p>
-            <p><strong>DNI/N° Socio:</strong> <span id="pdf-dni"></span></p>
+            <p><strong>DNI:</strong> <span id="pdf-dni"></span></p>
             <p><strong>Monto:</strong> $<span id="pdf-monto"></span></p>
             <p><strong>Fecha de Emisión:</strong> <span id="pdf-fecha"></span></p>
             <p><strong>Estado:</strong> <span id="pdf-estado" style="color: #10b981; font-weight: bold;">Aporte Generado</span></p>
@@ -414,7 +413,7 @@
          <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
             <h4 style="color: #10b981; margin-top: 0; font-family: 'Bebas Neue', cursive; font-size: 1.5rem; letter-spacing: 1px;">Paso 1: Elige tu aporte</h4>
             <div style="font-size: 0.9rem; color: #a3a3a3; text-transform: uppercase;">Monto a Abonar (Mínimo $5.000)</div>
-            <p style="font-size: 0.8rem; color: #64748b; margin: 5px 0 15px;">Puedes aportar más si deseas hacer una donación al club.</p>
+            <p style="font-size: 0.8rem; color: #64748b; margin: 5px 0 15px;">Puedes aportar más si deseas hacer una donación extra al club.</p>
             <div style="display: flex; justify-content: center; align-items: center; gap: 5px; color: #10b981;">
                 <span style="font-size: 2.5rem; font-family: 'Bebas Neue', cursive;">$</span>
                 <input type="number" id="pagoMonto" value="5000" min="5000" step="500" style="background: transparent; border: none; color: #10b981; font-family: 'Bebas Neue', cursive; font-size: 2.5rem; width: 150px; outline: none; border-bottom: 2px dashed #10b981; text-align: center;">
@@ -426,16 +425,16 @@
             <h4 style="color: #3b82f6; margin-top: 0; font-family: 'Bebas Neue', cursive; font-size: 1.5rem; letter-spacing: 1px;">Paso 2: Realiza el pago</h4>
             <p style="font-size: 0.85rem; color: #a3a3a3; margin-bottom: 15px;">Elige la opción que te quede más cómoda:</p>
             
-            <a href="https://link.mercadopago.com.ar/funebrero" target="_blank" id="btnPagarMP" class="action-btn" style="background: #009ee3; color: white; text-align: center; text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px;">
+            <a href="https://mpago.la/16hZWUT" target="_blank" id="btnPagarMP" class="action-btn" style="background: #009ee3; color: white; text-align: center; text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px;">
                 💳 Tocar aquí para pagar con Mercado Pago
             </a>
             
             <div style="border-top: 1px dashed #333; padding-top: 15px; margin-top: 15px;">
-                <p style="color: #fff; font-weight: 600; margin-bottom: 5px;">O transfiere directamente a nuestra cuenta:</p>
+                <p style="color: #fff; font-weight: 600; margin-bottom: 5px;">O transfiere directamente a nuestra cuenta bancaria:</p>
                 <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; display: inline-block; text-align: left;">
-                    <span style="color: #a3a3a3; font-size: 0.8rem;">CBU/CVU:</span> <strong style="color: #10b981; letter-spacing: 1px;">[AQUI_TU_CBU_CVU]</strong><br>
-                    <span style="color: #a3a3a3; font-size: 0.8rem;">Alias:</span> <strong style="color: #10b981; letter-spacing: 1px;">[AQUI_TU_ALIAS]</strong><br>
-                    <span style="color: #a3a3a3; font-size: 0.8rem;">A nombre de:</span> <strong style="color: #fff;">Club Funebrero</strong>
+                    <span style="color: #a3a3a3; font-size: 0.8rem;">CVU:</span> <strong style="color: #10b981; letter-spacing: 1px;">0000003100137467286158</strong><br>
+                    <span style="color: #a3a3a3; font-size: 0.8rem;">Alias:</span> <strong style="color: #10b981; letter-spacing: 1px;">funebrerosocios.mp</strong><br>
+                    <span style="color: #a3a3a3; font-size: 0.8rem;">A nombre de:</span> <strong style="color: #fff;">Vicente Anibal Gallozo</strong>
                 </div>
             </div>
          </div>
@@ -443,7 +442,7 @@
          <!-- PASO 3: Enviar Whatsapp -->
          <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 20px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
             <h4 style="color: #f59e0b; margin-top: 0; font-family: 'Bebas Neue', cursive; font-size: 1.5rem; letter-spacing: 1px;">Paso 3: Confirma tu aporte</h4>
-            <p style="font-size: 0.85rem; color: #a3a3a3; margin-bottom: 15px;">Una vez hecho el pago en tu banco, envíanos el comprobante por WhatsApp y guarda tu recibo oficial.</p>
+            <p style="font-size: 0.85rem; color: #a3a3a3; margin-bottom: 15px;">Una vez hecho el pago en tu banco, envíanos el comprobante por WhatsApp presionando este botón verde y luego guarda tu recibo.</p>
             
             <button id="btnEnviarWhatsApp" class="action-btn" style="background: #25D366; margin-bottom: 10px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px;">
                📲 1. Enviar comprobante al Club

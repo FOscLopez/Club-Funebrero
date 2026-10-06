@@ -351,7 +351,7 @@ function initSociosPortal() {
         
         let socio = await getSocioByDni(dni);
 
-        if(!socio) { socio = { name: "Socio de Prueba Funebrero", dni: dni, birthdate: pass }; }
+        if(!socio) { socio = { name: "Socio de Prueba Funebrero", dni: dni, birthdate: pass, numSocio: "00" }; }
 
         if (socio) {
             const cleanBirth = socio.birthdate.replace(/[^0-9]/g, '');
@@ -363,7 +363,10 @@ function initSociosPortal() {
                 globalData.currentSocio = socio;
                 document.getElementById("dash-nombre").textContent = socio.name;
                 document.getElementById("pdf-nombre").textContent = socio.name;
-                document.getElementById("pdf-dni").textContent = socio.dni;
+                
+                // Muestra el DNI y el Numero de Socio si lo tiene
+                document.getElementById("pdf-dni").innerHTML = `${socio.dni} <strong style="color:#dc2626; margin-left: 10px;">| N° Socio: ${socio.numSocio || 'S/N'}</strong>`;
+                
                 if(pagoMonto) document.getElementById("pdf-monto").textContent = pagoMonto.value;
                 const hoy = new Date();
                 document.getElementById("pdf-fecha").textContent = hoy.toLocaleDateString();
@@ -406,16 +409,15 @@ function initSociosPortal() {
         }
     });
 
-    // Nuevo: Lógica para enviar WhatsApp
     if(btnEnviarWhatsApp) {
         btnEnviarWhatsApp.addEventListener("click", () => {
             if(globalData.currentSocio) {
                 const monto = pagoMonto ? pagoMonto.value : "5000";
-                const mensaje = `Hola Club Funebrero 👋.\n\nSoy el socio/a *${globalData.currentSocio.name}* (DNI: ${globalData.currentSocio.dni}). \n\nTe envío adjunto el comprobante de mi pago de la cuota o aporte por el monto de *$${monto}*.\n\n¡Abrazo Funebrero!`;
+                const numSo = globalData.currentSocio.numSocio || 'S/N';
+                const mensaje = `Hola Club Funebrero 👋.\n\nSoy el socio/a *${globalData.currentSocio.name}*\n(DNI: ${globalData.currentSocio.dni} - Socio Nº: ${numSo}). \n\nTe envío adjunto el comprobante de mi pago de la cuota o aporte por el monto de *$${monto}*.\n\n¡Abrazo Funebrero!`;
                 
-                // IMPORTANTE: REEMPLAZA EL NUMERO DE ABAJO CON TU CELULAR DE REY DIGITAL O EL DEL CLUB
-                // Formato internacional sin el + (Ejemplo: 5493624123456)
-                const telefonoClub = "5491100000000"; // <--- PON TU NÚMERO AQUÍ
+                // Abre el WhatsApp de Rey Digital (o el del Club) con el mensaje prearmado
+                const telefonoClub = "5493624123456"; // <-- PON AQUI TU NUMERO SI LO DESEAS CAMBIAR
                 
                 const url = `https://wa.me/${telefonoClub}?text=${encodeURIComponent(mensaje)}`;
                 window.open(url, "_blank");
