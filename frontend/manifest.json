@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
     "name": "Club Atlético Funebrero",
     "short_name": "Funebrero",
     "start_url": "/index.html",
@@ -18,3 +19,24 @@
       }
     ]
   }
+=======
+  "name": "Club Atlético Funebrero",
+  "short_name": "Funebrero",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#dc2626",
+  "icons": [
+    {
+      "src": "logo-funebrero_2.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo-funebrero_2.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+>>>>>>> 8e956ac4a87deb1c8392dc0b7a8aec60ea88bf36

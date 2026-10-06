@@ -122,7 +122,7 @@ export async function deleteSponsor(id) {
 }
 
 // ==============================
-// SOCIOS (CAJA MÁGICA Y PAGOS)
+// PORTAL SOCIOS
 // ==============================
 export async function getSocios() {
   try {

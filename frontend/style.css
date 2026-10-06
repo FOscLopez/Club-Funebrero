@@ -23,6 +23,24 @@ html {
     scroll-behavior: smooth;
 }
 
+/* ====================================================
+   SCROLLBAR DE ALTA GAMA (Oculta la barra fea de Windows)
+   ==================================================== */
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+::-webkit-scrollbar-thumb {
+    background: #1f1f1f;
+    border-radius: 5px;
+    border: 2px solid var(--bg-dark);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--rojo-funebrero);
+}
+
 /* 1. Fondo Animado Respirable (Tonos Oscuros y Rojizos) */
 @keyframes dynamicBg {
     0% { background-position: 0% 50%; }
@@ -31,9 +49,9 @@ html {
 }
 
 body {
-    background: linear-gradient(-45deg, #050505, #1a0505, #0a0a0a, #2a0808);
+    background: linear-gradient(-45deg, #050505, #150505, #0a0a0a, #200505);
     background-size: 400% 400%;
-    animation: dynamicBg 15s ease infinite;
+    animation: dynamicBg 20s ease infinite;
     color: var(--blanco);
     font-family: var(--font-textos);
     min-height: 100vh;
@@ -44,7 +62,9 @@ body {
 .ticker-wrap {
     width: 100%;
     overflow: hidden;
-    background: linear-gradient(90deg, #7f1d1d, var(--rojo-funebrero));
+    /* Degradado más rico y profundo */
+    background: linear-gradient(90deg, #7f1d1d, var(--rojo-funebrero), #7f1d1d);
+    background-size: 200% auto;
     color: var(--blanco);
     padding: 6px 0;
     border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -53,6 +73,7 @@ body {
     left: 0;
     z-index: 1000;
     height: 32px;
+    box-shadow: 0 2px 15px rgba(220, 38, 38, 0.4);
 }
 
 .ticker-move {
@@ -71,10 +92,11 @@ body {
     display: flex;
     align-items: center;
     height: 100%;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
 .ticker-item span {
-    background: var(--bg-dark);
+    background: var(--blanco);
     color: var(--rojo-funebrero);
     padding: 2px 8px;
     border-radius: 4px;
@@ -82,6 +104,7 @@ body {
     font-size: 0.7rem;
     font-weight: 800;
     text-transform: uppercase;
+    box-shadow: 0 0 10px rgba(255,255,255,0.3);
 }
 
 @keyframes tickerAnim {
@@ -92,16 +115,22 @@ body {
 /* 3. Navegación de Cristal */
 .header {
     position: fixed;
-    top: 32px; /* Justo debajo del ticker */
+    top: 32px; 
     left: 0;
     width: 100%;
     background: rgba(5, 5, 5, 0.75);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     z-index: 900;
     border-bottom: 1px solid rgba(220, 38, 38, 0.3);
     padding: 12px 0;
-    transition: 0.3s;
+    transition: all 0.4s ease;
+}
+
+.header:hover {
+    background: rgba(5, 5, 5, 0.95);
+    border-bottom-color: var(--rojo-brillante);
+    box-shadow: 0 4px 20px rgba(220, 38, 38, 0.2);
 }
 
 .header-inner {
@@ -124,14 +153,32 @@ body {
     letter-spacing: 1px;
     transition: 0.3s;
     margin-left: 20px;
+    position: relative;
+}
+
+/* Efecto de subrayado de Neón en el menú */
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -5px;
+    left: 0;
+    background-color: var(--rojo-brillante);
+    transition: width 0.3s ease;
 }
 
 .nav-links a:hover {
-    color: var(--rojo-funebrero);
-    text-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
+    color: var(--blanco);
+    text-shadow: 0 0 12px rgba(220, 38, 38, 0.8);
 }
 
-/* 4. Sección Hero y Escudo Flotante */
+.nav-links a:hover::after {
+    width: 100%;
+    box-shadow: 0 0 10px var(--rojo-brillante);
+}
+
+/* 4. Sección Hero y Animaciones de Entrada */
 .hero {
     min-height: 100vh;
     display: flex;
@@ -143,16 +190,34 @@ body {
     position: relative;
 }
 
+/* Resplandor radial detrás del logo */
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60vw;
+    height: 60vw;
+    max-width: 600px;
+    max-height: 600px;
+    background: radial-gradient(circle, rgba(220,38,38,0.15) 0%, transparent 70%);
+    z-index: 0;
+    pointer-events: none;
+}
+
 .hero-logo {
     width: 220px;
-    filter: drop-shadow(0 0 25px rgba(220, 38, 38, 0.5));
+    filter: drop-shadow(0 0 25px rgba(220, 38, 38, 0.6));
     animation: floatLogo 4s ease-in-out infinite;
     margin-bottom: 15px;
+    position: relative;
+    z-index: 2;
 }
 
 @keyframes floatLogo {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-15px); filter: drop-shadow(0 0 40px rgba(220, 38, 38, 0.8)); }
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-15px) scale(1.02); filter: drop-shadow(0 0 45px rgba(220, 38, 38, 0.9)); }
 }
 
 .club-title-glow {
@@ -160,11 +225,20 @@ body {
     font-size: 5.5rem;
     margin: 0;
     letter-spacing: 5px;
-    background: linear-gradient(to right, var(--blanco), var(--rojo-funebrero));
+    background: linear-gradient(to right, #fff, #ffbaba, #fff);
+    background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 4px 10px rgba(220, 38, 38, 0.3));
+    filter: drop-shadow(0 4px 15px rgba(220, 38, 38, 0.4));
     line-height: 1;
+    animation: shineText 5s linear infinite;
+    position: relative;
+    z-index: 2;
+}
+
+/* El texto brilla como si le pasara una luz por encima */
+@keyframes shineText {
+    to { background-position: 200% center; }
 }
 
 .hero-subtitle {
@@ -174,13 +248,35 @@ body {
     letter-spacing: 3px;
     font-weight: 300;
     margin-top: 10px;
+    position: relative;
+    z-index: 2;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
 }
+
+/* Animación Escalonada al cargar la página */
+@keyframes fadeUpIn {
+    0% { opacity: 0; transform: translateY(30px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.hero-container > * {
+    animation: fadeUpIn 1s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+    opacity: 0;
+}
+
+.hero-logo-wrapper { animation-delay: 0.2s; }
+.title-container { animation-delay: 0.4s; }
+.hero-subtitle { animation-delay: 0.6s; }
+.hero-socials { animation-delay: 0.8s; }
+#main-carousel-container { animation-delay: 1s; }
 
 /* 5. Cristalería Premium (Tarjetas Levitantes) */
 .section-padding {
     padding: 80px 20px;
     max-width: 1200px;
     margin: 0 auto;
+    position: relative;
+    z-index: 2;
 }
 
 .section-title {
@@ -190,10 +286,12 @@ body {
     margin-bottom: 40px;
     color: var(--blanco);
     letter-spacing: 2px;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
 .section-title span {
     color: var(--rojo-funebrero);
+    text-shadow: 0 0 20px rgba(220,38,38,0.5);
 }
 
 .grid-cards {
@@ -202,23 +300,43 @@ body {
     gap: 30px;
 }
 
+/* Efecto de Cristal Avanzado con reflejo (Glassmorphism) */
 .glass-premium {
-    background: rgba(15, 15, 15, 0.5);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(15, 15, 15, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-top: 2px solid var(--rojo-funebrero);
     border-radius: 16px;
     padding: 30px;
     text-align: center;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, border-color 0.4s;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.6), inset 0 0 15px rgba(255,255,255,0.02);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+/* El reflejo de luz que cruza la tarjeta */
+.glass-premium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
+    transform: skewX(-25deg);
+    transition: 0.5s;
 }
 
 .glass-premium:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 25px 45px rgba(220, 38, 38, 0.15);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px rgba(220, 38, 38, 0.15), inset 0 0 20px rgba(220, 38, 38, 0.05);
     border-color: var(--rojo-brillante);
+}
+
+.glass-premium:hover::before {
+    left: 200%;
 }
 
 .glass-premium h3 {
@@ -241,40 +359,46 @@ body {
     padding: 10px 25px;
     border-radius: 30px;
     background: transparent;
-    color: var(--rojo-funebrero);
-    border: 2px solid var(--rojo-funebrero);
+    color: var(--rojo-brillante);
+    border: 2px solid var(--rojo-brillante);
     font-weight: 600;
     text-transform: uppercase;
     text-decoration: none;
-    transition: 0.3s;
+    transition: all 0.3s ease;
     margin-top: 15px;
     letter-spacing: 1px;
     font-size: 0.85rem;
+    box-shadow: 0 0 10px rgba(220,38,38,0.2) inset;
 }
 
 .btn-neon:hover {
-    background: var(--rojo-funebrero);
+    background: var(--rojo-brillante);
     color: var(--blanco);
-    box-shadow: 0 0 20px rgba(220, 38, 38, 0.6);
-    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(220, 38, 38, 0.8), inset 0 0 10px rgba(255,255,255,0.2);
+    transform: translateY(-3px);
+    border-color: transparent;
 }
 
 .btn-white {
-    border-color: var(--blanco);
+    border-color: rgba(255,255,255,0.5);
     color: var(--blanco);
+    box-shadow: none;
 }
 
 .btn-white:hover {
     background: var(--blanco);
     color: var(--bg-dark);
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.6);
+    border-color: transparent;
 }
 
 /* 7. Footer */
 .main-footer {
-    background: rgba(5, 5, 5, 0.95);
+    background: #000;
     border-top: 2px solid var(--rojo-funebrero);
-    padding: 40px 20px;
+    padding: 50px 20px;
     text-align: center;
     margin-top: 40px;
+    position: relative;
+    box-shadow: 0 -10px 30px rgba(220,38,38,0.05);
 }

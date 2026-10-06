@@ -1,12 +1,12 @@
 import { auth } from "./services/firebase.config.js";
 import { 
-    db, // Importamos la conexión corregida
+    db, 
     addPlayersBulk, getPlayers, updatePlayer, deletePlayer, 
     getFixtures, updateFixture, deleteFixture,
     getMeetings, createMeeting, updateMeeting, deleteMeeting,
     getSponsors, createSponsor, updateSponsor, deleteSponsor,
-    addSociosBulk, getSocios, deleteSocio, // NUEVOS IMPORTS SOCIOS
-    getCarouselImages, createCarouselImage, deleteCarouselImage // NUEVOS IMPORTS CARRUSEL
+    addSociosBulk, getSocios, deleteSocio,
+    getCarouselImages, createCarouselImage, deleteCarouselImage // NUEVOS IMPORTS
 } from "./services/firestore.service.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { collection, addDoc, getDocs, doc, query, orderBy, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -49,8 +49,8 @@ onAuthStateChanged(auth, (user) => {
         loadPlayers();
         loadMeetingsAdmin();
         loadSponsorsAdmin();
-        loadSociosAdmin(); // CARGA NUEVA TABLA DE SOCIOS
-        loadMainCarouselAdmin(); // CARGA TABLA DE CARRUSEL
+        loadSociosAdmin(); 
+        loadMainCarouselAdmin(); // CARGA LA NUEVA TABLA DEL CARRUSEL
     }
 });
 
@@ -206,9 +206,6 @@ document.getElementById("playerForm").addEventListener("submit", async (e) => {
     finally { btn.textContent = "Procesar Plantel"; btn.disabled = false; }
 });
 
-// =========================================
-// MÓDULO SOCIOS: CAJA MÁGICA Y TABLA
-// =========================================
 document.getElementById("socioForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const btn = document.getElementById("saveSocioBtn");
@@ -222,16 +219,14 @@ document.getElementById("socioForm").addEventListener("submit", async (e) => {
         let cleanLine = line.trim();
         if (!cleanLine) return;
         
-        // Extrae DNI (7 u 8 digitos) y Fecha de nacimiento inteligente
         const dniMatch = cleanLine.match(/\b\d{7,8}\b/);
         const dateMatch = cleanLine.match(/\b\d{2}[/-]\d{2}[/-]\d{4}\b/);
 
         if (dniMatch && dateMatch) {
             const dni = dniMatch[0];
             const birthdate = dateMatch[0];
-            // Lo que resta en la linea es el nombre
             let name = cleanLine.replace(dni, '').replace(birthdate, '').trim();
-            name = name.replace(/\s{2,}/g, ' '); // quitar dobles espacios
+            name = name.replace(/\s{2,}/g, ' '); 
             
             sociosToSave.push({ name, dni, birthdate, createdAt: new Date().toISOString() });
         }
@@ -278,9 +273,6 @@ window.deleteSocioAdmin = async (id) => {
     }
 };
 
-// =========================================
-// TABLA DE FIXTURES (EDICIÓN EN LÍNEA)
-// =========================================
 async function loadFixtures() {
     const tbody = document.getElementById("fixturesList");
     try {
@@ -396,9 +388,6 @@ window.deleteFixtureAdmin = async (id) => {
     }
 };
 
-// ==========================================
-// SUBIDA DE FOTOS EN LÍNEA (IMGBB)
-// ==========================================
 let inlineUploadId = null;
 let inlineUploadType = null;
 
@@ -436,9 +425,6 @@ document.getElementById('adminFileUploader').onchange = async (e) => {
     }
 };
 
-// =========================================
-// RENDERIZADO DE JUGADORES Y CATEGORÍAS
-// =========================================
 async function loadPlayers() {
     const container = document.getElementById("playersListContainer");
     try {
@@ -485,7 +471,7 @@ window.deletePlayerAdmin = async (id) => {
 };
 
 window.deleteAllPlayersInCategory = async (cat) => {
-    if(confirm(`⚠️ PELIGRO: ¿Estás seguro de borrar TODOS los jugadores de la categoría ${cat}? Esta acción no se puede deshacer.`)) {
+    if(confirm(`⚠️️ PELIGRO: ¿Estás seguro de borrar TODOS los jugadores de la categoría ${cat}? Esta acción no se puede deshacer.`)) {
         try {
             const q = query(collection(db, "players"), where("categoryId", "==", cat));
             const snap = await getDocs(q);
@@ -502,9 +488,6 @@ window.deleteAllPlayersInCategory = async (cat) => {
     }
 };
 
-// ==========================================
-// MÓDULO INSTITUCIONAL (ACTAS/PDF EN DRIVE)
-// ==========================================
 document.getElementById("meetingForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const btn = document.getElementById("saveMeetBtn");
@@ -555,9 +538,6 @@ window.deleteMeetAdmin = async (id) => {
     }
 };
 
-// ==========================================
-// MÓDULO SPONSORS (CARRUSEL)
-// ==========================================
 document.getElementById("sponsorForm").addEventListener("submit", (e) => {
     e.preventDefault();
     pendingSponsorData = {
@@ -669,7 +649,7 @@ async function loadMainCarouselAdmin() {
             <tr>
                 <td><img src="${img.imageUrl}" style="height:60px; object-fit:cover; border-radius:4px; border: 1px solid #333;"></td>
                 <td style="text-align:right;">
-                    <button onclick="deleteMainCarouselImgAdmin('${img.id}')" class="delete-btn">Borrar</button>
+                    <button class="delete-btn" onclick="deleteMainCarouselImgAdmin('${img.id}')">Borrar</button>
                 </td>
             </tr>
         `).join("");
@@ -683,10 +663,6 @@ window.deleteMainCarouselImgAdmin = async (id) => {
     }
 };
 
-
-// ==========================================
-// VENTANA MODAL MAESTRA (REPARACIÓN DE ERRORES)
-// ==========================================
 const catsOptions = `
     <option value="Mosquito">Mosquito</option><option value="Mini">Mini</option><option value="Pre Mini">Pre Mini</option>
     <option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option>

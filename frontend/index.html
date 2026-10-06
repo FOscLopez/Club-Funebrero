@@ -4,7 +4,12 @@
   <meta charset="UTF-8" />
   <title>Club Atlético Funebrero - Sitio Oficial</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  
+  <!-- ETIQUETAS PWA Y BARRA DEL NAVEGADOR -->
   <link rel="icon" type="image/png" href="logo-funebrero_2.png">
+  <link rel="apple-touch-icon" href="logo-funebrero_2.png">
+  <meta name="theme-color" content="#dc2626"> <!-- Pinta la barra superior del celular de Rojo Funebrero -->
+  <link rel="manifest" href="manifest.json">
   
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
@@ -35,7 +40,7 @@
     }
 
     /* ====================================================
-       2. BOTÓN INGRESO Y LANDING ANIMADA CON RELOJ Y EFECTO SOLDADURA
+       2. BOTÓN INGRESO Y LANDING ANIMADA
        ==================================================== */
     #enter-stadium-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #050505; z-index: 2000000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
     .btn-enter { background: #dc2626; color: #fff; border: 2px solid #ffbaba; padding: 15px 40px; font-family: 'Bebas Neue', cursive; font-size: 2rem; letter-spacing: 2px; border-radius: 8px; cursor: pointer; box-shadow: 0 0 20px rgba(220,38,38,0.6); transition: 0.3s; animation: pulseBd 2s infinite; text-transform: uppercase; }
@@ -75,7 +80,7 @@
     .landing-title span { color: #dc2626; }
     @keyframes fadeInText { to { opacity: 1; } }
 
-    /* ---- INICIO EFECTO SOLDADURA (8 SEGUNDOS) ---- */
+    /* ---- INICIO EFECTO SOLDADURA ---- */
     .weld-spark {
         position: absolute;
         width: 8px; height: 8px;
@@ -85,12 +90,10 @@
         z-index: 10;
         animation: sparkPath 8s linear forwards, sparkFlicker 0.1s infinite alternate;
     }
-    
     @keyframes sparkFlicker {
         0% { transform: scale(1); opacity: 0.8; }
         100% { transform: scale(1.8); opacity: 1; box-shadow: 0 0 25px 12px #dc2626, 0 0 45px 20px #ffffff; }
     }
-
     @keyframes sparkPath {
         0%   { top: 0; left: 0; }
         25%  { top: 0; left: calc(100% - 8px); }
@@ -98,14 +101,12 @@
         75%  { top: calc(100% - 8px); left: 0; }
         100% { top: 0; left: 0; }
     }
-
     .weld-line {
         position: absolute;
         background: #dc2626;
         box-shadow: 0 0 15px #dc2626, 0 0 25px #dc2626;
         z-index: 5;
     }
-    
     .weld-top    { top: 0; left: 0; height: 4px; width: 0; animation: drawTop 2s linear forwards; }
     .weld-right  { top: 0; right: 0; width: 4px; height: 0; animation: drawRight 2s linear 2s forwards; }
     .weld-bottom { bottom: 0; right: 0; height: 4px; width: 0; animation: drawBottom 2s linear 4s forwards; }
@@ -116,7 +117,6 @@
     @keyframes drawBottom { to { width: 100%; } }
     @keyframes drawLeft   { to { height: 100%; } }
 
-    /* Partículas voladoras inyectadas por JS */
     .flying-spark {
         position: absolute;
         width: 3px; height: 3px;
@@ -126,7 +126,6 @@
         pointer-events: none;
         z-index: 9;
     }
-    /* ---- FIN EFECTO SOLDADURA ---- */
 
     /* ====================================================
        3. TICKER
@@ -151,7 +150,7 @@
     .nav-links a:hover { color: #ffffff; text-shadow: 0 0 10px rgba(220,38,38,0.5); }
     .nav-links a:hover::after { width: 100%; }
     
-    .outline-btn { border: 1px solid #333; border-radius: 20px; text-decoration: none; font-weight: 600; transition: all 0.3s; background: rgba(255,255,255,0.05); padding: 5px 12px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; color:#fff;}
+    .outline-btn { border: 1px solid #333; border-radius: 20px; text-decoration: none; font-weight: 600; transition: all 0.3s; background: rgba(255,255,255,0.05); padding: 5px 12px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px;}
     .outline-btn:hover { background: #dc2626; color: #fff !important; border-color: #dc2626; box-shadow: 0 0 15px rgba(220,38,38,0.4); transform: translateY(-2px); }
 
     @media (min-width: 992px) {
@@ -275,7 +274,7 @@
       <p style="color: #64748b; margin-top: 20px; font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase;">Activar Sonido 🔊</p>
   </div>
 
-  <!-- PANTALLA DE CARGA ANIMADA CON SOLDADURA Y MOTOR DE CHISPAS -->
+  <!-- PANTALLA DE CARGA ANIMADA -->
   <div id="landing-overlay">
     
     <!-- Efecto Soldadura Borde Perimetral -->
@@ -298,7 +297,7 @@
     </div>
   </div>
 
-  <!-- NAVEGACIÓN CRISTAL (ADAPTADA A PC Y MÓVIL) -->
+  <!-- NAVEGACIÓN CRISTAL -->
   <header class="header">
     <div class="header-inner">
       <div class="header-brand" style="display: flex; align-items: center; gap: 12px; justify-content: center;">
@@ -466,6 +465,9 @@
     </div>
   </footer>
 
+  <!-- =====================================
+       LÓGICA DE AUDIO Y LANDING
+       ===================================== -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const btnEnter = document.getElementById("btn-enter-stadium");
@@ -561,7 +563,6 @@
       }
     });
 
-    // PWA: Instalar la aplicación
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW Error:', err));
@@ -574,7 +575,7 @@
         deferredPrompt = e;
         const btnInstall = document.getElementById('btn-install-app');
         if (btnInstall) {
-            btnInstall.style.display = 'block'; // Muestra el botón solo si es instalable
+            btnInstall.style.display = 'block'; 
             btnInstall.addEventListener('click', () => {
                 btnInstall.style.display = 'none';
                 deferredPrompt.prompt();
