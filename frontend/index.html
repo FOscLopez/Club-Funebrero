@@ -275,6 +275,8 @@
 
   <!-- PANTALLA DE CARGA ANIMADA -->
   <div id="landing-overlay">
+    
+    <!-- Efecto Soldadura Borde Perimetral -->
     <div class="weld-spark"></div>
     <div class="weld-line weld-top"></div>
     <div class="weld-line weld-right"></div>
@@ -314,7 +316,7 @@
       <div class="admin-nav" style="text-align: center; display: flex; gap: 10px; align-items: center; justify-content: center;">
         <!-- BOTÓN DE INSTALACIÓN PWA -->
         <button id="btn-install-app" class="outline-btn" style="background: #10b981; border-color: #10b981; color: #fff; cursor: pointer; display: none;">📲 Instalar App</button>
-        <a href="/login.html" class="outline-btn">⚙️ Admin</a>
+        <a href="/login.html" class="outline-btn">⚙️️ Admin</a>
       </div>
     </div>
   </header>
@@ -366,26 +368,27 @@
          ===================================== -->
     <section id="socios-portal" class="section-padding">
       <h2 class="section-title">Portal de <span>Socios</span></h2>
-      <p style="text-align: center; color: #a3a3a3; font-size: 1rem; max-width: 600px; margin: 0 auto 30px;">Ingresa para abonar tu cuota social o imprimir comprobantes.</p>
+      <p style="text-align: center; color: #a3a3a3; font-size: 1rem; max-width: 600px; margin: 0 auto 30px;">Ingresa para abonar tu cuota social o imprimir tus comprobantes.</p>
       
-      <!-- CUADRO DE LOGIN -->
+      <!-- CUADRO DE LOGIN AMIGABLE -->
       <div id="login-socio-box" class="glass-premium" style="max-width: 450px; margin: 0 auto; text-align: center; padding: 30px;">
-        <h3 style="color: #fff; font-family: 'Bebas Neue', cursive; font-size: 2rem; margin-top: 0;">Ingreso Socios</h3>
+        <h3 style="color: #fff; font-family: 'Bebas Neue', cursive; font-size: 2rem; margin-top: 0;">Ingreso al Portal</h3>
         
-        <input type="number" id="socioDniInput" class="form-input" placeholder="Tu DNI (Usuario)" style="text-align: center; font-size: 1.1rem;">
+        <label style="display: block; text-align: left; color: #a3a3a3; font-size: 0.85rem; margin-bottom: 5px;">Tu Usuario (DNI):</label>
+        <input type="number" id="socioDniInput" class="form-input" placeholder="Ej: 35123456" style="text-align: center; font-size: 1.1rem;">
         
+        <label style="display: block; text-align: left; color: #a3a3a3; font-size: 0.85rem; margin-bottom: 5px; margin-top: 15px;">Tu Contraseña (Fecha de nacimiento sin barras):</label>
         <div style="position: relative; margin-bottom: 5px;">
-            <input type="password" id="socioPassInput" class="form-input" placeholder="Contraseña" style="text-align: center; font-size: 1.1rem; padding-right: 40px; margin-bottom: 0;">
+            <input type="password" id="socioPassInput" class="form-input" placeholder="Ej: 13031990" style="text-align: center; font-size: 1.1rem; padding-right: 40px; margin-bottom: 0;">
             <span id="toggleSocioPass" style="position: absolute; right: 15px; top: 12px; cursor: pointer; font-size: 1.2rem;">👁️</span>
         </div>
-        <p style="color: #64748b; font-size: 0.75rem; margin-top: 5px; margin-bottom: 20px;">(Coloca tu contraseña fecha de nacimiento completo sin barras ni guiones, ej: 19061984)</p>
         
-        <button id="btnBuscarSocio" class="action-btn">Ingresar al Portal</button>
+        <button id="btnBuscarSocio" class="action-btn" style="margin-top: 20px;">Ingresar a mi Cuenta</button>
         <p id="socioError" style="color: #ff3b3b; font-size: 0.85rem; margin-top: 15px; display: none;"></p>
         
         <div id="socioWpLink" style="display: none; margin-top: 15px; border-top: 1px solid #333; padding-top: 15px;">
             <p style="color: #a3a3a3; font-size: 0.85rem; margin-bottom: 10px;">¿No estás registrado o tienes problemas para ingresar?</p>
-            <a href="https://wa.me/message/NWPXJJVFKLHHB1" target="_blank" style="color: #10b981; text-decoration: none; font-weight: bold; font-size: 0.9rem;">📲 Contáctanos por WhatsApp para ayudarte</a>
+            <a href="https://wa.me/5493624168410" target="_blank" style="color: #10b981; text-decoration: none; font-weight: bold; font-size: 0.9rem;">📲 Contáctanos por WhatsApp para ayudarte</a>
         </div>
       </div>
 
@@ -485,7 +488,7 @@
       <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
         <a href="https://www.facebook.com/ReyDigitaldelNorte/" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 0.85rem; font-weight: 600;">📘 Facebook</a>
         <a href="https://www.instagram.com/digitalesrey/" target="_blank" style="color: #f472b6; text-decoration: none; font-size: 0.85rem; font-weight: 600;">📸 Instagram</a>
-        <a href="https://wa.me/message/NWPXJJVFKLHHB1" target="_blank" style="color: #10b981; text-decoration: none; font-size: 0.85rem; font-weight: 600;">💬 WhatsApp</a>
+        <a href="https://wa.me/5493624168410" target="_blank" style="color: #10b981; text-decoration: none; font-size: 0.85rem; font-weight: 600;">💬 WhatsApp</a>
       </div>
     </div>
   </footer>
