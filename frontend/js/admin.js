@@ -6,12 +6,22 @@ import {
     getMeetings, createMeeting, updateMeeting, deleteMeeting,
     getSponsors, createSponsor, updateSponsor, deleteSponsor,
     addSociosBulk, getSocios, deleteSocio,
-    getCarouselImages, createCarouselImage, deleteCarouselImage // NUEVOS IMPORTS
+    getCarouselImages, createCarouselImage, deleteCarouselImage 
 } from "./services/firestore.service.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { collection, addDoc, getDocs, doc, query, orderBy, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-const allowedAdmins = ["mecinfotec@gmail.com", "admin@abnch.com", "admin@reydigital.com"];
+// ==========================================
+// ROLES DE SEGURIDAD
+// ==========================================
+const superAdmins = ["mecinfotec@gmail.com", "admin@abnch.com", "admin@reydigital.com"];
+const editores = ["editor@funebrero.com", "prensa@funebrero.com"];
+const editoresSocios = ["socios@funebrero.com"]; // NUEVO USUARIO PARA SOCIOS
+const allowedUsers = [...superAdmins, ...editores, ...editoresSocios];
+
+let isSuperAdmin = false;
+let isSocioEditor = false;
+
 const IMGBB_API_KEY = "4b6599a15cc7870198cb96ee95df9905";
 
 let allFixturesCache = [];
@@ -42,15 +52,53 @@ window.setSort = (column) => {
 };
 
 onAuthStateChanged(auth, (user) => {
-    if (!user || !allowedAdmins.includes(user.email)) {
+    if (!user || !allowedUsers.includes(user.email)) {
         window.location.replace("index.html");
     } else {
-        loadFixtures();
-        loadPlayers();
-        loadMeetingsAdmin();
-        loadSponsorsAdmin();
-        loadSociosAdmin(); 
-        loadMainCarouselAdmin(); // CARGA LA NUEVA TABLA DEL CARRUSEL
+        isSuperAdmin = superAdmins.includes(user.email);
+        isSocioEditor = editoresSocios.includes(user.email);
+        const badge = document.getElementById("userRoleBadge");
+        
+        if(isSuperAdmin) {
+            badge.textContent = "⚙️ Super Admin";
+            badge.style.borderColor = "#dc2626";
+            badge.style.color = "#dc2626";
+            
+            // Carga todo normal
+            loadFixtures();
+            loadPlayers();
+            loadMeetingsAdmin();
+            loadSponsorsAdmin();
+            loadSociosAdmin(); 
+            loadMainCarouselAdmin(); 
+            
+        } else if (isSocioEditor) {
+            badge.textContent = "👥 Editor Socios";
+            badge.style.borderColor = "#06b6d4";
+            badge.style.color = "#06b6d4";
+            
+            // MAGIA: Oculta absolutamente todos los acordeones por defecto...
+            // Y luego MUESTRA ÚNICAMENTE los que tienen el ID de Socios
+            const style = document.createElement('style');
+            style.innerHTML = `
+                details.fune-accordion { display: none !important; }
+                #moduloSociosCarga, #moduloSociosLista { display: block !important; }
+            `;
+            document.head.appendChild(style);
+            
+            // Carga unicamente la base de datos de socios para no gastar recursos
+            loadSociosAdmin();
+
+        } else {
+            badge.textContent = "✍️ Editor";
+            // Oculta modulos administrativos fuertes
+            const style = document.createElement('style');
+            style.innerHTML = '.super-admin-only { display: none !important; }';
+            document.head.appendChild(style);
+
+            loadFixtures();
+            loadPlayers();
+        }
     }
 });
 
@@ -61,159 +109,62 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
 
 document.getElementById("fixtureForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const btn = document.getElementById("saveBtn");
-    btn.textContent = "Guardando..."; btn.disabled = true;
-
-    const fixtureData = {
-        categoryId: document.getElementById("categoria").value,
-        homeClubId: document.getElementById("condicion").value === "local" ? "Funebrero" : document.getElementById("rival").value.trim(),
-        awayClubId: document.getElementById("condicion").value === "visita" ? "Funebrero" : document.getElementById("rival").value.trim(),
-        round: "A definir",
-        date: document.getElementById("fecha").value,
-        time: document.getElementById("hora").value || null,
-        status: "scheduled",
-        scoreLocal: null, scoreAway: null,
-        createdAt: new Date().toISOString()
-    };
-
-    try {
-        await addDoc(collection(db, "fixtures"), fixtureData);
-        document.getElementById("fixtureForm").reset();
-        await loadFixtures();
-    } catch (error) { alert("Error al guardar el partido."); } 
-    finally { btn.textContent = "Guardar Partido"; btn.disabled = false; }
+    const btn = document.getElementById("saveBtn"); btn.textContent = "Guardando..."; btn.disabled = true;
+    const fixtureData = { categoryId: document.getElementById("categoria").value, homeClubId: document.getElementById("condicion").value === "local" ? "Funebrero" : document.getElementById("rival").value.trim(), awayClubId: document.getElementById("condicion").value === "visita" ? "Funebrero" : document.getElementById("rival").value.trim(), round: "A definir", date: document.getElementById("fecha").value, time: document.getElementById("hora").value || null, status: "scheduled", scoreLocal: null, scoreAway: null, createdAt: new Date().toISOString() };
+    try { await addDoc(collection(db, "fixtures"), fixtureData); document.getElementById("fixtureForm").reset(); await loadFixtures(); } catch (error) { alert("Error al guardar el partido."); } finally { btn.textContent = "Guardar Partido"; btn.disabled = false; }
 });
 
 document.getElementById("magicFixtureForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const btn = document.getElementById("saveMagicFixturesBtn");
-    btn.textContent = "Procesando..."; btn.disabled = true;
-
-    const category = document.getElementById("magicFixtureCategory").value;
-    const text = document.getElementById("magicFixtureBox").value;
-    const lines = text.split('\n');
-    const fixturesToSave = [];
-
+    const btn = document.getElementById("saveMagicFixturesBtn"); btn.textContent = "Procesando..."; btn.disabled = true;
+    const category = document.getElementById("magicFixtureCategory").value; const text = document.getElementById("magicFixtureBox").value;
+    const lines = text.split('\n'); const fixturesToSave = [];
     lines.forEach(line => {
-        const cleanLine = line.trim();
-        if (!cleanLine || cleanLine.toUpperCase().includes("LIBRE")) return;
-
+        const cleanLine = line.trim(); if (!cleanLine || cleanLine.toUpperCase().includes("LIBRE")) return;
         const matchVs = cleanLine.toUpperCase().split(" VS ");
         if (matchVs.length === 2) {
-            const firstPart = matchVs[0].trim();
-            const spaceIndex = firstPart.indexOf(" ");
-            let round = "A definir";
-            let home = firstPart;
-            
-            if (spaceIndex > -1 && !isNaN(firstPart.substring(0, spaceIndex))) {
-                round = "Fecha " + firstPart.substring(0, spaceIndex);
-                home = firstPart.substring(spaceIndex + 1).trim();
-            }
-
-            home = home.replace("S. ZAPALLAR", "S. Zapallar").replace("FUNEBRERO", "Funebrero");
-            const away = matchVs[1].trim().replace("S. ZAPALLAR", "S. Zapallar").replace("FUNEBRERO", "Funebrero");
-
-            fixturesToSave.push({
-                categoryId: category,
-                homeClubId: home,
-                awayClubId: away,
-                round: round,
-                date: "A definir",
-                time: "",
-                status: "scheduled",
-                scoreLocal: null, scoreAway: null,
-                createdAt: new Date().toISOString()
-            });
+            const firstPart = matchVs[0].trim(); const spaceIndex = firstPart.indexOf(" ");
+            let round = "A definir"; let home = firstPart;
+            if (spaceIndex > -1 && !isNaN(firstPart.substring(0, spaceIndex))) { round = "Fecha " + firstPart.substring(0, spaceIndex); home = firstPart.substring(spaceIndex + 1).trim(); }
+            home = home.replace("S. ZAPALLAR", "S. Zapallar").replace("FUNEBRERO", "Funebrero"); const away = matchVs[1].trim().replace("S. ZAPALLAR", "S. Zapallar").replace("FUNEBRERO", "Funebrero");
+            fixturesToSave.push({ categoryId: category, homeClubId: home, awayClubId: away, round: round, date: "A definir", time: "", status: "scheduled", scoreLocal: null, scoreAway: null, createdAt: new Date().toISOString() });
         }
     });
-
-    if (fixturesToSave.length === 0) {
-        alert("No se detectaron partidos.");
-        btn.textContent = "Procesar Fixture"; btn.disabled = false;
-        return;
-    }
-
+    if (fixturesToSave.length === 0) { alert("No se detectaron partidos."); btn.textContent = "Procesar Fixture"; btn.disabled = false; return; }
     try {
-        const q = query(collection(db, "fixtures"), where("categoryId", "==", category));
-        const existingSnap = await getDocs(q);
-        const batch = writeBatch(db);
-        
+        const q = query(collection(db, "fixtures"), where("categoryId", "==", category)); const existingSnap = await getDocs(q); const batch = writeBatch(db);
         existingSnap.forEach(docSnap => {
-            const d = docSnap.data();
-            const matchExists = fixturesToSave.find(f => 
-                (f.homeClubId.toUpperCase() === d.homeClubId.toUpperCase() && f.awayClubId.toUpperCase() === d.awayClubId.toUpperCase()) ||
-                (f.homeClubId.toUpperCase() === d.awayClubId.toUpperCase() && f.awayClubId.toUpperCase() === d.homeClubId.toUpperCase())
-            );
-            if (matchExists && d.date === "A definir") {
-                batch.delete(docSnap.ref);
-            }
+            const d = docSnap.data(); const matchExists = fixturesToSave.find(f => (f.homeClubId.toUpperCase() === d.homeClubId.toUpperCase() && f.awayClubId.toUpperCase() === d.awayClubId.toUpperCase()) || (f.homeClubId.toUpperCase() === d.awayClubId.toUpperCase() && f.awayClubId.toUpperCase() === d.homeClubId.toUpperCase()));
+            if (matchExists && d.date === "A definir") { batch.delete(docSnap.ref); }
         });
-
-        fixturesToSave.forEach(f => {
-            const newRef = doc(collection(db, "fixtures"));
-            batch.set(newRef, f);
-        });
-
-        await batch.commit();
-        document.getElementById("magicFixtureBox").value = "";
-        await loadFixtures();
-        alert(`Se cargaron ${fixturesToSave.length} partidos.`);
-    } catch (err) { alert("Error al procesar."); } 
-    finally { btn.textContent = "Procesar Fixture"; btn.disabled = false; }
+        fixturesToSave.forEach(f => { const newRef = doc(collection(db, "fixtures")); batch.set(newRef, f); });
+        await batch.commit(); document.getElementById("magicFixtureBox").value = ""; await loadFixtures(); alert(`Se cargaron ${fixturesToSave.length} partidos.`);
+    } catch (err) { alert("Error al procesar."); } finally { btn.textContent = "Procesar Fixture"; btn.disabled = false; }
 });
 
 document.getElementById("playerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const btn = document.getElementById("savePlayersBtn");
-    btn.textContent = "Procesando..."; btn.disabled = true;
-
-    const category = document.getElementById("playerCategory").value;
-    const text = document.getElementById("magicBox").value;
-    const lines = text.split('\n');
-    const playersToSave = [];
-
+    const btn = document.getElementById("savePlayersBtn"); btn.textContent = "Procesando..."; btn.disabled = true;
+    const category = document.getElementById("playerCategory").value; const text = document.getElementById("magicBox").value;
+    const lines = text.split('\n'); const playersToSave = [];
     lines.forEach(line => {
-        let cleanLine = line.trim();
-        if (!cleanLine || cleanLine.toLowerCase().includes("apellido") || cleanLine.toLowerCase().includes("fecha de nacimiento")) return;
-
+        let cleanLine = line.trim(); if (!cleanLine || cleanLine.toLowerCase().includes("apellido") || cleanLine.toLowerCase().includes("fecha de nacimiento")) return;
         cleanLine = cleanLine.replace(/\b\d{1,2}[\.\-]?\d{3}[\.\-]?\d{3}\b/g, "").replace(/\s{2,}/g, " ").trim();
-
-        let parts = cleanLine.split('\t');
-        if (parts.length < 2) parts = cleanLine.split(/ {2,}/);
-
-        if (parts.length >= 2) {
-            playersToSave.push({ name: parts[0].trim(), birthdate: parts[1].trim(), categoryId: category, clubId: "Funebrero", createdAt: new Date().toISOString() });
-        } else {
-            const lastSpace = cleanLine.lastIndexOf(' ');
-            if (lastSpace > 0) {
-                playersToSave.push({ name: cleanLine.substring(0, lastSpace).trim(), birthdate: cleanLine.substring(lastSpace + 1).trim(), categoryId: category, clubId: "Funebrero", createdAt: new Date().toISOString() });
-            }
-        }
+        let parts = cleanLine.split('\t'); if (parts.length < 2) parts = cleanLine.split(/ {2,}/);
+        if (parts.length >= 2) { playersToSave.push({ name: parts[0].trim(), birthdate: parts[1].trim(), categoryId: category, clubId: "Funebrero", createdAt: new Date().toISOString() }); } 
+        else { const lastSpace = cleanLine.lastIndexOf(' '); if (lastSpace > 0) { playersToSave.push({ name: cleanLine.substring(0, lastSpace).trim(), birthdate: cleanLine.substring(lastSpace + 1).trim(), categoryId: category, clubId: "Funebrero", createdAt: new Date().toISOString() }); } }
     });
-
-    if (playersToSave.length === 0) {
-        alert("Formato no reconocido. Asegurate de que quede Nombre y Fecha.");
-        btn.textContent = "Procesar Plantel"; btn.disabled = false;
-        return;
-    }
-
-    try {
-        await addPlayersBulk(playersToSave);
-        document.getElementById("magicBox").value = "";
-        await loadPlayers();
-        alert(`Se cargaron ${playersToSave.length} jugadores.`);
-    } catch(err) { alert("Error al guardar."); } 
-    finally { btn.textContent = "Procesar Plantel"; btn.disabled = false; }
+    if (playersToSave.length === 0) { alert("Formato no reconocido. Asegurate de que quede Nombre y Fecha."); btn.textContent = "Procesar Plantel"; btn.disabled = false; return; }
+    try { await addPlayersBulk(playersToSave); document.getElementById("magicBox").value = ""; await loadPlayers(); alert(`Se cargaron ${playersToSave.length} jugadores.`); } catch(err) { alert("Error al guardar."); } finally { btn.textContent = "Procesar Plantel"; btn.disabled = false; }
 });
 
+// =========================================
+// MÓDULO SOCIOS: CAJA MÁGICA Y TABLA
+// =========================================
 document.getElementById("socioForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const btn = document.getElementById("saveSocioBtn");
-    btn.textContent = "Procesando..."; btn.disabled = true;
-
-    const text = document.getElementById("magicSocioBox").value;
-    const lines = text.split('\n');
-    const sociosToSave = [];
+    const btn = document.getElementById("saveSocioBtn"); btn.textContent = "Procesando..."; btn.disabled = true;
+    const text = document.getElementById("magicSocioBox").value; const lines = text.split('\n'); const sociosToSave = [];
 
     lines.forEach(line => {
         let cleanLine = line.trim();
@@ -621,9 +572,6 @@ window.deleteSpAdmin = async (id) => {
     }
 };
 
-// ==========================================
-// NUEVO: GESTIÓN DEL CARRUSEL PRINCIPAL DE FOTOS
-// ==========================================
 document.getElementById("triggerMainCarouselUploadBtn").addEventListener("click", () => {
     document.getElementById("mainCarouselFileUploader").click();
 });
@@ -690,7 +638,7 @@ const catsOptions = `
 
 window.openEditPlayer = (id, name, birthdate, cat) => {
     currentEditTarget = { id, type: 'player' };
-    document.getElementById('modalTitle').textContent = "✏️ Reparar Jugador";
+    document.getElementById('modalTitle').textContent = "✏️️ Reparar Jugador";
     document.getElementById('modalFormContainer').innerHTML = `
         <label style="color:#a3a3a3; font-size:0.8rem; margin-bottom:-10px;">Nombre Completo:</label>
         <input type="text" id="editPName" class="form-input" value="${name}">
