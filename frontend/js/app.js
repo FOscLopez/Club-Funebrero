@@ -321,6 +321,7 @@ function initSociosPortal() {
     const btnDescargarPdf = document.getElementById("btnDescargarPdf");
     const btnEnviarWhatsApp = document.getElementById("btnEnviarWhatsApp");
     const pagoMonto = document.getElementById("pagoMonto");
+    const pdfInfoText = document.getElementById("pdfInfoText"); // Texto ayuda del PDF
 
     if(!btnBuscar) return;
 
@@ -371,6 +372,14 @@ function initSociosPortal() {
                 const hoy = new Date();
                 document.getElementById("pdf-fecha").textContent = hoy.toLocaleDateString();
 
+                // Resetear estado del botón PDF al entrar
+                if (btnDescargarPdf) {
+                    btnDescargarPdf.disabled = true;
+                    btnDescargarPdf.style.opacity = "0.5";
+                    btnDescargarPdf.style.cursor = "not-allowed";
+                    if(pdfInfoText) pdfInfoText.style.display = "block";
+                }
+
                 boxLogin.style.display = "none";
                 boxDash.style.display = "block";
             }
@@ -409,23 +418,33 @@ function initSociosPortal() {
         }
     });
 
-    // Nuevo: Lógica para enviar WhatsApp
+    // Lógica para enviar WhatsApp y HABILITAR EL PDF
     if(btnEnviarWhatsApp) {
         btnEnviarWhatsApp.addEventListener("click", () => {
             if(globalData.currentSocio) {
                 const monto = pagoMonto ? pagoMonto.value : "5000";
                 const numSo = globalData.currentSocio.numSocio || 'S/N';
-                const mensaje = `Hola Vicente 👋.\n\nSoy el socio/a *${globalData.currentSocio.name}*\n(DNI: ${globalData.currentSocio.dni} - Socio Nº: ${numSo}). \n\nTe envío adjunto el comprobante de mi aporte al Club por el monto de *$${monto}*.\n\n¡Abrazo Funebrero!`;
+                const mensaje = `Hola Club Funebrero 👋.\n\nSoy el socio/a *${globalData.currentSocio.name}*\n(DNI: ${globalData.currentSocio.dni} - Socio Nº: ${numSo}). \n\nTe envío adjunto el comprobante de mi pago de la cuota o aporte por el monto de *$${monto}*.\n\n¡Abrazo Funebrero!`;
                 
-                const telefonoClub = "5493624168410"; // WhatsApp de Vicente
+                const telefonoClub = "5493625451176"; 
                 
                 const url = `https://wa.me/${telefonoClub}?text=${encodeURIComponent(mensaje)}`;
                 window.open(url, "_blank");
+
+                // Magia: Se habilita el botón del PDF después de hacer clic en WhatsApp
+                if (btnDescargarPdf) {
+                    btnDescargarPdf.disabled = false;
+                    btnDescargarPdf.style.opacity = "1";
+                    btnDescargarPdf.style.cursor = "pointer";
+                    if(pdfInfoText) pdfInfoText.style.display = "none";
+                }
             }
         });
     }
 
     btnDescargarPdf.addEventListener("click", () => {
+        if (btnDescargarPdf.disabled) return; // Por las dudas
+        
         const comp = document.getElementById("comprobante-imprimir");
         comp.style.display = "block"; 
         const opt = { 

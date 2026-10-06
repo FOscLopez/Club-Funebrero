@@ -57,6 +57,7 @@
     }
     #landing-video { max-width: 350px; width: 90%; outline: none; mix-blend-mode: screen; position: relative; z-index: 2; }
     
+    /* Contador estilo reloj de básquetbol CENTRADO */
     #shot-clock {
         position: absolute;
         top: 40px; 
@@ -316,7 +317,7 @@
       <div class="admin-nav" style="text-align: center; display: flex; gap: 10px; align-items: center; justify-content: center;">
         <!-- BOTÓN DE INSTALACIÓN PWA -->
         <button id="btn-install-app" class="outline-btn" style="background: #10b981; border-color: #10b981; color: #fff; cursor: pointer; display: none;">📲 Instalar App</button>
-        <a href="/login.html" class="outline-btn">⚙️️ Admin</a>
+        <a href="/login.html" class="outline-btn">⚙️ Admin</a>
       </div>
     </div>
   </header>
@@ -388,7 +389,7 @@
         
         <div id="socioWpLink" style="display: none; margin-top: 15px; border-top: 1px solid #333; padding-top: 15px;">
             <p style="color: #a3a3a3; font-size: 0.85rem; margin-bottom: 10px;">¿No estás registrado o tienes problemas para ingresar?</p>
-            <a href="https://wa.me/5493624168410" target="_blank" style="color: #10b981; text-decoration: none; font-weight: bold; font-size: 0.9rem;">📲 Contáctanos por WhatsApp para ayudarte</a>
+            <a href="https://wa.me/5493625451176" target="_blank" style="color: #10b981; text-decoration: none; font-weight: bold; font-size: 0.9rem;">📲 Contáctanos por WhatsApp para ayudarte</a>
         </div>
       </div>
 
@@ -426,16 +427,16 @@
          <!-- PASO 2: Pagar -->
          <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
             <h4 style="color: #3b82f6; margin-top: 0; font-family: 'Bebas Neue', cursive; font-size: 1.5rem; letter-spacing: 1px;">Paso 2: Realiza el pago</h4>
-            <p style="font-size: 0.85rem; color: #a3a3a3; margin-bottom: 15px;">Elige la opción que te quede más cómoda:</p>
+            <p style="font-size: 0.85rem; color: #a3a3a3; margin-bottom: 15px;">Elige la opción que te quede más cómoda (Billeteras Virtuales o Bancos):</p>
             
             <a href="https://mpago.la/16hZWUT" target="_blank" id="btnPagarMP" class="action-btn" style="background: #009ee3; color: white; text-align: center; text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px;">
                 💳 Tocar aquí para pagar con Mercado Pago
             </a>
             
             <div style="border-top: 1px dashed #333; padding-top: 15px; margin-top: 15px;">
-                <p style="color: #fff; font-weight: 600; margin-bottom: 5px;">O transfiere directamente a nuestra cuenta bancaria:</p>
+                <p style="color: #fff; font-weight: 600; margin-bottom: 5px;">O transfiere desde cualquier cuenta o billetera (Ualá, Naranja X, MODO, Bancos) a:</p>
                 <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; display: inline-block; text-align: left;">
-                    <span style="color: #a3a3a3; font-size: 0.8rem;">CVU:</span> <strong style="color: #10b981; letter-spacing: 1px;">0000003100137467286158</strong><br>
+                    <span style="color: #a3a3a3; font-size: 0.8rem;">CVU/CBU:</span> <strong style="color: #10b981; letter-spacing: 1px;">0000003100137467286158</strong><br>
                     <span style="color: #a3a3a3; font-size: 0.8rem;">Alias:</span> <strong style="color: #10b981; letter-spacing: 1px;">funebrerosocios.mp</strong><br>
                     <span style="color: #a3a3a3; font-size: 0.8rem;">A nombre de:</span> <strong style="color: #fff;">Vicente Anibal Gallozo</strong>
                 </div>
@@ -445,15 +446,16 @@
          <!-- PASO 3: Enviar Whatsapp -->
          <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 20px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
             <h4 style="color: #f59e0b; margin-top: 0; font-family: 'Bebas Neue', cursive; font-size: 1.5rem; letter-spacing: 1px;">Paso 3: Confirma tu aporte</h4>
-            <p style="font-size: 0.85rem; color: #a3a3a3; margin-bottom: 15px;">Una vez hecho el pago en tu banco, envíanos el comprobante por WhatsApp presionando este botón verde y luego guarda tu recibo.</p>
+            <p style="font-size: 0.85rem; color: #a3a3a3; margin-bottom: 15px;">Una vez hecho el pago en tu aplicación, envíanos el comprobante por WhatsApp presionando el botón verde. Al hacerlo, se habilitará tu recibo oficial.</p>
             
             <button id="btnEnviarWhatsApp" class="action-btn" style="background: #25D366; margin-bottom: 10px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px;">
-               📲 1. Enviar comprobante al Club
+               📲 1. Enviar comprobante al WhatsApp
             </button>
             
-            <button id="btnDescargarPdf" class="outline-btn" style="padding: 12px; font-size: 1rem; border-color: #3b82f6; color: #3b82f6; width: 100%; margin-top: 0; margin-bottom: 0;">
+            <button id="btnDescargarPdf" class="outline-btn" style="padding: 12px; font-size: 1rem; border-color: #3b82f6; color: #3b82f6; width: 100%; margin-top: 0; margin-bottom: 0; opacity: 0.5; cursor: not-allowed;" disabled>
                📄 2. Descargar Mi Recibo (PDF)
             </button>
+            <p id="pdfInfoText" style="font-size: 0.75rem; color: #ef4444; margin-top: 8px;">* Envía el WhatsApp primero para poder generar el recibo.</p>
          </div>
 
          <button id="btnSalirSocio" class="outline-btn" style="border: none; color: #a3a3a3; text-decoration: underline; width: 100%;">Cerrar Sesión</button>
@@ -488,7 +490,7 @@
       <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
         <a href="https://www.facebook.com/ReyDigitaldelNorte/" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 0.85rem; font-weight: 600;">📘 Facebook</a>
         <a href="https://www.instagram.com/digitalesrey/" target="_blank" style="color: #f472b6; text-decoration: none; font-size: 0.85rem; font-weight: 600;">📸 Instagram</a>
-        <a href="https://wa.me/5493624168410" target="_blank" style="color: #10b981; text-decoration: none; font-size: 0.85rem; font-weight: 600;">💬 WhatsApp</a>
+        <a href="https://wa.me/5493625451176" target="_blank" style="color: #10b981; text-decoration: none; font-size: 0.85rem; font-weight: 600;">💬 WhatsApp</a>
       </div>
     </div>
   </footer>
