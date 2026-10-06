@@ -321,7 +321,7 @@ function initSociosPortal() {
     const btnDescargarPdf = document.getElementById("btnDescargarPdf");
     const btnEnviarWhatsApp = document.getElementById("btnEnviarWhatsApp");
     const pagoMonto = document.getElementById("pagoMonto");
-    const pdfInfoText = document.getElementById("pdfInfoText"); // Texto ayuda del PDF
+    const pdfInfoText = document.getElementById("pdfInfoText");
 
     if(!btnBuscar) return;
 
@@ -352,27 +352,32 @@ function initSociosPortal() {
         
         let socio = await getSocioByDni(dni);
 
+        // SOLO PARA PRUEBAS (Permite ingresar con cualquier DNI inventado)
         if(!socio) { socio = { name: "Socio de Prueba Funebrero", dni: dni, birthdate: pass, numSocio: "00" }; }
 
         if (socio) {
             const cleanBirth = socio.birthdate.replace(/[^0-9]/g, '');
             
             if (pass !== cleanBirth) {
-                errorMsg.textContent = "Contraseña incorrecta. (Recuerda: fecha de nacimiento sin barras, ej: 19061984)";
+                errorMsg.textContent = "Contraseña incorrecta. (Recuerda: fecha de nacimiento sin barras, ej: 13031990)";
                 errorMsg.style.display = "block";
             } else {
                 globalData.currentSocio = socio;
-                document.getElementById("dash-nombre").textContent = socio.name;
+                // Mostrar primer nombre o nombre completo en el saludo
+                document.getElementById("dash-nombre").textContent = socio.name; 
                 document.getElementById("pdf-nombre").textContent = socio.name;
                 
                 // Muestra el DNI y el Numero de Socio en el PDF
                 document.getElementById("pdf-dni").innerHTML = `${socio.dni} <strong style="color:#dc2626; margin-left: 10px;">| N° Socio: ${socio.numSocio || 'S/N'}</strong>`;
                 
-                if(pagoMonto) document.getElementById("pdf-monto").textContent = pagoMonto.value;
+                if(pagoMonto) {
+                    pagoMonto.value = 5000; // Resetear a 5000 al entrar
+                    document.getElementById("pdf-monto").textContent = pagoMonto.value;
+                }
                 const hoy = new Date();
                 document.getElementById("pdf-fecha").textContent = hoy.toLocaleDateString();
 
-                // Resetear estado del botón PDF al entrar
+                // Resetear estado del botón PDF al entrar (bloqueado)
                 if (btnDescargarPdf) {
                     btnDescargarPdf.disabled = true;
                     btnDescargarPdf.style.opacity = "0.5";
@@ -423,8 +428,12 @@ function initSociosPortal() {
         btnEnviarWhatsApp.addEventListener("click", () => {
             if(globalData.currentSocio) {
                 const monto = pagoMonto ? pagoMonto.value : "5000";
+                
+                // Forzamos que el PDF actualice el monto justo antes de habilitarlo
+                document.getElementById("pdf-monto").textContent = monto;
+                
                 const numSo = globalData.currentSocio.numSocio || 'S/N';
-                const mensaje = `Hola Club Funebrero 👋.\n\nSoy el socio/a *${globalData.currentSocio.name}*\n(DNI: ${globalData.currentSocio.dni} - Socio Nº: ${numSo}). \n\nTe envío adjunto el comprobante de mi pago de la cuota o aporte por el monto de *$${monto}*.\n\n¡Abrazo Funebrero!`;
+                const mensaje = `Hola Vicente 👋.\n\nSoy el socio/a *${globalData.currentSocio.name}*\n(DNI: ${globalData.currentSocio.dni} - Socio Nº: ${numSo}). \n\nTe envío adjunto el comprobante de mi aporte al Club por el monto de *$${monto}*.\n\n¡Abrazo Funebrero!`;
                 
                 const telefonoClub = "5493625451176"; 
                 
@@ -443,7 +452,7 @@ function initSociosPortal() {
     }
 
     btnDescargarPdf.addEventListener("click", () => {
-        if (btnDescargarPdf.disabled) return; // Por las dudas
+        if (btnDescargarPdf.disabled) return; 
         
         const comp = document.getElementById("comprobante-imprimir");
         comp.style.display = "block"; 
