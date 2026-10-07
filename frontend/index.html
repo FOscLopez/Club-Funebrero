@@ -17,7 +17,7 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
   
-  <!-- PREVENCIÓN DE CACHÉ DINÁMICA -->
+  <!-- PREVENCIÓN DE CACHÉ DINÁMICA PARA ESTILOS -->
   <script>
     document.write('<link rel="stylesheet" href="style.css?v=' + new Date().getTime() + '">');
   </script>
@@ -379,10 +379,11 @@
       <div id="login-socio-box" class="glass-premium" style="max-width: 450px; margin: 0 auto; text-align: center; padding: 30px;">
         <h3 style="color: #fff; font-family: 'Bebas Neue', cursive; font-size: 2rem; margin-top: 0;">Ingreso al Portal</h3>
         
-        <label style="display: block; text-align: left; color: #a3a3a3; font-size: 0.85rem; margin-bottom: 5px;">Tu Usuario (DNI):</label>
+        <!-- EXPLICACIÓN CLARA DEL DNI Y LA FECHA -->
+        <label style="display: block; text-align: left; color: #a3a3a3; font-size: 0.85rem; margin-bottom: 5px;"><strong>Tu Usuario (Ingresa tu DNI):</strong></label>
         <input type="number" id="socioDniInput" class="form-input" placeholder="Ej: 35123456" style="text-align: center; font-size: 1.1rem;">
         
-        <label style="display: block; text-align: left; color: #a3a3a3; font-size: 0.85rem; margin-bottom: 5px; margin-top: 15px;">Tu Contraseña (Fecha de nacimiento sin barras):</label>
+        <label style="display: block; text-align: left; color: #a3a3a3; font-size: 0.85rem; margin-bottom: 5px; margin-top: 15px;"><strong>Tu Contraseña (Fecha de nacimiento sin barras):</strong></label>
         <div style="position: relative; margin-bottom: 5px;">
             <input type="password" id="socioPassInput" class="form-input" placeholder="Ej: 13031990" style="text-align: center; font-size: 1.1rem; padding-right: 40px; margin-bottom: 0;">
             <span id="toggleSocioPass" style="position: absolute; right: 15px; top: 12px; cursor: pointer; font-size: 1.2rem;">👁️</span>
@@ -391,6 +392,7 @@
         <button id="btnBuscarSocio" class="action-btn" style="margin-top: 20px;">Ingresar a mi Cuenta</button>
         <p id="socioError" style="color: #ff3b3b; font-size: 0.85rem; margin-top: 15px; display: none;"></p>
         
+        <!-- LINK A WHATSAPP DEL CREADOR (FABIÁN) SI NO ESTÁ REGISTRADO -->
         <div id="socioWpLink" style="display: none; margin-top: 15px; border-top: 1px solid #333; padding-top: 15px;">
             <p style="color: #a3a3a3; font-size: 0.85rem; margin-bottom: 10px;">¿No estás registrado o tienes problemas para ingresar?</p>
             <a href="https://wa.me/5493624168410" target="_blank" style="color: #10b981; text-decoration: none; font-weight: bold; font-size: 0.9rem;">📲 Contáctanos por WhatsApp para ayudarte</a>
@@ -440,6 +442,8 @@
             <div style="border-top: 1px dashed #333; padding-top: 15px; margin-top: 15px;">
                 <p style="color: #fff; font-weight: 600; margin-bottom: 5px;">O transfiere desde cualquier cuenta o billetera (Ualá, Naranja X, MODO, Bancos) a:</p>
                 <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; display: inline-block; text-align: left;">
+                    
+                    <!-- BOTONES COPIAR AÑADIDOS -->
                     <span style="color: #a3a3a3; font-size: 0.8rem;">CVU/CBU:</span> <strong style="color: #10b981; letter-spacing: 1px;" id="textToCopyCvu">0000003100137467286158</strong> 
                     <span style="cursor:pointer; color:#3b82f6; font-size: 0.8rem; margin-left: 5px;" onclick="copiarAlPortapapeles('textToCopyCvu')">📋 Copiar</span><br>
                     
@@ -463,7 +467,7 @@
             <button id="btnDescargarPdf" class="outline-btn" style="padding: 12px; font-size: 1rem; border-color: #3b82f6; color: #3b82f6; width: 100%; margin-top: 0; margin-bottom: 0; opacity: 0.5; cursor: not-allowed;" disabled>
                📄 2. Descargar Mi Recibo (PDF)
             </button>
-            <p id="pdfInfoText" style="font-size: 0.75rem; color: #ef4444; margin-top: 8px;">* Envía el WhatsApp primero para poder generar el recibo.</p>
+            <p id="pdfInfoText" style="font-size: 0.75rem; color: #ef4444; margin-top: 8px;">Envía el WhatsApp primero para poder generar el recibo.</p>
          </div>
 
          <button id="btnSalirSocio" class="outline-btn" style="border: none; color: #a3a3a3; text-decoration: underline; width: 100%;">Cerrar Sesión</button>
@@ -505,7 +509,7 @@
 
   <!-- LÓGICA DE AUDIO, LANDING Y COPIAR AL PORTAPAPELES -->
   <script>
-    // FUNCION PARA COPIAR AL PORTAPAPELES
+    // FUNCION PARA COPIAR AL PORTAPAPELES (Para el CVU y Alias)
     function copiarAlPortapapeles(idElemento) {
         var texto = document.getElementById(idElemento).innerText;
         navigator.clipboard.writeText(texto).then(function() {
@@ -631,7 +635,7 @@
     });
   </script>
 
-  <!-- CARGA DEL SCRIPT DE LA APP (Añadido parámetro para Evitar Caché) -->
+  <!-- CARGA DEL SCRIPT DE LA APP (Añadido parámetro para Evitar Caché JS) -->
   <script>
     document.write('<script type="module" src="/js/app.js?v=' + new Date().getTime() + '"><\/script>');
   </script>
