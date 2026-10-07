@@ -6,7 +6,8 @@ import {
     getMeetings, createMeeting, updateMeeting, deleteMeeting,
     getSponsors, createSponsor, updateSponsor, deleteSponsor,
     addSociosBulk, getSocios, deleteSocio,
-    getCarouselImages, createCarouselImage, deleteCarouselImage 
+    getCarouselImages, createCarouselImage, deleteCarouselImage,
+    getUpcomingMatches, createUpcomingMatch, deleteUpcomingMatch // NUEVOS IMPORTS
 } from "./services/firestore.service.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { collection, addDoc, getDocs, doc, query, orderBy, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -71,14 +72,13 @@ onAuthStateChanged(auth, (user) => {
             loadSponsorsAdmin();
             loadSociosAdmin(); 
             loadMainCarouselAdmin(); 
+            loadUpcomingMatchesAdmin(); // CARGA LA NUEVA TABLA DE PRÓXIMOS PARTIDOS
             
         } else if (isSocioEditor) {
             badge.textContent = "👥 Editor Socios";
             badge.style.borderColor = "#06b6d4";
             badge.style.color = "#06b6d4";
             
-            // MAGIA: Oculta absolutamente todos los acordeones por defecto...
-            // Y luego MUESTRA ÚNICAMENTE los que tienen el ID de Socios
             const style = document.createElement('style');
             style.innerHTML = `
                 details.fune-accordion { display: none !important; }
@@ -86,12 +86,10 @@ onAuthStateChanged(auth, (user) => {
             `;
             document.head.appendChild(style);
             
-            // Carga unicamente la base de datos de socios para no gastar recursos
             loadSociosAdmin();
 
         } else {
             badge.textContent = "✍️ Editor";
-            // Oculta modulos administrativos fuertes
             const style = document.createElement('style');
             style.innerHTML = '.super-admin-only { display: none !important; }';
             document.head.appendChild(style);
@@ -158,9 +156,6 @@ document.getElementById("playerForm").addEventListener("submit", async (e) => {
     try { await addPlayersBulk(playersToSave); document.getElementById("magicBox").value = ""; await loadPlayers(); alert(`Se cargaron ${playersToSave.length} jugadores.`); } catch(err) { alert("Error al guardar."); } finally { btn.textContent = "Procesar Plantel"; btn.disabled = false; }
 });
 
-// =========================================
-// MÓDULO SOCIOS: CAJA MÁGICA Y TABLA
-// =========================================
 document.getElementById("socioForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const btn = document.getElementById("saveSocioBtn"); btn.textContent = "Procesando..."; btn.disabled = true;
@@ -201,7 +196,7 @@ document.getElementById("socioForm").addEventListener("submit", async (e) => {
     });
 
     if (sociosToSave.length === 0) {
-        alert("Formato no reconocido. Asegurate de incluir Nombre, Fecha de Nacimiento y DNI (ej: Juan Perez 15/05/1984 35123456) o pegar la tabla de Word.");
+        alert("Formato no reconocido. Asegurate de incluir Nombre, Fecha de Nacimiento y DNI o pegar la tabla de Word.");
         btn.textContent = "Procesar Socios"; btn.disabled = false;
         return;
     }
@@ -629,6 +624,66 @@ window.deleteMainCarouselImgAdmin = async (id) => {
     }
 };
 
+// ==========================================
+// NUEVO: GESTIÓN DE PRÓXIMOS PARTIDOS
+// ==========================================
+document.getElementById("triggerUpcomingMatchUploadBtn").addEventListener("click", () => {
+    document.getElementById("upcomingMatchFileUploader").click();
+});
+
+document.getElementById("upcomingMatchFileUploader").onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const btn = document.getElementById("triggerUpcomingMatchUploadBtn");
+    const originalText = btn.textContent;
+    btn.textContent = "⏳ Subiendo Flyer..."; 
+    btn.disabled = true;
+
+    const formData = new FormData();
+    formData.append("image", file);
+    
+    try {
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
+        const data = await res.json();
+        if (data.success) {
+            await createUpcomingMatch({ imageUrl: data.data.url });
+            loadUpcomingMatchesAdmin();
+            alert("Flyer agregado correctamente.");
+        } else throw new Error();
+    } catch(err) {
+        alert("Error al subir el flyer.");
+    } finally { 
+        e.target.value = ""; 
+        btn.textContent = originalText; 
+        btn.disabled = false;
+    }
+};
+
+async function loadUpcomingMatchesAdmin() {
+    const tbody = document.getElementById("upcomingMatchesList");
+    try {
+        const images = await getUpcomingMatches();
+        if(images.length === 0) { tbody.innerHTML = "<tr><td colspan='2' style='text-align:center;'>No hay flyers cargados</td></tr>"; return; }
+        
+        tbody.innerHTML = images.map(img => `
+            <tr>
+                <td><img src="${img.imageUrl}" style="height:60px; object-fit:contain; border-radius:4px; border: 1px solid #333;"></td>
+                <td style="text-align:right;">
+                    <button class="delete-btn" onclick="deleteUpcomingMatchAdmin('${img.id}')">Borrar</button>
+                </td>
+            </tr>
+        `).join("");
+    } catch(e) { tbody.innerHTML = "<tr><td colspan='2'>Error al cargar</td></tr>"; }
+}
+
+window.deleteUpcomingMatchAdmin = async (id) => {
+    if(confirm("¿Quitar este flyer de los próximos partidos?")) {
+        await deleteUpcomingMatch(id);
+        loadUpcomingMatchesAdmin();
+    }
+};
+
 const catsOptions = `
     <option value="Mosquito">Mosquito</option><option value="Mini">Mini</option><option value="Pre Mini">Pre Mini</option>
     <option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option>
@@ -638,7 +693,7 @@ const catsOptions = `
 
 window.openEditPlayer = (id, name, birthdate, cat) => {
     currentEditTarget = { id, type: 'player' };
-    document.getElementById('modalTitle').textContent = "✏️️ Reparar Jugador";
+    document.getElementById('modalTitle').textContent = "✏️ Reparar Jugador";
     document.getElementById('modalFormContainer').innerHTML = `
         <label style="color:#a3a3a3; font-size:0.8rem; margin-bottom:-10px;">Nombre Completo:</label>
         <input type="text" id="editPName" class="form-input" value="${name}">
