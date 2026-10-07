@@ -163,7 +163,7 @@ export async function registerPaymentIntent(data) {
 }
 
 // ==============================
-// CARRUSEL PRINCIPAL DE FOTOS (NUEVO)
+// CARRUSEL PRINCIPAL DE FOTOS
 // ==============================
 export async function getCarouselImages() {
   try {
@@ -186,4 +186,30 @@ export async function createCarouselImage(data) {
 
 export async function deleteCarouselImage(id) {
   await deleteDoc(doc(db, "carousel_images", id));
+}
+
+// ==============================
+// PRÓXIMOS PARTIDOS (NUEVO)
+// ==============================
+export async function getUpcomingMatches() {
+  try {
+    const snapshot = await getDocs(query(collection(db, "upcoming_matches"), orderBy("createdAt", "asc")));
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) { return []; }
+}
+
+export function listenToUpcomingMatches(callback) {
+  return onSnapshot(collection(db, "upcoming_matches"), (snapshot) => {
+    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    callback(data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)));
+  });
+}
+
+export async function createUpcomingMatch(data) {
+  data.createdAt = new Date().toISOString();
+  await addDoc(collection(db, "upcoming_matches"), data);
+}
+
+export async function deleteUpcomingMatch(id) {
+  await deleteDoc(doc(db, "upcoming_matches", id));
 }

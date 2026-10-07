@@ -47,6 +47,11 @@ service cloud.firestore {
     match /carousel_images/{document=**} {
       allow write: if isSuperAdmin();
     }
+    
+    // Próximos Partidos (Flyers Publicitarios)
+    match /upcoming_matches/{document=**} {
+      allow write: if isSuperAdmin();
+    }
 
     // Socios (Super Admin y el nuevo Editor de Socios)
     match /socios/{document=**} {

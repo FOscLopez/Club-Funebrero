@@ -1,4 +1,4 @@
-import { listenToFixtures, getPlayers, listenToMeetings, listenToSponsors, getSocioByDni, registerPaymentIntent, listenToCarouselImages } from "./services/firestore.service.js";
+import { listenToFixtures, getPlayers, listenToMeetings, listenToSponsors, getSocioByDni, registerPaymentIntent, listenToCarouselImages, listenToUpcomingMatches } from "./services/firestore.service.js";
 
 // ==========================================
 // DICCIONARIO DE LOGOS (IMGBB)
@@ -20,7 +20,7 @@ const CLUB_LOGOS = {
 const DEFAULT_LOGO = "https://i.ibb.co/Cpw4zbBv/571425287-18303994912267310-8920899741855718292-n.jpg";
 const GEMINI_API_KEY = "AIzaSyDvsq3fg1nEOQxR8wVcZW8rEX2lcc_xC8U";
 
-let globalData = { fixtures: [], players: [], meetings: [], sponsors: [], currentSocio: null, carouselImages: [] };
+let globalData = { fixtures: [], players: [], meetings: [], sponsors: [], currentSocio: null, carouselImages: [], upcomingMatches: [] };
 
 function getLogoSrc(clubName) {
     if (!clubName) return DEFAULT_LOGO;
@@ -70,6 +70,11 @@ async function initApp() {
     listenToCarouselImages((images) => {
         globalData.carouselImages = images;
         renderMainCarousel(images);
+    });
+
+    listenToUpcomingMatches((matches) => {
+        globalData.upcomingMatches = matches;
+        renderUpcomingMatches(matches);
     });
     
     initSociosPortal();
@@ -304,6 +309,54 @@ function renderMainCarousel(images) {
 }
 
 // ==========================================
+// NUEVO: RENDER PRÓXIMOS PARTIDOS
+// ==========================================
+let matchesInterval = null;
+function renderUpcomingMatches(matches) {
+    // Busca el contenedor que agregamos en el index.html
+    const container = document.getElementById("upcoming-matches-container");
+    if (!container) return;
+    
+    if (matches.length === 0) {
+        // Muestra el mensaje por defecto si no hay flyers
+        container.innerHTML = `
+            <div style="background: rgba(15,15,15,0.6); padding: 30px; border-radius: 12px; border: 1px dashed #333; margin-top: 20px;">
+                <p style="color:#a3a3a3; font-size:1.1rem; margin:0;">⏳ Esperando próximos partidos...</p>
+            </div>
+        `;
+        if (matchesInterval) clearInterval(matchesInterval);
+        return;
+    }
+
+    // Estilos para el carrusel de flyers
+    container.innerHTML = `
+        <div style="position: relative; height: 350px; border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(139, 92, 246, 0.3); margin-top: 20px;">
+            ${matches.map((match, idx) => `
+                <img src="${match.imageUrl}" class="match-slide ${idx === 0 ? 'active' : ''}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1s ease-in-out; object-fit: contain;" alt="Próximo Partido">
+            `).join("")}
+        </div>
+    `;
+
+    // Si hay más de 1 flyer, activa la rotación
+    if (matchesInterval) clearInterval(matchesInterval);
+    if (matches.length > 1) {
+        let currentIndex = 0;
+        const slides = container.querySelectorAll('.match-slide');
+        matchesInterval = setInterval(() => {
+            slides[currentIndex].classList.remove('active');
+            slides[currentIndex].style.opacity = '0';
+            currentIndex = (currentIndex + 1) % slides.length;
+            slides[currentIndex].classList.add('active');
+            slides[currentIndex].style.opacity = '1';
+        }, 5000); // Rota cada 5 segundos
+    } else {
+        // Si hay solo uno, asegurarse de que se vea (opacidad 1)
+        const slide = container.querySelector('.match-slide');
+        if(slide) slide.style.opacity = '1';
+    }
+}
+
+// ==========================================
 // PORTAL DE SOCIOS
 // ==========================================
 function initSociosPortal() {
@@ -352,7 +405,6 @@ function initSociosPortal() {
         
         let socio = await getSocioByDni(dni);
 
-        // SOLO PARA PRUEBAS (Permite ingresar con cualquier DNI inventado)
         if(!socio) { socio = { name: "Socio de Prueba Funebrero", dni: dni, birthdate: pass, numSocio: "00" }; }
 
         if (socio) {
@@ -363,21 +415,18 @@ function initSociosPortal() {
                 errorMsg.style.display = "block";
             } else {
                 globalData.currentSocio = socio;
-                // Mostrar primer nombre o nombre completo en el saludo
-                document.getElementById("dash-nombre").textContent = socio.name; 
+                document.getElementById("dash-nombre").textContent = socio.name;
                 document.getElementById("pdf-nombre").textContent = socio.name;
                 
-                // Muestra el DNI y el Numero de Socio en el PDF
                 document.getElementById("pdf-dni").innerHTML = `${socio.dni} <strong style="color:#dc2626; margin-left: 10px;">| N° Socio: ${socio.numSocio || 'S/N'}</strong>`;
                 
                 if(pagoMonto) {
-                    pagoMonto.value = 5000; // Resetear a 5000 al entrar
+                    pagoMonto.value = 5000; 
                     document.getElementById("pdf-monto").textContent = pagoMonto.value;
                 }
                 const hoy = new Date();
                 document.getElementById("pdf-fecha").textContent = hoy.toLocaleDateString();
 
-                // Resetear estado del botón PDF al entrar (bloqueado)
                 if (btnDescargarPdf) {
                     btnDescargarPdf.disabled = true;
                     btnDescargarPdf.style.opacity = "0.5";
@@ -423,13 +472,11 @@ function initSociosPortal() {
         }
     });
 
-    // Lógica para enviar WhatsApp y HABILITAR EL PDF
     if(btnEnviarWhatsApp) {
         btnEnviarWhatsApp.addEventListener("click", () => {
             if(globalData.currentSocio) {
                 const monto = pagoMonto ? pagoMonto.value : "5000";
                 
-                // Forzamos que el PDF actualice el monto justo antes de habilitarlo
                 document.getElementById("pdf-monto").textContent = monto;
                 
                 const numSo = globalData.currentSocio.numSocio || 'S/N';
@@ -440,7 +487,6 @@ function initSociosPortal() {
                 const url = `https://wa.me/${telefonoClub}?text=${encodeURIComponent(mensaje)}`;
                 window.open(url, "_blank");
 
-                // Magia: Se habilita el botón del PDF después de hacer clic en WhatsApp
                 if (btnDescargarPdf) {
                     btnDescargarPdf.disabled = false;
                     btnDescargarPdf.style.opacity = "1";
