@@ -7,17 +7,14 @@ import {
     getSponsors, createSponsor, updateSponsor, deleteSponsor,
     addSociosBulk, getSocios, deleteSocio,
     getCarouselImages, createCarouselImage, deleteCarouselImage,
-    getUpcomingMatches, createUpcomingMatch, deleteUpcomingMatch // NUEVOS IMPORTS
+    getUpcomingMatches, createUpcomingMatch, deleteUpcomingMatch 
 } from "./services/firestore.service.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { collection, addDoc, getDocs, doc, query, orderBy, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// ==========================================
-// ROLES DE SEGURIDAD
-// ==========================================
 const superAdmins = ["mecinfotec@gmail.com", "admin@abnch.com", "admin@reydigital.com"];
 const editores = ["editor@funebrero.com", "prensa@funebrero.com"];
-const editoresSocios = ["socios@funebrero.com"]; // NUEVO USUARIO PARA SOCIOS
+const editoresSocios = ["socios@funebrero.com"]; 
 const allowedUsers = [...superAdmins, ...editores, ...editoresSocios];
 
 let isSuperAdmin = false;
@@ -65,14 +62,13 @@ onAuthStateChanged(auth, (user) => {
             badge.style.borderColor = "#dc2626";
             badge.style.color = "#dc2626";
             
-            // Carga todo normal
             loadFixtures();
             loadPlayers();
             loadMeetingsAdmin();
             loadSponsorsAdmin();
             loadSociosAdmin(); 
             loadMainCarouselAdmin(); 
-            loadUpcomingMatchesAdmin(); // CARGA LA NUEVA TABLA DE PRÓXIMOS PARTIDOS
+            loadUpcomingMatchesAdmin(); 
             
         } else if (isSocioEditor) {
             badge.textContent = "👥 Editor Socios";
@@ -237,6 +233,9 @@ window.deleteSocioAdmin = async (id) => {
     }
 };
 
+// =========================================
+// TABLA DE FIXTURES (EDICIÓN EN LÍNEA)
+// =========================================
 async function loadFixtures() {
     const tbody = document.getElementById("fixturesList");
     try {
@@ -244,9 +243,34 @@ async function loadFixtures() {
         const snapshot = await getDocs(q);
         allFixturesCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderFixturesTable();
+        
+        // ACTUALIZAMOS EL DESPLEGABLE DE FLYERS AUTOMÁTICAMENTE
+        populateFlyerDropdown();
+        // RECARGAMOS LA TABLA DE FLYERS PARA VER LOS VÍNCULOS
+        loadUpcomingMatchesAdmin();
+        
     } catch (error) { 
         tbody.innerHTML = '<tr><td colspan="6">Error de lectura.</td></tr>'; 
     }
+}
+
+// NUEVA FUNCIÓN: Rellena la lista de partidos programados para el módulo de Flyers
+function populateFlyerDropdown() {
+    const select = document.getElementById("flyerFixtureSelect");
+    if (!select) return;
+    
+    // Filtramos solo los partidos que NO estén finalizados
+    const scheduledFixtures = allFixturesCache.filter(f => f.status !== "finished");
+    
+    if (scheduledFixtures.length === 0) {
+        select.innerHTML = '<option value="">No hay partidos programados actualmente</option>';
+        return;
+    }
+    
+    select.innerHTML = '<option value="">Selecciona a qué partido corresponde el Flyer...</option>' + 
+        scheduledFixtures.map(f => {
+            return `<option value="${f.id}">CAT. ${f.categoryId} | ${f.homeClubId} vs ${f.awayClubId} (${f.round || 'S/N'})</option>`;
+        }).join("");
 }
 
 function renderFixturesTable() {
@@ -338,7 +362,7 @@ window.updateScoreInline = async (id, val, side) => {
 };
 
 window.toggleStatusAdmin = async (id, newStatus) => {
-    let msg = newStatus === 'finished' ? "¿Sellar partido? Pasará a la vista pública." : "¿Reabrir partido? Se habilitará la edición del marcador.";
+    let msg = newStatus === 'finished' ? "¿Sellar partido? El flyer publicitario desaparecerá del inicio automáticamente." : "¿Reabrir partido? El flyer volverá a mostrarse.";
     if(confirm(msg)) {
         await updateFixture(id, { status: newStatus });
         loadFixtures();
@@ -634,6 +658,14 @@ document.getElementById("triggerUpcomingMatchUploadBtn").addEventListener("click
 document.getElementById("upcomingMatchFileUploader").onchange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    // VALIDACIÓN: Verificamos que se haya seleccionado un partido del menú
+    const fixtureId = document.getElementById("flyerFixtureSelect").value;
+    if(!fixtureId) {
+        alert("Por favor, selecciona a qué partido corresponde el flyer antes de subirlo.");
+        e.target.value = ""; 
+        return;
+    }
     
     const btn = document.getElementById("triggerUpcomingMatchUploadBtn");
     const originalText = btn.textContent;
@@ -647,9 +679,10 @@ document.getElementById("upcomingMatchFileUploader").onchange = async (e) => {
         const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
         const data = await res.json();
         if (data.success) {
-            await createUpcomingMatch({ imageUrl: data.data.url });
+            // Guardamos el flyer JUNTO con el ID del partido
+            await createUpcomingMatch({ imageUrl: data.data.url, fixtureId: fixtureId });
             loadUpcomingMatchesAdmin();
-            alert("Flyer agregado correctamente.");
+            alert("Flyer vinculado y agregado correctamente.");
         } else throw new Error();
     } catch(err) {
         alert("Error al subir el flyer.");
@@ -664,17 +697,24 @@ async function loadUpcomingMatchesAdmin() {
     const tbody = document.getElementById("upcomingMatchesList");
     try {
         const images = await getUpcomingMatches();
-        if(images.length === 0) { tbody.innerHTML = "<tr><td colspan='2' style='text-align:center;'>No hay flyers cargados</td></tr>"; return; }
+        if(images.length === 0) { tbody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>No hay flyers cargados</td></tr>"; return; }
         
-        tbody.innerHTML = images.map(img => `
-            <tr>
-                <td><img src="${img.imageUrl}" style="height:60px; object-fit:contain; border-radius:4px; border: 1px solid #333;"></td>
-                <td style="text-align:right;">
-                    <button class="delete-btn" onclick="deleteUpcomingMatchAdmin('${img.id}')">Borrar</button>
-                </td>
-            </tr>
-        `).join("");
-    } catch(e) { tbody.innerHTML = "<tr><td colspan='2'>Error al cargar</td></tr>"; }
+        tbody.innerHTML = images.map(img => {
+            // Buscamos el partido vinculado en el caché
+            const linkedFix = allFixturesCache.find(f => f.id === img.fixtureId);
+            const fixText = linkedFix ? `${linkedFix.homeClubId} vs ${linkedFix.awayClubId} (${linkedFix.status === 'finished' ? 'FINALIZADO' : 'PENDIENTE'})` : 'Sin vincular';
+            
+            return `
+                <tr>
+                    <td><img src="${img.imageUrl}" style="height:60px; object-fit:contain; border-radius:4px; border: 1px solid #333;"></td>
+                    <td style="color:#a3a3a3; font-size:0.85rem;">${fixText}</td>
+                    <td style="text-align:right;">
+                        <button class="delete-btn" onclick="deleteUpcomingMatchAdmin('${img.id}')">Borrar</button>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    } catch(e) { tbody.innerHTML = "<tr><td colspan='3'>Error al cargar</td></tr>"; }
 }
 
 window.deleteUpcomingMatchAdmin = async (id) => {

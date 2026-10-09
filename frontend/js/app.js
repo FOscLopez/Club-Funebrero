@@ -51,6 +51,10 @@ async function initApp() {
     listenToFixtures((fixtures) => {
         globalData.fixtures = fixtures;
         renderFixtures(fixtures);
+        // Si el estado de un partido cambia a Finalizado, vuelve a evaluar los flyers
+        if(globalData.upcomingMatches.length > 0) {
+            renderUpcomingMatches(globalData.upcomingMatches);
+        }
     });
 
     globalData.players = await getPlayers();
@@ -72,7 +76,6 @@ async function initApp() {
         renderMainCarousel(images);
     });
 
-    // Restauramos el listener para pintar los próximos partidos
     listenToUpcomingMatches((matches) => {
         globalData.upcomingMatches = matches;
         renderUpcomingMatches(matches);
@@ -310,14 +313,22 @@ function renderMainCarousel(images) {
 }
 
 // ==========================================
-// RENDER PRÓXIMOS PARTIDOS
+// RENDER PRÓXIMOS PARTIDOS (CON FILTRO)
 // ==========================================
 let matchesInterval = null;
 function renderUpcomingMatches(matches) {
     const container = document.getElementById("upcoming-matches-container");
     if (!container) return;
     
-    if (matches.length === 0) {
+    // MAGIA: Filtramos para mostrar solo los flyers de los partidos que NO están finalizados
+    const activeMatches = matches.filter(m => {
+        if (!m.fixtureId) return true; // Si es un flyer viejo sin vincular, se muestra
+        const linkedFixture = globalData.fixtures.find(f => f.id === m.fixtureId);
+        // Si encontramos el partido y NO está en estado 'finished', mostramos el flyer
+        return linkedFixture && linkedFixture.status !== "finished";
+    });
+
+    if (activeMatches.length === 0) {
         container.innerHTML = `
             <div style="background: rgba(15,15,15,0.6); padding: 30px; border-radius: 12px; border: 1px dashed #333;">
                 <p style="color:#a3a3a3; font-size:1.1rem; margin:0;">⏳ Esperando confirmación de próximos partidos...</p>
@@ -329,7 +340,7 @@ function renderUpcomingMatches(matches) {
 
     container.innerHTML = `
         <div style="position: relative; height: 400px; border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(220, 38, 38, 0.3);">
-            ${matches.map((match, idx) => `
+            ${activeMatches.map((match, idx) => `
                 <img src="${match.imageUrl}" class="match-slide ${idx === 0 ? 'active' : ''}" style="position: absolute; top: 0; left: 0; width: 100\%; height: 100\%; opacity: ${idx === 0 ? '1' : '0'}; transition: opacity 1s ease-in-out; object-fit: contain;" alt="Próximo Partido">
             `).join("")}
         </div>
@@ -337,13 +348,13 @@ function renderUpcomingMatches(matches) {
 
     if (matchesInterval) clearInterval(matchesInterval);
     
-    if (matches.length > 1) {
+    if (activeMatches.length > 1) {
         let currentIndex = 0;
         const slides = container.querySelectorAll('.match-slide');
         matchesInterval = setInterval(() => {
             slides[currentIndex].classList.remove('active');
             slides[currentIndex].style.opacity = '0';
-            currentIndex = (currentIndex + 1) % slides.length;
+            currentIndex = (currentIndex + 1) % activeMatches.length;
             slides[currentIndex].classList.add('active');
             slides[currentIndex].style.opacity = '1';
         }, 5000);
