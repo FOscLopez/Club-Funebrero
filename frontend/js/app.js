@@ -72,6 +72,7 @@ async function initApp() {
         renderMainCarousel(images);
     });
 
+    // Restauramos el listener para pintar los próximos partidos
     listenToUpcomingMatches((matches) => {
         globalData.upcomingMatches = matches;
         renderUpcomingMatches(matches);
@@ -309,36 +310,33 @@ function renderMainCarousel(images) {
 }
 
 // ==========================================
-// NUEVO: RENDER PRÓXIMOS PARTIDOS
+// RENDER PRÓXIMOS PARTIDOS
 // ==========================================
 let matchesInterval = null;
 function renderUpcomingMatches(matches) {
-    // Busca el contenedor que agregamos en el index.html
     const container = document.getElementById("upcoming-matches-container");
     if (!container) return;
     
     if (matches.length === 0) {
-        // Muestra el mensaje por defecto si no hay flyers
         container.innerHTML = `
-            <div style="background: rgba(15,15,15,0.6); padding: 30px; border-radius: 12px; border: 1px dashed #333; margin-top: 20px;">
-                <p style="color:#a3a3a3; font-size:1.1rem; margin:0;">⏳ Esperando próximos partidos...</p>
+            <div style="background: rgba(15,15,15,0.6); padding: 30px; border-radius: 12px; border: 1px dashed #333;">
+                <p style="color:#a3a3a3; font-size:1.1rem; margin:0;">⏳ Esperando confirmación de próximos partidos...</p>
             </div>
         `;
         if (matchesInterval) clearInterval(matchesInterval);
         return;
     }
 
-    // Estilos para el carrusel de flyers
     container.innerHTML = `
-        <div style="position: relative; height: 350px; border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(139, 92, 246, 0.3); margin-top: 20px;">
+        <div style="position: relative; height: 400px; border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(220, 38, 38, 0.3);">
             ${matches.map((match, idx) => `
-                <img src="${match.imageUrl}" class="match-slide ${idx === 0 ? 'active' : ''}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1s ease-in-out; object-fit: contain;" alt="Próximo Partido">
+                <img src="${match.imageUrl}" class="match-slide ${idx === 0 ? 'active' : ''}" style="position: absolute; top: 0; left: 0; width: 100\%; height: 100\%; opacity: ${idx === 0 ? '1' : '0'}; transition: opacity 1s ease-in-out; object-fit: contain;" alt="Próximo Partido">
             `).join("")}
         </div>
     `;
 
-    // Si hay más de 1 flyer, activa la rotación
     if (matchesInterval) clearInterval(matchesInterval);
+    
     if (matches.length > 1) {
         let currentIndex = 0;
         const slides = container.querySelectorAll('.match-slide');
@@ -348,11 +346,7 @@ function renderUpcomingMatches(matches) {
             currentIndex = (currentIndex + 1) % slides.length;
             slides[currentIndex].classList.add('active');
             slides[currentIndex].style.opacity = '1';
-        }, 5000); // Rota cada 5 segundos
-    } else {
-        // Si hay solo uno, asegurarse de que se vea (opacidad 1)
-        const slide = container.querySelector('.match-slide');
-        if(slide) slide.style.opacity = '1';
+        }, 5000);
     }
 }
 
@@ -415,7 +409,7 @@ function initSociosPortal() {
                 errorMsg.style.display = "block";
             } else {
                 globalData.currentSocio = socio;
-                document.getElementById("dash-nombre").textContent = socio.name;
+                document.getElementById("dash-nombre").textContent = socio.name; 
                 document.getElementById("pdf-nombre").textContent = socio.name;
                 
                 document.getElementById("pdf-dni").innerHTML = `${socio.dni} <strong style="color:#dc2626; margin-left: 10px;">| N° Socio: ${socio.numSocio || 'S/N'}</strong>`;
