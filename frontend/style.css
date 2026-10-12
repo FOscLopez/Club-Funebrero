@@ -501,10 +501,32 @@ body {
 .sponsor-logo { height: 40px; max-width: 100px; object-fit: contain; filter: grayscale(20%); transition: 0.3s; }
 .sponsor-card:hover .sponsor-logo { filter: grayscale(0%); transform: scale(1.05); }
 
+/* ====================================================
+   9. CORRECCIONES RESTAURADAS (CARRUSEL Y REDES)
+   ==================================================== */
+
+/* Estilos de Redes Sociales */
+.hero-socials { display: flex; flex-direction: column; gap: 10px; justify-content: center; margin-top: 25px; width: 100%; max-width: 300px; margin-left: auto; margin-right: auto;}
+.social-btn { padding: 12px 20px; border-radius: 30px; font-weight: 600; text-decoration: none; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; width: 100%; box-sizing: border-box;}
+.btn-fb { background: rgba(24, 119, 242, 0.1); border: 1px solid rgba(24, 119, 242, 0.5); color: #60a5fa; }
+.btn-fb:hover { background: #1877F2; color: #fff; box-shadow: 0 5px 20px rgba(24, 119, 242, 0.4); transform: translateY(-3px); }
+.btn-ig { background: rgba(225, 48, 108, 0.1); border: 1px solid rgba(225, 48, 108, 0.5); color: #f472b6; }
+.btn-ig:hover { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: #fff; box-shadow: 0 5px 20px rgba(225, 48, 108, 0.4); transform: translateY(-3px); border-color: transparent; }
+
+/* Contenedor del Carrusel Principal de Fotos */
+.main-carousel { width: 100%; max-width: 600px; height: 250px; margin: 30px auto 0; position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(220,38,38,0.2); border: 1px solid rgba(255,255,255,0.1); background: #000; }
+.carousel-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1s ease-in-out; object-fit: cover; }
+.carousel-slide.active { opacity: 1; }
+
 @media (min-width: 992px) {
     .club-title-glow { font-size: 6.5rem; }
     .hero-subtitle { font-size: 1.2rem; }
     #main-logo { width: 200px; }
     .horizontal-scroller { padding: 10px 40px 30px 40px; }
     .row-title { padding-left: 40px; }
+    
+    /* Adaptación Redes y Carrusel para PC */
+    .hero-socials { flex-direction: row; max-width: 800px; width: auto;}
+    .social-btn { width: auto; padding: 10px 25px; font-size: 0.9rem;}
+    .main-carousel { height: 350px; }
 }
