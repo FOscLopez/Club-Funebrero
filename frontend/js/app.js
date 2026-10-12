@@ -57,7 +57,6 @@ window.observeDynamicElements = () => {
 
 document.addEventListener("DOMContentLoaded", () => {
     console.log("🏀 Plataforma del Club Atlético Funebrero inicializada.");
-    
     document.querySelectorAll('.nav-links a').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             const targetId = this.getAttribute('href');
@@ -78,6 +77,7 @@ async function initApp() {
     listenToFixtures((fixtures) => {
         globalData.fixtures = fixtures;
         renderFixtures(fixtures);
+        // Si el estado de un partido cambia a Finalizado, vuelve a evaluar los flyers
         if(globalData.upcomingMatches.length > 0) {
             renderUpcomingMatches(globalData.upcomingMatches);
         }
@@ -111,7 +111,7 @@ async function initApp() {
 }
 
 // ==========================================
-// RENDER: FIXTURES (Añadido .reveal)
+// RENDER: FIXTURES
 // ==========================================
 function renderFixtures(fixtures) {
     const container = document.getElementById("publicFixturesContainer");
@@ -167,7 +167,7 @@ function renderFixtures(fixtures) {
 }
 
 // ==========================================
-// RENDER: PLANTELES (Añadido .reveal)
+// RENDER: PLANTELES
 // ==========================================
 function renderRosters(players) {
     const container = document.getElementById("rostersContainer");
@@ -189,7 +189,7 @@ function renderRosters(players) {
 }
 
 // ==========================================
-// RENDER: CUMPLEAÑOS (Añadido .reveal)
+// RENDER: CUMPLEAÑOS
 // ==========================================
 function renderBirthdays(players) {
     const container = document.getElementById("birthdaysContainer");
@@ -251,7 +251,7 @@ function renderBirthdays(players) {
 }
 
 // ==========================================
-// RENDER: ACTAS INSTITUCIONALES (Añadido .reveal)
+// RENDER: ACTAS INSTITUCIONALES (PDF EN DRIVE)
 // ==========================================
 function renderMeetings(meetings) {
     const container = document.getElementById("meetingsContainer");
@@ -343,7 +343,7 @@ function renderMainCarousel(images) {
 }
 
 // ==========================================
-// RENDER PRÓXIMOS PARTIDOS
+// RENDER PRÓXIMOS PARTIDOS (CON FILTRO CORREGIDO)
 // ==========================================
 let matchesInterval = null;
 function renderUpcomingMatches(matches) {
@@ -352,8 +352,12 @@ function renderUpcomingMatches(matches) {
     
     const activeMatches = matches.filter(m => {
         if (!m.fixtureId) return true;
+        
+        // CORRECCIÓN DE LA LÓGICA DE VINCULACIÓN
         const linkedFixture = globalData.fixtures.find(f => f.id === m.fixtureId);
-        return linkedFixture && linkedFixture.status !== "finished";
+        if (!linkedFixture) return true; // Si por alguna razón el partido aún no cargó, mostramos el flyer para que no parezca que desapareció por error.
+        
+        return linkedFixture.status !== "finished";
     });
 
     if (activeMatches.length === 0) {
