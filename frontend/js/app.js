@@ -1,8 +1,5 @@
 import { listenToFixtures, getPlayers, listenToMeetings, listenToSponsors, getSocioByDni, registerPaymentIntent, listenToCarouselImages, listenToUpcomingMatches } from "./services/firestore.service.js";
 
-// ==========================================
-// DICCIONARIO DE LOGOS (IMGBB)
-// ==========================================
 const CLUB_LOGOS = {
     "FUNEBRERO": "https://i.ibb.co/r85gwzH/funebrero.webp",
     "UNIÓN": "https://i.ibb.co/YGgpKFT/union.webp",
@@ -109,7 +106,7 @@ async function initApp() {
 }
 
 // ==========================================
-// RENDER: FIXTURES
+// RENDER: FIXTURES (CAMBIO A FILAS HORIZONTALES)
 // ==========================================
 function renderFixtures(fixtures) {
     const container = document.getElementById("publicFixturesContainer");
@@ -185,7 +182,7 @@ function renderRosters(players) {
     const grouped = {};
     players.forEach(p => { if (!grouped[p.categoryId]) grouped[p.categoryId] = []; grouped[p.categoryId].push(p); });
     
-    // SVG de Pelota Sonriente que servirá de "avatar" hasta que subas fotos reales.
+    // SVG de Pelota Sonriente que servirá de "avatar"
     const svgBall = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23ea580c' stroke='%23431407' stroke-width='4'/><path d='M50 4 v92' stroke='%23431407' stroke-width='3' fill='none'/><path d='M4 50 h92' stroke='%23431407' stroke-width='3' fill='none'/><path d='M15 15 a 40 40 0 0 0 0 70' stroke='%23431407' stroke-width='3' fill='none'/><path d='M85 15 a 40 40 0 0 1 0 70' stroke='%23431407' stroke-width='3' fill='none'/><circle cx='35' cy='35' r='6' fill='%23000'/><circle cx='65' cy='35' r='6' fill='%23000'/><path d='M35 55 Q50 75 65 55' stroke='%23000' stroke-width='5' fill='none' stroke-linecap='round'/></svg>";
 
     let html = "";
@@ -285,7 +282,7 @@ function renderBirthdays(players) {
 }
 
 // ==========================================
-// RENDER: ACTAS INSTITUCIONALES
+// RENDER: ACTAS INSTITUCIONALES 
 // ==========================================
 function renderMeetings(meetings) {
     const container = document.getElementById("meetingsContainer");
@@ -427,8 +424,6 @@ function renderUpcomingMatches(matches) {
             slides[currentIndex].style.opacity = '1';
         }, 5000);
     }
-    
-    if(window.observeDynamicElements) window.observeDynamicElements();
 }
 
 // ==========================================
