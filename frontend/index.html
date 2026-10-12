@@ -8,7 +8,7 @@
   <!-- ETIQUETAS PWA Y BARRA DEL NAVEGADOR -->
   <link rel="icon" type="image/png" href="logo-funebrero_2.png">
   <link rel="apple-touch-icon" href="logo-funebrero_2.png">
-  <meta name="theme-color" content="#dc2626">
+  <meta name="theme-color" content="#dc2626"> <!-- Pinta la barra superior del celular de Rojo Funebrero -->
   <link rel="manifest" href="manifest.json">
   
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -17,14 +17,18 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
   
+  <!-- PREVENCIÓN DE CACHÉ DINÁMICA PARA ESTILOS -->
   <script>
     document.write('<link rel="stylesheet" href="style.css?v=' + new Date().getTime() + '">');
   </script>
   
+  <!-- LIBRERIA PARA DESCARGAR PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
-    /* ANIMACIONES DE SCROLL (REVEAL MOTOR) */
+    /* ====================================================
+       ANIMACIONES DE SCROLL (REVEAL MOTOR)
+       ==================================================== */
     .reveal {
         opacity: 0;
         transform: translateY(40px);
@@ -35,6 +39,7 @@
         transform: translateY(0);
     }
 
+    /* HEADER DINÁMICO AL HACER SCROLL */
     .header.scrolled {
         padding: 6px 0 !important;
         background: rgba(3, 3, 3, 0.98) !important;
@@ -42,6 +47,9 @@
         border-bottom-color: #ff3b3b;
     }
 
+    /* ====================================================
+       1. EFECTOS VISUALES PREMIUM (FONDO VIVO)
+       ==================================================== */
     @keyframes dynamicBg {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
@@ -56,6 +64,9 @@
       scroll-behavior: smooth;
     }
 
+    /* ====================================================
+       2. BOTÓN INGRESO Y LANDING ANIMADA
+       ==================================================== */
     #enter-stadium-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #050505; z-index: 2000000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
     .btn-enter { background: #dc2626; color: #fff; border: 2px solid #ffbaba; padding: 15px 40px; font-family: 'Bebas Neue', cursive; font-size: 2rem; letter-spacing: 2px; border-radius: 8px; cursor: pointer; box-shadow: 0 0 20px rgba(220,38,38,0.6); transition: 0.3s; animation: pulseBd 2s infinite; text-transform: uppercase; }
     .btn-enter:hover { background: #ff3b3b; transform: scale(1.05); box-shadow: 0 0 40px rgba(220,38,38,0.8); }
@@ -93,6 +104,7 @@
     .landing-title span { color: #dc2626; }
     @keyframes fadeInText { to { opacity: 1; } }
 
+    /* ---- INICIO EFECTO SOLDADURA ---- */
     .weld-spark {
         position: absolute;
         width: 8px; height: 8px;
@@ -106,8 +118,8 @@
         0% { transform: scale(1); opacity: 0.8; }
         100% { transform: scale(1.8); opacity: 1; box-shadow: 0 0 25px 12px #dc2626, 0 0 45px 20px #ffffff; }
     }
-    
-    /* CORRECCIÓN DE SALTOS DE LÍNEA EN LA ANIMACIÓN */
+
+    /* CORRECCIÓN: Saltos de línea eliminados */
     @keyframes sparkPath {
         0%   { top: 0; left: 0; }
         25%  { top: 0; left: calc(100% - 8px); }
@@ -115,7 +127,7 @@
         75%  { top: calc(100% - 8px); left: 0; }
         100% { top: 0; left: 0; }
     }
-    
+
     .weld-line {
         position: absolute;
         background: #dc2626;
@@ -160,6 +172,7 @@
   <!-- PANTALLA DE CARGA ANIMADA -->
   <div id="landing-overlay">
     
+    <!-- Efecto Soldadura Borde Perimetral -->
     <div class="weld-spark"></div>
     <div class="weld-line weld-top"></div>
     <div class="weld-line weld-right"></div>
@@ -453,7 +466,7 @@
                       const destX = centerX + (Math.random() - 0.5) * 600; 
                       const destY = centerY + (Math.random() - 0.5) * 600;
 
-                      // CORRECCIÓN DE SALTOS DE LÍNEA EN EL JAVASCRIPT
+                      /* CORRECCIÓN: Saltos de línea eliminados */
                       particle.animate([
                           { transform: `translate(0, 0) scale(1.5)`, opacity: 1 },
                           { transform: `translate(${destX - rect.left}px, ${destY - rect.top}px) scale(0)`, opacity: 0 }

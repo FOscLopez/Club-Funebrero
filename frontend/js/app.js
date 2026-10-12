@@ -106,7 +106,7 @@ async function initApp() {
 }
 
 // ==========================================
-// RENDER: FIXTURES (CAMBIO A FILAS HORIZONTALES)
+// RENDER: FIXTURES (CAMBIADO A FILAS HORIZONTALES)
 // ==========================================
 function renderFixtures(fixtures) {
     const container = document.getElementById("publicFixturesContainer");
@@ -127,7 +127,7 @@ function renderFixtures(fixtures) {
             return getNum(a.round) - getNum(b.round);
         });
         
-        finalHtml += `<div class="app-row reveal"><h3 class="row-title">🏆 CATEGORÍA ${cat}</h3><div class="horizontal-scroller">`;
+        finalHtml += `<div class="app-row reveal"><h3 class="row-title" style="font-size: 1.5rem; margin-top: 15px;">🏆 CATEGORÍA ${cat}</h3><div class="horizontal-scroller">`;
         
         finalHtml += grouped[cat].map(f => {
             const isFinished = f.status === "finished";
@@ -139,9 +139,9 @@ function renderFixtures(fixtures) {
             let photosHtml = "";
             if (f.planilla || f.photoHome || f.photoAway) {
                 photosHtml = `<div style="display:flex; gap:10px; justify-content:center; margin-top:15px; flex-wrap:wrap; width: 100%; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">`;
-                if (f.planilla) photosHtml += `<a href="${f.planilla}" target="_blank" class="outline-btn" style="border-color:#3b82f6; color:#3b82f6;"><i style="font-style:normal;">📄</i> Planilla Oficial</a>`;
-                if (f.photoHome) photosHtml += `<a href="${f.photoHome}" target="_blank" class="outline-btn" style="border-color:#10b981; color:#10b981;"><i style="font-style:normal;">📸</i> Foto Local</a>`;
-                if (f.photoAway) photosHtml += `<a href="${f.photoAway}" target="_blank" class="outline-btn" style="border-color:#f59e0b; color:#f59e0b;"><i style="font-style:normal;">📸</i> Foto Visita</a>`;
+                if (f.planilla) photosHtml += `<a href="${f.planilla}" target="_blank" class="outline-btn" style="border-color:#3b82f6; color:#3b82f6;"><i style="font-style:normal;">📄</i> Planilla</a>`;
+                if (f.photoHome) photosHtml += `<a href="${f.photoHome}" target="_blank" class="outline-btn" style="border-color:#10b981; color:#10b981;"><i style="font-style:normal;">📸</i> Local</a>`;
+                if (f.photoAway) photosHtml += `<a href="${f.photoAway}" target="_blank" class="outline-btn" style="border-color:#f59e0b; color:#f59e0b;"><i style="font-style:normal;">📸</i> Visita</a>`;
                 photosHtml += `</div>`;
             }
 
@@ -172,7 +172,7 @@ function renderFixtures(fixtures) {
 }
 
 // ==========================================
-// RENDER: PLANTELES (ACTUALIZADO CON PELOTA SONRIENTE)
+// RENDER: PLANTELES (ACTUALIZADO A PELOTA SONRIENTE/FOTOS)
 // ==========================================
 function renderRosters(players) {
     const container = document.getElementById("rostersContainer");
@@ -182,17 +182,17 @@ function renderRosters(players) {
     const grouped = {};
     players.forEach(p => { if (!grouped[p.categoryId]) grouped[p.categoryId] = []; grouped[p.categoryId].push(p); });
     
-    // SVG de Pelota Sonriente que servirá de "avatar"
+    // SVG de Pelota Sonriente que servirá de avatar dinámico
     const svgBall = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23ea580c' stroke='%23431407' stroke-width='4'/><path d='M50 4 v92' stroke='%23431407' stroke-width='3' fill='none'/><path d='M4 50 h92' stroke='%23431407' stroke-width='3' fill='none'/><path d='M15 15 a 40 40 0 0 0 0 70' stroke='%23431407' stroke-width='3' fill='none'/><path d='M85 15 a 40 40 0 0 1 0 70' stroke='%23431407' stroke-width='3' fill='none'/><circle cx='35' cy='35' r='6' fill='%23000'/><circle cx='65' cy='35' r='6' fill='%23000'/><path d='M35 55 Q50 75 65 55' stroke='%23000' stroke-width='5' fill='none' stroke-linecap='round'/></svg>";
 
     let html = "";
     Object.keys(grouped).sort().forEach(cat => {
-        html += `<div class="app-row reveal"><h3 class="row-title">🏀 PLANTEL ${cat} <span style="font-size: 0.9rem; color: #a3a3a3; font-family: 'Poppins', sans-serif; font-weight: normal; margin-left: 10px;">(${grouped[cat].length} Jugadores)</span></h3><div class="horizontal-scroller">`;
+        html += `<div class="app-row reveal"><h3 class="row-title" style="font-size: 1.5rem; margin-top: 15px;">🏀 CATEGORÍA ${cat} <span style="font-size: 0.9rem; color: #a3a3a3; font-family: 'Poppins', sans-serif; font-weight: normal; margin-left: 10px;">(${grouped[cat].length} Jugadores)</span></h3><div class="horizontal-scroller">`;
         
         grouped[cat].sort((a, b) => a.name.localeCompare(b.name)).forEach(p => {
             html += `
                 <div class="player-card">
-                    <!-- Cuando subas foto, la variable p.photoUrl pisará automáticamente este SVG sonriente -->
+                    <!-- Si subes una foto, se mostrará aquí; si no, la pelota sonriente -->
                     <img src="${p.photoUrl || svgBall}" class="smiling-ball" alt="Jugador">
                     <strong style="color: #fff; display: block; font-family: 'Bebas Neue', cursive; font-size: 1.2rem; letter-spacing: 1px;">${p.name}</strong>
                     <span style="color: #a3a3a3; font-size: 0.75rem;">Nac: ${p.birthdate}</span>
@@ -205,7 +205,7 @@ function renderRosters(players) {
 }
 
 // ==========================================
-// RENDER: CUMPLEAÑOS
+// RENDER: CUMPLEAÑOS (CAMBIO A FILAS HORIZONTALES)
 // ==========================================
 function renderBirthdays(players) {
     const container = document.getElementById("birthdaysContainer");
@@ -282,7 +282,7 @@ function renderBirthdays(players) {
 }
 
 // ==========================================
-// RENDER: ACTAS INSTITUCIONALES 
+// RENDER: ACTAS INSTITUCIONALES (CAMBIO A FILAS HORIZONTALES)
 // ==========================================
 function renderMeetings(meetings) {
     const container = document.getElementById("meetingsContainer");
@@ -294,7 +294,7 @@ function renderMeetings(meetings) {
 
     meetings.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    let html = `<div class="app-row reveal"><h3 class="row-title">📜 BOLETÍN OFICIAL Y ACTAS</h3><div class="horizontal-scroller">`;
+    let html = `<div class="app-row reveal"><div class="horizontal-scroller">`;
     
     html += meetings.map(m => {
         let pdfHtml = "";
