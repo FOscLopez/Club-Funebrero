@@ -1,136 +1,122 @@
 /* ====================================================
-   ESTILOS PREMIUM - CLUB FUNEBRERO (BLANCO, NEGRO, ROJO)
+   ESTILOS ULTRA PREMIUM 2026 - CLUB FUNEBRERO
    ==================================================== */
 
    :root {
-    --bg-dark: #050505;
+    --bg-deep: #030303;
+    --bg-surface: #0a0a0a;
     --rojo-funebrero: #dc2626;
-    --rojo-brillante: #ff3b3b;
-    --blanco: #ffffff;
-    --gris-claro: #a3a3a3;
+    --rojo-neon: #ff3b3b;
+    --blanco-puro: #ffffff;
+    --gris-texto: #94a3b8;
+    --gris-borde: rgba(255, 255, 255, 0.08);
     --font-titulos: 'Bebas Neue', cursive;
     --font-textos: 'Poppins', sans-serif;
 }
 
-/* Reset Básico */
+/* Reset Suave y Custom Scrollbar (Estilo Mac/App) */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-html {
-    scroll-behavior: smooth;
-}
-
-/* ====================================================
-   SCROLLBAR DE ALTA GAMA (Oculta la barra fea de Windows)
-   ==================================================== */
 ::-webkit-scrollbar {
-    width: 10px;
+    width: 8px;
 }
 ::-webkit-scrollbar-track {
-    background: var(--bg-dark);
+    background: var(--bg-deep);
 }
 ::-webkit-scrollbar-thumb {
     background: #1f1f1f;
-    border-radius: 5px;
-    border: 2px solid var(--bg-dark);
+    border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
     background: var(--rojo-funebrero);
 }
 
-/* 1. Fondo Animado Respirable (Tonos Oscuros y Rojizos) */
-@keyframes dynamicBg {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+html {
+    scroll-behavior: smooth;
 }
 
+/* 1. FONDO MESH ANIMADO (Mucho más inmersivo y oscuro) */
 body {
-    background: linear-gradient(-45deg, #050505, #150505, #0a0a0a, #200505);
-    background-size: 400% 400%;
-    animation: dynamicBg 20s ease infinite;
-    color: var(--blanco);
+    background: radial-gradient(circle at 15% 50%, rgba(220, 38, 38, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(220, 38, 38, 0.05), transparent 25%),
+                var(--bg-deep);
+    background-size: 100vw 100vh;
+    background-attachment: fixed;
+    color: var(--blanco-puro);
     font-family: var(--font-textos);
     min-height: 100vh;
     overflow-x: hidden;
 }
 
-/* 2. Ticker Último Momento */
+/* 2. TICKER MEJORADO (Aspecto de noticias deportivas TV) */
 .ticker-wrap {
     width: 100%;
     overflow: hidden;
-    /* Degradado más rico y profundo */
-    background: linear-gradient(90deg, #7f1d1d, var(--rojo-funebrero), #7f1d1d);
-    background-size: 200% auto;
-    color: var(--blanco);
-    padding: 6px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    background: #000;
+    color: #fff;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--rojo-funebrero);
     position: fixed;
     top: 0;
     left: 0;
     z-index: 1000;
-    height: 32px;
-    box-shadow: 0 2px 15px rgba(220, 38, 38, 0.4);
+    height: 35px;
+    box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
 }
 
 .ticker-move {
     display: inline-flex;
     white-space: nowrap;
-    animation: tickerAnim 25s linear infinite;
-}
-
-.ticker-move:hover {
-    animation-play-state: paused;
+    animation: tickerAnim 40s linear infinite;
 }
 
 .ticker-item {
-    padding: 0 2rem;
+    padding: 0 3rem;
     font-size: 0.85rem;
     display: flex;
     align-items: center;
-    height: 100%;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    letter-spacing: 1px;
 }
 
 .ticker-item span {
-    background: var(--blanco);
-    color: var(--rojo-funebrero);
-    padding: 2px 8px;
+    background: var(--rojo-funebrero);
+    color: var(--blanco-puro);
+    padding: 3px 10px;
     border-radius: 4px;
-    margin-right: 8px;
-    font-size: 0.7rem;
+    margin-right: 12px;
+    font-size: 0.75rem;
     font-weight: 800;
     text-transform: uppercase;
-    box-shadow: 0 0 10px rgba(255,255,255,0.3);
+    box-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
 }
 
 @keyframes tickerAnim {
-    0% { transform: translateX(100vw); }
+    0% { transform: translateX(10vw); }
     100% { transform: translateX(-100%); }
 }
 
-/* 3. Navegación de Cristal */
+/* 3. NAVEGACIÓN MODERNA (Efecto Glass profundo) */
 .header {
     position: fixed;
-    top: 32px; 
     left: 0;
     width: 100%;
-    background: rgba(5, 5, 5, 0.75);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
+    background: rgba(3, 3, 3, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     z-index: 900;
-    border-bottom: 1px solid rgba(220, 38, 38, 0.3);
-    padding: 12px 0;
-    transition: all 0.4s ease;
+    border-bottom: 1px solid var(--gris-borde);
+    padding: 15px 0;
+    top: 35px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .header:hover {
-    background: rgba(5, 5, 5, 0.95);
-    border-bottom-color: var(--rojo-brillante);
-    box-shadow: 0 4px 20px rgba(220, 38, 38, 0.2);
+    background: rgba(3, 3, 3, 0.9);
+    border-bottom: 1px solid rgba(220, 38, 38, 0.4);
 }
 
 .header-inner {
@@ -141,264 +127,266 @@ body {
     margin: 0 auto;
     padding: 0 20px;
     flex-wrap: wrap;
-    gap: 15px;
 }
 
 .nav-links a {
-    color: var(--blanco);
+    color: var(--gris-texto);
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
+    transition: color 0.3s, text-shadow 0.3s;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: 0.3s;
-    margin-left: 20px;
+    letter-spacing: 2px;
     position: relative;
+    padding: 5px 0;
 }
 
-/* Efecto de subrayado de Neón en el menú */
 .nav-links a::after {
     content: '';
     position: absolute;
     width: 0;
     height: 2px;
-    bottom: -5px;
-    left: 0;
-    background-color: var(--rojo-brillante);
-    transition: width 0.3s ease;
+    bottom: 0;
+    left: 50%;
+    background-color: var(--rojo-neon);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+    box-shadow: 0 0 8px var(--rojo-neon);
 }
 
 .nav-links a:hover {
-    color: var(--blanco);
-    text-shadow: 0 0 12px rgba(220, 38, 38, 0.8);
+    color: var(--blanco-puro);
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
 }
 
 .nav-links a:hover::after {
     width: 100%;
-    box-shadow: 0 0 10px var(--rojo-brillante);
 }
 
-/* 4. Sección Hero y Animaciones de Entrada */
+/* 4. HERO SECTION (Cinematográfico) */
 .hero {
     min-height: 100vh;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding-top: 50px;
     position: relative;
+    padding-top: 80px;
 }
 
-/* Resplandor radial detrás del logo */
+/* Luz de fondo en el centro */
 .hero::before {
     content: '';
     position: absolute;
-    top: 50%;
+    top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 60vw;
     height: 60vw;
-    max-width: 600px;
-    max-height: 600px;
-    background: radial-gradient(circle, rgba(220,38,38,0.15) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(220, 38, 38, 0.15) 0%, transparent 60%);
     z-index: 0;
     pointer-events: none;
 }
 
-.hero-logo {
-    width: 220px;
-    filter: drop-shadow(0 0 25px rgba(220, 38, 38, 0.6));
-    animation: floatLogo 4s ease-in-out infinite;
-    margin-bottom: 15px;
+.hero-logo-wrapper {
     position: relative;
     z-index: 2;
+    animation: floatLogo 6s ease-in-out infinite;
+}
+
+#main-logo {
+    width: 150px;
+    filter: drop-shadow(0 15px 25px rgba(220, 38, 38, 0.5));
 }
 
 @keyframes floatLogo {
-    0%, 100% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(-15px) scale(1.02); filter: drop-shadow(0 0 45px rgba(220, 38, 38, 0.9)); }
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(2deg); filter: drop-shadow(0 25px 35px rgba(220, 38, 38, 0.7)); }
 }
 
 .club-title-glow {
     font-family: var(--font-titulos);
-    font-size: 5.5rem;
-    margin: 0;
-    letter-spacing: 5px;
-    background: linear-gradient(to right, #fff, #ffbaba, #fff);
-    background-size: 200% auto;
+    font-size: 4.5rem;
+    margin: 15px 0 5px;
+    letter-spacing: 4px;
+    /* Texto con textura metálica/brillante */
+    background: linear-gradient(to bottom right, #ffffff 20%, #a3a3a3 50%, #ffffff 80%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 4px 15px rgba(220, 38, 38, 0.4));
-    line-height: 1;
-    animation: shineText 5s linear infinite;
+    filter: drop-shadow(0 4px 20px rgba(220, 38, 38, 0.3));
+    line-height: 1.1;
     position: relative;
     z-index: 2;
-}
-
-/* El texto brilla como si le pasara una luz por encima */
-@keyframes shineText {
-    to { background-position: 200% center; }
 }
 
 .hero-subtitle {
-    font-size: 1.2rem;
-    color: var(--gris-claro);
+    color: var(--rojo-neon);
+    font-size: 1rem;
     text-transform: uppercase;
-    letter-spacing: 3px;
-    font-weight: 300;
-    margin-top: 10px;
-    position: relative;
-    z-index: 2;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-}
-
-/* Animación Escalonada al cargar la página */
-@keyframes fadeUpIn {
-    0% { opacity: 0; transform: translateY(30px); }
-    100% { opacity: 1; transform: translateY(0); }
-}
-
-.hero-container > * {
-    animation: fadeUpIn 1s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
-    opacity: 0;
-}
-
-.hero-logo-wrapper { animation-delay: 0.2s; }
-.title-container { animation-delay: 0.4s; }
-.hero-subtitle { animation-delay: 0.6s; }
-.hero-socials { animation-delay: 0.8s; }
-#main-carousel-container { animation-delay: 1s; }
-
-/* 5. Cristalería Premium (Tarjetas Levitantes) */
-.section-padding {
-    padding: 80px 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+    letter-spacing: 4px;
+    font-weight: 600;
     position: relative;
     z-index: 2;
 }
 
-.section-title {
-    text-align: center;
-    font-family: var(--font-titulos);
-    font-size: 3rem;
-    margin-bottom: 40px;
-    color: var(--blanco);
-    letter-spacing: 2px;
-    text-shadow: 0 4px 10px rgba(0,0,0,0.5);
-}
-
-.section-title span {
-    color: var(--rojo-funebrero);
-    text-shadow: 0 0 20px rgba(220,38,38,0.5);
-}
-
-.grid-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 30px;
-}
-
-/* Efecto de Cristal Avanzado con reflejo (Glassmorphism) */
+/* 5. TARJETAS PREMIUM (Glassmorphism Avanzado con Hover 3D) */
 .glass-premium {
-    background: rgba(15, 15, 15, 0.4);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-top: 2px solid var(--rojo-funebrero);
+    background: rgba(15, 15, 15, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--gris-borde);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 16px;
-    padding: 30px;
-    text-align: center;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.6), inset 0 0 15px rgba(255,255,255,0.02);
+    padding: 25px;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0, 0, 0, 0.5);
     position: relative;
     overflow: hidden;
 }
 
-/* El reflejo de luz que cruza la tarjeta */
-.glass-premium::before {
+/* Brillo que cruza la tarjeta al pasar el mouse */
+.glass-premium::after {
     content: '';
     position: absolute;
     top: 0;
     left: -100%;
     width: 50%;
     height: 100%;
-    background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.05), transparent);
     transform: skewX(-25deg);
-    transition: 0.5s;
+    transition: 0.6s;
 }
 
 .glass-premium:hover {
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 25px 50px rgba(220, 38, 38, 0.15), inset 0 0 20px rgba(220, 38, 38, 0.05);
-    border-color: var(--rojo-brillante);
+    border-color: rgba(220, 38, 38, 0.4);
+    box-shadow: 0 25px 45px rgba(220, 38, 38, 0.15), inset 0 0 20px rgba(0, 0, 0, 0.8);
 }
 
-.glass-premium:hover::before {
+.glass-premium:hover::after {
     left: 200%;
 }
 
-.glass-premium h3 {
+/* 6. BOTONES E INTERACCIONES (Estilo Cyber/Neon) */
+.action-btn, .btn-enter {
+    background: linear-gradient(135deg, #b91c1c, #dc2626);
+    color: #fff;
+    border: 1px solid #ffbaba;
+    border-radius: 8px;
+    padding: 12px 28px;
     font-family: var(--font-titulos);
-    font-size: 2.2rem;
-    color: var(--blanco);
-    margin-bottom: 15px;
-    letter-spacing: 1px;
-}
-
-.glass-premium p {
-    color: var(--gris-claro);
-    font-size: 0.95rem;
-    line-height: 1.7;
-}
-
-/* 6. Botones Neón */
-.btn-neon {
-    display: inline-block;
-    padding: 10px 25px;
-    border-radius: 30px;
-    background: transparent;
-    color: var(--rojo-brillante);
-    border: 2px solid var(--rojo-brillante);
-    font-weight: 600;
-    text-transform: uppercase;
-    text-decoration: none;
+    font-size: 1.3rem;
+    cursor: pointer;
     transition: all 0.3s ease;
-    margin-top: 15px;
-    letter-spacing: 1px;
-    font-size: 0.85rem;
-    box-shadow: 0 0 10px rgba(220,38,38,0.2) inset;
-}
-
-.btn-neon:hover {
-    background: var(--rojo-brillante);
-    color: var(--blanco);
-    box-shadow: 0 0 25px rgba(220, 38, 38, 0.8), inset 0 0 10px rgba(255,255,255,0.2);
-    transform: translateY(-3px);
-    border-color: transparent;
-}
-
-.btn-white {
-    border-color: rgba(255,255,255,0.5);
-    color: var(--blanco);
-    box-shadow: none;
-}
-
-.btn-white:hover {
-    background: var(--blanco);
-    color: var(--bg-dark);
-    box-shadow: 0 0 25px rgba(255, 255, 255, 0.6);
-    border-color: transparent;
-}
-
-/* 7. Footer */
-.main-footer {
-    background: #000;
-    border-top: 2px solid var(--rojo-funebrero);
-    padding: 50px 20px;
-    text-align: center;
-    margin-top: 40px;
+    letter-spacing: 2px;
+    box-shadow: 0 5px 15px rgba(220, 38, 38, 0.4), inset 0 2px 5px rgba(255, 255, 255, 0.2);
     position: relative;
-    box-shadow: 0 -10px 30px rgba(220,38,38,0.05);
+    overflow: hidden;
+    text-transform: uppercase;
 }
+
+.action-btn:hover, .btn-enter:hover {
+    background: linear-gradient(135deg, #dc2626, #ff3b3b);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(220, 38, 38, 0.6), inset 0 2px 5px rgba(255, 255, 255, 0.3);
+    border-color: #fff;
+}
+
+.outline-btn {
+    border: 1px solid var(--gris-texto);
+    background: transparent;
+    color: var(--blanco-puro);
+    border-radius: 30px;
+    padding: 8px 20px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.outline-btn:hover {
+    border-color: var(--rojo-neon);
+    background: rgba(220, 38, 38, 0.1);
+    color: var(--rojo-neon);
+    box-shadow: 0 0 15px rgba(220, 38, 38, 0.3);
+}
+
+/* 7. ACORDEONES ESTRUCTURALES (Para Fixtures y Planteles) */
+details.fune-accordion {
+    background: rgba(15, 15, 15, 0.5);
+    border: 1px solid var(--gris-borde);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+details.fune-accordion:hover {
+    border-color: rgba(220, 38, 38, 0.3);
+}
+
+details.fune-accordion summary {
+    padding: 20px;
+    font-family: var(--font-titulos);
+    font-size: 1.8rem;
+    color: var(--blanco-puro);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(90deg, rgba(0,0,0,0.8), rgba(20,0,0,0.8));
+    transition: background 0.3s ease;
+}
+
+details.fune-accordion[open] summary {
+    border-bottom: 1px solid var(--gris-borde);
+    color: var(--rojo-neon);
+}
+
+/* 8. INPUTS DEL DASHBOARD SOCIO */
+.form-input {
+    width: 100%;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #000;
+    color: #fff;
+    font-family: var(--font-textos);
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.8);
+}
+
+.form-input:focus {
+    border-color: var(--rojo-funebrero);
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.8), 0 0 15px rgba(220, 38, 38, 0.2);
+}
+
+/* 9. TÍTULOS DE SECCIÓN */
+.section-title {
+    text-align: center;
+    font-family: var(--font-titulos);
+    font-size: 3.5rem;
+    margin-bottom: 50px;
+    letter-spacing: 2px;
+    color: var(--blanco-puro);
+    text-transform: uppercase;
+}
+
+.section-title span {
+    color: var(--rojo-neon);
+    text-shadow: 0 0 20px rgba(220, 38, 38, 0.4);
+}
+
+/* Ajustes Responsive */
+@media (min-width: 992px) {
+    .club-title-glow { font-size: 6.5rem; }
+    .hero-subtitle { font-size: 1.2rem; }
+    #main-logo { width: 200px; }
+}
+
+/* Ocultar scrollbar fea en Webkit */
+details.fune-accordion-content::-webkit-scrollbar { width: 5px; }
+details.fune-accordion-content::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; }
