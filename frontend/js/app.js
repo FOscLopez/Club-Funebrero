@@ -1,8 +1,5 @@
 import { listenToFixtures, getPlayers, listenToMeetings, listenToSponsors, getSocioByDni, registerPaymentIntent, listenToCarouselImages, listenToUpcomingMatches } from "./services/firestore.service.js";
 
-// ==========================================
-// DICCIONARIO DE LOGOS (IMGBB)
-// ==========================================
 const CLUB_LOGOS = {
     "FUNEBRERO": "https://i.ibb.co/r85gwzH/funebrero.webp",
     "UNIÓN": "https://i.ibb.co/YGgpKFT/union.webp",
@@ -48,7 +45,7 @@ function initScrollReveal() {
     document.querySelectorAll('.reveal').forEach(el => scrollObserver.observe(el));
 }
 
-// Se ejecuta cada vez que Firebase pinta nuevos elementos
+// Reevaluar animaciones cuando se pintan cosas nuevas desde Firebase
 window.observeDynamicElements = () => {
     setTimeout(() => {
         document.querySelectorAll('.reveal:not(.active)').forEach(el => scrollObserver.observe(el));
@@ -67,7 +64,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
-    
     initScrollReveal();
     initApp();
     initFuneBot();
@@ -77,7 +73,6 @@ async function initApp() {
     listenToFixtures((fixtures) => {
         globalData.fixtures = fixtures;
         renderFixtures(fixtures);
-        // Si el estado de un partido cambia a Finalizado, vuelve a evaluar los flyers
         if(globalData.upcomingMatches.length > 0) {
             renderUpcomingMatches(globalData.upcomingMatches);
         }
@@ -111,7 +106,7 @@ async function initApp() {
 }
 
 // ==========================================
-// RENDER: FIXTURES
+// RENDER: FIXTURES (CAMBIO A FILAS HORIZONTALES)
 // ==========================================
 function renderFixtures(fixtures) {
     const container = document.getElementById("publicFixturesContainer");
@@ -124,6 +119,7 @@ function renderFixtures(fixtures) {
         if (!grouped[cat]) grouped[cat] = [];
         grouped[cat].push(f);
     });
+    
     let finalHtml = "";
     Object.keys(grouped).sort().forEach(cat => {
         grouped[cat].sort((a, b) => {
@@ -131,11 +127,14 @@ function renderFixtures(fixtures) {
             return getNum(a.round) - getNum(b.round);
         });
         
-        finalHtml += `<details class="fune-accordion reveal"><summary>🏆 CATEGORÍA ${cat}</summary><div class="fune-accordion-content">`;
+        finalHtml += `<div class="app-row reveal"><h3 class="row-title">🏆 CATEGORÍA ${cat}</h3><div class="horizontal-scroller">`;
+        
         finalHtml += grouped[cat].map(f => {
             const isFinished = f.status === "finished";
-            const hasScore = f.scoreLocal !== null && f.scoreLocal !== undefined && f.scoreAway !== null && f.scoreAway !== undefined;
-            const scoreHtml = (isFinished || hasScore) ? `<strong style="color:#ffffff; font-size:1.8rem; margin: 0 15px; background: rgba(220,38,38,0.2); padding: 5px 15px; border-radius: 8px; border: 1px solid rgba(220,38,38,0.4); box-shadow: 0 0 15px rgba(220,38,38,0.2);">${f.scoreLocal || 0} - ${f.scoreAway || 0}</strong>` : `<strong style="color:#dc2626; font-size:1.5rem; margin: 0 15px;">VS</strong>`;
+            const scoreL = f.scoreLocal !== null && f.scoreLocal !== undefined ? f.scoreLocal : "-";
+            const scoreA = f.scoreAway !== null && f.scoreAway !== undefined ? f.scoreAway : "-";
+            const displayScore = isFinished || (scoreL !== "-" && scoreA !== "-") ? `${scoreL} - ${scoreA}` : "VS";
+            const scoreColor = isFinished ? "var(--rojo-funebrero)" : "#a3a3a3";
             
             let photosHtml = "";
             if (f.planilla || f.photoHome || f.photoAway) {
@@ -147,27 +146,33 @@ function renderFixtures(fixtures) {
             }
 
             return `
-                <div class="glass-premium" style="padding: 15px; margin-bottom: 15px; border-left: 4px solid #dc2626; display: flex; flex-direction: column; gap: 10px; background: rgba(10, 10, 10, 0.8);">
+                <div class="match-card">
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
                         <span style="color: #3b82f6; font-weight: bold; font-size: 0.85rem; text-transform: uppercase;">${f.round || 'A DEFINIR'}</span>
                         <span style="color: #a3a3a3; font-size: 0.85rem;">📅 ${f.date} ${f.time ? '🕒 ' + f.time : ''}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-                        <div style="flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 10px;"><span style="font-size: 1.3rem; font-family: 'Bebas Neue', cursive; font-weight: 600; color: #fff;">${f.homeClubId}</span><img src="${getLogoSrc(f.homeClubId)}" style="width: 40px; height: 40px; object-fit: contain;"></div>
-                        <div style="text-align: center; min-width: 90px;">${scoreHtml}</div>
-                        <div style="flex: 1; display: flex; align-items: center; justify-content: flex-start; gap: 10px;"><img src="${getLogoSrc(f.awayClubId)}" style="width: 40px; height: 40px; object-fit: contain;"><span style="font-size: 1.3rem; font-family: 'Bebas Neue', cursive; font-weight: 600; color: #fff;">${f.awayClubId}</span></div>
+                    <div class="match-teams">
+                        <div class="match-team">
+                            <img src="${getLogoSrc(f.homeClubId)}" alt="Local">
+                            <span>${f.homeClubId.substring(0,12)}</span>
+                        </div>
+                        <div class="match-score-box" style="color: ${scoreColor}">${displayScore}</div>
+                        <div class="match-team">
+                            <img src="${getLogoSrc(f.awayClubId)}" alt="Visita">
+                            <span>${f.awayClubId.substring(0,12)}</span>
+                        </div>
                     </div>
                     ${photosHtml}
                 </div>`;
         }).join("");
-        finalHtml += `</div></details>`;
+        finalHtml += `</div></div>`;
     });
     container.innerHTML = finalHtml;
     if(window.observeDynamicElements) window.observeDynamicElements();
 }
 
 // ==========================================
-// RENDER: PLANTELES
+// RENDER: PLANTELES (CAMBIO A FILAS HORIZONTALES)
 // ==========================================
 function renderRosters(players) {
     const container = document.getElementById("rostersContainer");
@@ -178,18 +183,24 @@ function renderRosters(players) {
     players.forEach(p => { if (!grouped[p.categoryId]) grouped[p.categoryId] = []; grouped[p.categoryId].push(p); });
     let html = "";
     Object.keys(grouped).sort().forEach(cat => {
-        html += `<details class="fune-accordion reveal"><summary>🏀 CATEGORÍA ${cat} <span style="font-size: 1rem; color: #ffbaba; font-family: 'Poppins', sans-serif;">(${grouped[cat].length} Jugadores)</span></summary><div class="fune-accordion-content" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;">`;
+        html += `<div class="app-row reveal"><h3 class="row-title">🏀 PLANTEL ${cat} <span style="font-size: 0.9rem; color: #a3a3a3; font-family: 'Poppins', sans-serif; font-weight: normal; margin-left: 10px;">(${grouped[cat].length} Jugadores)</span></h3><div class="horizontal-scroller">`;
+        
         grouped[cat].sort((a, b) => a.name.localeCompare(b.name)).forEach(p => {
-            html += `<div style="background: rgba(255,255,255,0.05); border-left: 3px solid #dc2626; padding: 12px; border-radius: 6px;"><strong style="color: #fff; display: block; margin-bottom: 3px;">${p.name}</strong><span style="color: #a3a3a3; font-size: 0.8rem;">Nacimiento: ${p.birthdate}</span></div>`;
+            html += `
+                <div class="player-card">
+                    <div style="width: 50px; height: 50px; background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.3); border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">⛹️‍♂️</div>
+                    <strong style="color: #fff; display: block; font-family: 'Bebas Neue', cursive; font-size: 1.2rem; letter-spacing: 1px;">${p.name}</strong>
+                    <span style="color: #a3a3a3; font-size: 0.75rem;">Nac: ${p.birthdate}</span>
+                </div>`;
         });
-        html += `</div></details>`;
+        html += `</div></div>`;
     });
     container.innerHTML = html;
     if(window.observeDynamicElements) window.observeDynamicElements();
 }
 
 // ==========================================
-// RENDER: CUMPLEAÑOS
+// RENDER: CUMPLEAÑOS (CAMBIO A FILAS HORIZONTALES)
 // ==========================================
 function renderBirthdays(players) {
     const container = document.getElementById("birthdaysContainer");
@@ -226,32 +237,47 @@ function renderBirthdays(players) {
         return dayA - dayB;
     });
 
-    let html = "";
+    let html = `<div class="horizontal-scroller" style="padding-bottom: 30px;">`;
     birthdaysThisMonth.forEach(p => {
         let pDay = parseInt(p.birthdate.split(/[-/]/)[0], 10);
         let isToday = (pDay === currentDay);
         
         if (isToday) {
-            if (ticker) {
+            if (ticker && !ticker.innerHTML.includes(p.name)) {
                 ticker.innerHTML += `<div class="ticker-item"><span style="background: #dc2626; color: white;">🎉 ¡FELIZ CUMPLEAÑOS!</span> Hoy celebramos a ${p.name} (Cat. ${p.categoryId}). ¡La familia Funebrera te desea lo mejor!</div>`;
             }
             html += `
-                <div class="birthday-card is-today reveal">
-                    <div><strong style="color: #fff; font-size: 1.1rem; display: block;">${p.name}</strong><span style="color: #a3a3a3; font-size: 0.8rem;">Categoría: ${p.categoryId}</span></div>
-                    <div style="text-align: right;"><span style="color: #dc2626; font-weight: bold; font-size: 0.8rem; text-transform: uppercase;">¡ES HOY! 🎂</span><div style="color: #fff; font-size: 1.5rem; font-family: 'Bebas Neue', cursive;">${pDay} DE ${monthNames[today.getMonth()].toUpperCase()}</div></div>
+                <div class="birthday-card is-today">
+                    <div>
+                        <strong style="color: #fff; font-size: 1.1rem; display: block;">${p.name}</strong>
+                        <span style="color: #a3a3a3; font-size: 0.8rem;">Categoría: ${p.categoryId}</span>
+                    </div>
+                    <div style="text-align: right; margin-top: 15px;">
+                        <span style="color: #dc2626; font-weight: bold; font-size: 0.8rem; text-transform: uppercase;">¡ES HOY! 🎂</span>
+                        <div style="color: #fff; font-size: 1.8rem; font-family: 'Bebas Neue', cursive;">${pDay} DE ${monthNames[today.getMonth()].toUpperCase()}</div>
+                    </div>
                 </div>`;
         } else {
             let passClass = pDay < currentDay ? 'opacity: 0.5;' : '';
-            html += `<div class="birthday-card reveal" style="${passClass}"><div><strong style="color: #e2e8f0; font-size: 1rem; display: block;">${p.name}</strong><span style="color: #64748b; font-size: 0.8rem;">Categoría: ${p.categoryId}</span></div><div style="color: #3b82f6; font-size: 1.2rem; font-family: 'Bebas Neue', cursive;">DÍA ${pDay}</div></div>`;
+            html += `
+                <div class="birthday-card" style="${passClass}">
+                    <div>
+                        <strong style="color: #e2e8f0; font-size: 1rem; display: block;">${p.name}</strong>
+                        <span style="color: #64748b; font-size: 0.8rem;">Categoría: ${p.categoryId}</span>
+                    </div>
+                    <div style="text-align: right; margin-top: 15px;">
+                        <div style="color: #3b82f6; font-size: 1.8rem; font-family: 'Bebas Neue', cursive;">DÍA ${pDay}</div>
+                    </div>
+                </div>`;
         }
     });
 
+    html += `</div>`;
     container.innerHTML = html;
-    if(window.observeDynamicElements) window.observeDynamicElements();
 }
 
 // ==========================================
-// RENDER: ACTAS INSTITUCIONALES (PDF EN DRIVE)
+// RENDER: ACTAS INSTITUCIONALES (CAMBIO A FILAS HORIZONTALES)
 // ==========================================
 function renderMeetings(meetings) {
     const container = document.getElementById("meetingsContainer");
@@ -263,32 +289,37 @@ function renderMeetings(meetings) {
 
     meetings.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    container.innerHTML = meetings.map(m => {
+    let html = `<div class="app-row reveal"><h3 class="row-title">📜 BOLETÍN OFICIAL Y ACTAS</h3><div class="horizontal-scroller">`;
+    
+    html += meetings.map(m => {
         let pdfHtml = "";
         if (m.pdfUrl && m.pdfUrl.includes("drive.google.com")) {
             let previewLink = m.pdfUrl.replace('/view', '/preview').split('?')[0];
             pdfHtml = `
                 <div style="margin-top: 15px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(220,38,38,0.3);">
-                    <iframe src="${previewLink}" width="100%" height="450px" style="border: none;" allow="autoplay"></iframe>
+                    <iframe src="${previewLink}" width="100%" height="250px" style="border: none;" allow="autoplay"></iframe>
                 </div>
                 <div style="text-align: right; margin-top: 8px;">
-                    <a href="${m.pdfUrl}" target="_blank" style="color: #3b82f6; font-size: 0.8rem; font-weight: bold; text-decoration: none; transition: 0.3s;">📄 Descargar desde Drive</a>
+                    <a href="${m.pdfUrl}" target="_blank" style="color: #3b82f6; font-size: 0.8rem; font-weight: bold; text-decoration: none; transition: 0.3s;">📄 Descargar Documento</a>
                 </div>
             `;
         } else if (m.pdfUrl) {
-            pdfHtml = `<div style="margin-top: 10px;"><a href="${m.pdfUrl}" target="_blank" style="color: #3b82f6; font-size: 0.85rem; font-weight: bold; text-decoration: none;">📄 Ver Documento Adjunto</a></div>`;
+            pdfHtml = `<div style="margin-top: 10px; text-align: center;"><a href="${m.pdfUrl}" target="_blank" style="color: #3b82f6; font-size: 0.85rem; font-weight: bold; text-decoration: none; background: rgba(59, 130, 246, 0.1); padding: 8px 15px; border-radius: 6px; border: 1px solid rgba(59, 130, 246, 0.3); display: inline-block;">📄 Ver Documento Adjunto</a></div>`;
         }
 
         return `
-            <div class="meeting-card reveal" style="display: flex; flex-direction: column; background: rgba(15,23,42,0.6); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">
+            <div class="meeting-card-horiz">
                 <div style="width: 100%;">
-                    <span style="color:#a3a3a3; font-size:0.8rem;">📅 FECHA DEL ACTA: ${m.date}</span>
+                    <span style="color:#a3a3a3; font-size:0.8rem;">📅 FECHA: ${m.date}</span>
                     <h4 style="color: #dc2626; font-family: 'Bebas Neue', cursive; font-size: 1.5rem; letter-spacing: 1px; margin: 5px 0;">${m.title}</h4>
                     <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; margin: 10px 0;">${m.summary || ''}</p>
                     ${pdfHtml}
                 </div>
             </div>`;
     }).join("");
+    
+    html += `</div></div>`;
+    container.innerHTML = html;
     if(window.observeDynamicElements) window.observeDynamicElements();
 }
 
@@ -343,7 +374,7 @@ function renderMainCarousel(images) {
 }
 
 // ==========================================
-// RENDER PRÓXIMOS PARTIDOS (CON FILTRO CORREGIDO)
+// RENDER PRÓXIMOS PARTIDOS
 // ==========================================
 let matchesInterval = null;
 function renderUpcomingMatches(matches) {
@@ -351,12 +382,9 @@ function renderUpcomingMatches(matches) {
     if (!container) return;
     
     const activeMatches = matches.filter(m => {
-        if (!m.fixtureId) return true;
-        
-        // CORRECCIÓN DE LA LÓGICA DE VINCULACIÓN
+        if (!m.fixtureId) return true; 
         const linkedFixture = globalData.fixtures.find(f => f.id === m.fixtureId);
-        if (!linkedFixture) return true; // Si por alguna razón el partido aún no cargó, mostramos el flyer para que no parezca que desapareció por error.
-        
+        if (!linkedFixture) return true; 
         return linkedFixture.status !== "finished";
     });
 
@@ -371,7 +399,7 @@ function renderUpcomingMatches(matches) {
     }
 
     container.innerHTML = `
-        <div class="reveal" style="position: relative; height: 400px; border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(220, 38, 38, 0.3);">
+        <div style="position: relative; height: 400px; border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(220, 38, 38, 0.3);">
             ${activeMatches.map((match, idx) => `
                 <img src="${match.imageUrl}" class="match-slide ${idx === 0 ? 'active' : ''}" style="position: absolute; top: 0; left: 0; width: 100\%; height: 100\%; opacity: ${idx === 0 ? '1' : '0'}; transition: opacity 1s ease-in-out; object-fit: contain;" alt="Próximo Partido">
             `).join("")}
@@ -391,12 +419,10 @@ function renderUpcomingMatches(matches) {
             slides[currentIndex].style.opacity = '1';
         }, 5000);
     }
-    
-    if(window.observeDynamicElements) window.observeDynamicElements();
 }
 
 // ==========================================
-// PORTAL DE SOCIOS
+// PORTAL DE SOCIOS (INTACTO SEGUN TU CODIGO)
 // ==========================================
 function initSociosPortal() {
     const btnBuscar = document.getElementById("btnBuscarSocio");
