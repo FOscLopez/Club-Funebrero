@@ -31,8 +31,33 @@ function getLogoSrc(clubName) {
     return DEFAULT_LOGO;
 }
 
+// ==========================================
+// INICIADOR DE ANIMACIONES DE SCROLL
+// ==========================================
+const scrollObserverOptions = { root: null, rootMargin: '0px', threshold: 0.15 };
+const scrollObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+            observer.unobserve(entry.target); 
+        }
+    });
+}, scrollObserverOptions);
+
+function initScrollReveal() {
+    document.querySelectorAll('.reveal').forEach(el => scrollObserver.observe(el));
+}
+
+// Se ejecuta cada vez que Firebase pinta nuevos elementos
+window.observeDynamicElements = () => {
+    setTimeout(() => {
+        document.querySelectorAll('.reveal:not(.active)').forEach(el => scrollObserver.observe(el));
+    }, 100); 
+};
+
 document.addEventListener("DOMContentLoaded", () => {
     console.log("🏀 Plataforma del Club Atlético Funebrero inicializada.");
+    
     document.querySelectorAll('.nav-links a').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             const targetId = this.getAttribute('href');
@@ -43,6 +68,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
+    
+    initScrollReveal();
     initApp();
     initFuneBot();
 });
@@ -51,7 +78,6 @@ async function initApp() {
     listenToFixtures((fixtures) => {
         globalData.fixtures = fixtures;
         renderFixtures(fixtures);
-        // Si el estado de un partido cambia a Finalizado, vuelve a evaluar los flyers
         if(globalData.upcomingMatches.length > 0) {
             renderUpcomingMatches(globalData.upcomingMatches);
         }
@@ -85,7 +111,7 @@ async function initApp() {
 }
 
 // ==========================================
-// RENDER: FIXTURES
+// RENDER: FIXTURES (Añadido .reveal)
 // ==========================================
 function renderFixtures(fixtures) {
     const container = document.getElementById("publicFixturesContainer");
@@ -105,7 +131,7 @@ function renderFixtures(fixtures) {
             return getNum(a.round) - getNum(b.round);
         });
         
-        finalHtml += `<details class="fune-accordion"><summary>🏆 CATEGORÍA ${cat}</summary><div class="fune-accordion-content">`;
+        finalHtml += `<details class="fune-accordion reveal"><summary>🏆 CATEGORÍA ${cat}</summary><div class="fune-accordion-content">`;
         finalHtml += grouped[cat].map(f => {
             const isFinished = f.status === "finished";
             const hasScore = f.scoreLocal !== null && f.scoreLocal !== undefined && f.scoreAway !== null && f.scoreAway !== undefined;
@@ -137,10 +163,11 @@ function renderFixtures(fixtures) {
         finalHtml += `</div></details>`;
     });
     container.innerHTML = finalHtml;
+    if(window.observeDynamicElements) window.observeDynamicElements();
 }
 
 // ==========================================
-// RENDER: PLANTELES
+// RENDER: PLANTELES (Añadido .reveal)
 // ==========================================
 function renderRosters(players) {
     const container = document.getElementById("rostersContainer");
@@ -151,17 +178,18 @@ function renderRosters(players) {
     players.forEach(p => { if (!grouped[p.categoryId]) grouped[p.categoryId] = []; grouped[p.categoryId].push(p); });
     let html = "";
     Object.keys(grouped).sort().forEach(cat => {
-        html += `<details class="fune-accordion"><summary>🏀 CATEGORÍA ${cat} <span style="font-size: 1rem; color: #ffbaba; font-family: 'Poppins', sans-serif;">(${grouped[cat].length} Jugadores)</span></summary><div class="fune-accordion-content" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;">`;
+        html += `<details class="fune-accordion reveal"><summary>🏀 CATEGORÍA ${cat} <span style="font-size: 1rem; color: #ffbaba; font-family: 'Poppins', sans-serif;">(${grouped[cat].length} Jugadores)</span></summary><div class="fune-accordion-content" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;">`;
         grouped[cat].sort((a, b) => a.name.localeCompare(b.name)).forEach(p => {
             html += `<div style="background: rgba(255,255,255,0.05); border-left: 3px solid #dc2626; padding: 12px; border-radius: 6px;"><strong style="color: #fff; display: block; margin-bottom: 3px;">${p.name}</strong><span style="color: #a3a3a3; font-size: 0.8rem;">Nacimiento: ${p.birthdate}</span></div>`;
         });
         html += `</div></details>`;
     });
     container.innerHTML = html;
+    if(window.observeDynamicElements) window.observeDynamicElements();
 }
 
 // ==========================================
-// RENDER: CUMPLEAÑOS
+// RENDER: CUMPLEAÑOS (Añadido .reveal)
 // ==========================================
 function renderBirthdays(players) {
     const container = document.getElementById("birthdaysContainer");
@@ -208,21 +236,22 @@ function renderBirthdays(players) {
                 ticker.innerHTML += `<div class="ticker-item"><span style="background: #dc2626; color: white;">🎉 ¡FELIZ CUMPLEAÑOS!</span> Hoy celebramos a ${p.name} (Cat. ${p.categoryId}). ¡La familia Funebrera te desea lo mejor!</div>`;
             }
             html += `
-                <div class="birthday-card is-today">
+                <div class="birthday-card is-today reveal">
                     <div><strong style="color: #fff; font-size: 1.1rem; display: block;">${p.name}</strong><span style="color: #a3a3a3; font-size: 0.8rem;">Categoría: ${p.categoryId}</span></div>
                     <div style="text-align: right;"><span style="color: #dc2626; font-weight: bold; font-size: 0.8rem; text-transform: uppercase;">¡ES HOY! 🎂</span><div style="color: #fff; font-size: 1.5rem; font-family: 'Bebas Neue', cursive;">${pDay} DE ${monthNames[today.getMonth()].toUpperCase()}</div></div>
                 </div>`;
         } else {
             let passClass = pDay < currentDay ? 'opacity: 0.5;' : '';
-            html += `<div class="birthday-card" style="${passClass}"><div><strong style="color: #e2e8f0; font-size: 1rem; display: block;">${p.name}</strong><span style="color: #64748b; font-size: 0.8rem;">Categoría: ${p.categoryId}</span></div><div style="color: #3b82f6; font-size: 1.2rem; font-family: 'Bebas Neue', cursive;">DÍA ${pDay}</div></div>`;
+            html += `<div class="birthday-card reveal" style="${passClass}"><div><strong style="color: #e2e8f0; font-size: 1rem; display: block;">${p.name}</strong><span style="color: #64748b; font-size: 0.8rem;">Categoría: ${p.categoryId}</span></div><div style="color: #3b82f6; font-size: 1.2rem; font-family: 'Bebas Neue', cursive;">DÍA ${pDay}</div></div>`;
         }
     });
 
     container.innerHTML = html;
+    if(window.observeDynamicElements) window.observeDynamicElements();
 }
 
 // ==========================================
-// RENDER: ACTAS INSTITUCIONALES (PDF EN DRIVE)
+// RENDER: ACTAS INSTITUCIONALES (Añadido .reveal)
 // ==========================================
 function renderMeetings(meetings) {
     const container = document.getElementById("meetingsContainer");
@@ -251,7 +280,7 @@ function renderMeetings(meetings) {
         }
 
         return `
-            <div class="meeting-card" style="display: flex; flex-direction: column; background: rgba(15,23,42,0.6); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">
+            <div class="meeting-card reveal" style="display: flex; flex-direction: column; background: rgba(15,23,42,0.6); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">
                 <div style="width: 100%;">
                     <span style="color:#a3a3a3; font-size:0.8rem;">📅 FECHA DEL ACTA: ${m.date}</span>
                     <h4 style="color: #dc2626; font-family: 'Bebas Neue', cursive; font-size: 1.5rem; letter-spacing: 1px; margin: 5px 0;">${m.title}</h4>
@@ -260,6 +289,7 @@ function renderMeetings(meetings) {
                 </div>
             </div>`;
     }).join("");
+    if(window.observeDynamicElements) window.observeDynamicElements();
 }
 
 // ==========================================
@@ -313,18 +343,16 @@ function renderMainCarousel(images) {
 }
 
 // ==========================================
-// RENDER PRÓXIMOS PARTIDOS (CON FILTRO)
+// RENDER PRÓXIMOS PARTIDOS
 // ==========================================
 let matchesInterval = null;
 function renderUpcomingMatches(matches) {
     const container = document.getElementById("upcoming-matches-container");
     if (!container) return;
     
-    // MAGIA: Filtramos para mostrar solo los flyers de los partidos que NO están finalizados
     const activeMatches = matches.filter(m => {
-        if (!m.fixtureId) return true; // Si es un flyer viejo sin vincular, se muestra
+        if (!m.fixtureId) return true;
         const linkedFixture = globalData.fixtures.find(f => f.id === m.fixtureId);
-        // Si encontramos el partido y NO está en estado 'finished', mostramos el flyer
         return linkedFixture && linkedFixture.status !== "finished";
     });
 
@@ -339,7 +367,7 @@ function renderUpcomingMatches(matches) {
     }
 
     container.innerHTML = `
-        <div style="position: relative; height: 400px; border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(220, 38, 38, 0.3);">
+        <div class="reveal" style="position: relative; height: 400px; border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(220, 38, 38, 0.3);">
             ${activeMatches.map((match, idx) => `
                 <img src="${match.imageUrl}" class="match-slide ${idx === 0 ? 'active' : ''}" style="position: absolute; top: 0; left: 0; width: 100\%; height: 100\%; opacity: ${idx === 0 ? '1' : '0'}; transition: opacity 1s ease-in-out; object-fit: contain;" alt="Próximo Partido">
             `).join("")}
@@ -359,6 +387,8 @@ function renderUpcomingMatches(matches) {
             slides[currentIndex].style.opacity = '1';
         }, 5000);
     }
+    
+    if(window.observeDynamicElements) window.observeDynamicElements();
 }
 
 // ==========================================

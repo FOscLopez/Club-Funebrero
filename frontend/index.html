@@ -27,6 +27,27 @@
 
   <style>
     /* ====================================================
+       ANIMACIONES DE SCROLL (REVEAL MOTOR)
+       ==================================================== */
+    .reveal {
+        opacity: 0;
+        transform: translateY(40px);
+        transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .reveal.active {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* HEADER DINÁMICO AL HACER SCROLL */
+    .header.scrolled {
+        padding: 6px 0 !important;
+        background: rgba(3, 3, 3, 0.98) !important;
+        box-shadow: 0 5px 20px rgba(220, 38, 38, 0.4);
+        border-bottom-color: #ff3b3b;
+    }
+
+    /* ====================================================
        1. EFECTOS VISUALES PREMIUM (FONDO VIVO)
        ==================================================== */
     @keyframes dynamicBg {
@@ -61,7 +82,6 @@
     }
     #landing-video { max-width: 350px; width: 90%; outline: none; mix-blend-mode: screen; position: relative; z-index: 2; }
     
-    /* Contador estilo reloj de básquetbol CENTRADO */
     #shot-clock {
         position: absolute;
         top: 40px; 
@@ -144,7 +164,7 @@
     /* ====================================================
        4. NAVEGACIÓN DE CRISTAL (PC VS MÓVIL)
        ==================================================== */
-    .header { position: fixed; left: 0; width: 100%; background: rgba(5, 5, 5, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 900; border-bottom: 1px solid rgba(220, 38, 38, 0.3); padding: 12px 0; top: 32px; transition: 0.3s; }
+    .header { position: fixed; left: 0; width: 100%; background: rgba(5, 5, 5, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 900; border-bottom: 1px solid rgba(220, 38, 38, 0.3); padding: 12px 0; top: 32px; transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
     .header:hover { background: rgba(5, 5, 5, 0.95); border-bottom-color: #dc2626; }
     
     .header-inner { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 15px; flex-wrap: wrap; gap: 10px; }
@@ -185,7 +205,6 @@
     .btn-ig { background: rgba(225, 48, 108, 0.1); border: 1px solid rgba(225, 48, 108, 0.5); color: #f472b6; }
     .btn-ig:hover { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: #fff; box-shadow: 0 5px 20px rgba(225, 48, 108, 0.4); transform: translateY(-3px); border-color: transparent; }
 
-    /* ESTILOS DEL CARRUSEL PRINCIPAL */
     .main-carousel { width: 100%; max-width: 600px; height: 250px; margin: 30px auto 0; position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(220,38,38,0.2); border: 1px solid rgba(255,255,255,0.1); background: #000; }
     .carousel-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1s ease-in-out; object-fit: cover; }
     .carousel-slide.active { opacity: 1; }
@@ -211,7 +230,6 @@
         .section-title { font-size: 3.5rem; margin-bottom: 50px; }
     }
 
-    /* Acordeones Dinámicos */
     details.fune-accordion { background: rgba(15, 15, 15, 0.4); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); border-top: 1px solid rgba(220, 38, 38, 0.3); border-radius: 12px; margin-bottom: 20px; transition: transform 0.3s, box-shadow 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     details.fune-accordion:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(220,38,38,0.15); border-top-color: #dc2626; }
     details.fune-accordion summary { padding: 15px 20px; font-family: 'Bebas Neue', cursive; font-size: 1.5rem; color: #fff; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; letter-spacing: 1px; transition: 0.3s; }
@@ -224,13 +242,11 @@
         .fune-accordion-content { padding: 25px; }
     }
 
-    /* Tarjetas Interiores */
     .glass-premium { background: rgba(10, 10, 10, 0.6); border: 1px solid rgba(255,255,255,0.03); border-left: 4px solid #dc2626; border-radius: 8px; padding: 15px; margin-bottom: 15px; transition: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; flex-direction: column; gap: 10px; position: relative; overflow: hidden; }
     .glass-premium::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.02), transparent); transform: translateX(-100%); transition: 0.5s; }
     .glass-premium:hover { transform: scale(1.01) translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.6), inset 2px 0 15px rgba(220,38,38,0.1); border-color: rgba(220,38,38,0.2); }
     .glass-premium:hover::before { transform: translateX(100%); }
 
-    /* PORTAL SOCIOS INPUTS */
     .form-input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #333; background: #050505; color: #fff; font-family: 'Poppins', sans-serif; outline: none; box-sizing: border-box; margin-bottom: 15px;}
     .form-input:focus { border-color: #dc2626; }
     .action-btn { background: #dc2626; color: #fff; border: none; border-radius: 6px; padding: 12px 25px; font-family: 'Bebas Neue', cursive; font-size: 1.2rem; cursor: pointer; transition: 0.3s; letter-spacing: 1px; width: 100%; }
@@ -319,7 +335,6 @@
       </nav>
 
       <div class="admin-nav" style="text-align: center; display: flex; gap: 10px; align-items: center; justify-content: center;">
-        <!-- BOTÓN DE INSTALACIÓN PWA -->
         <button id="btn-install-app" class="outline-btn" style="background: #10b981; border-color: #10b981; color: #fff; cursor: pointer; display: none;">📲 Instalar App</button>
         <a href="/login.html" class="outline-btn">⚙️ Admin</a>
       </div>
@@ -330,48 +345,41 @@
   <section id="inicio" class="hero">
     <div class="hero-container">
       <div class="hero-logo-wrapper"><img src="logo-funebrero_2.png" alt="Escudo Funebrero" id="main-logo"></div>
-      <div class="title-container"><h1 class="club-title-glow">CLUB ATLÉTICO FUNEBRERO</h1></div>
-      <p class="hero-subtitle">Asociación Civil Club Social Cultural y Deportivo</p>
+      <div class="title-container reveal"><h1 class="club-title-glow">CLUB ATLÉTICO FUNEBRERO</h1></div>
+      <p class="hero-subtitle reveal">Asociación Civil Club Social Cultural y Deportivo</p>
       
-      <!-- Redes Sociales Oficiales del Club -->
-      <div class="hero-socials">
+      <div class="hero-socials reveal">
         <a href="https://www.facebook.com/profile.php?id=61558452983433" target="_blank" class="social-btn btn-fb">📘 Facebook Club</a>
         <a href="https://www.facebook.com/profile.php?id=61592882245302" target="_blank" class="social-btn btn-fb">🏀 Escuelita de Básquet</a>
         <a href="https://www.instagram.com/clubfunebreroo/" target="_blank" class="social-btn btn-ig">📸 Instagram Oficial</a>
       </div>
 
-      <!-- CARRUSEL PRINCIPAL DE FOTOS -->
-      <div id="main-carousel-container" class="main-carousel" style="display: none;"></div>
-
+      <div id="main-carousel-container" class="main-carousel reveal" style="display: none;"></div>
     </div>
   </section>
 
   <main style="position: relative; z-index: 5;">
     
-    <!-- =====================================
-         NUEVA SECCIÓN: PRÓXIMOS PARTIDOS
-         ===================================== -->
-    <section id="proximos-partidos" class="section-padding" style="padding-bottom: 20px;">
+    <!-- SECCIÓN PRÓXIMOS PARTIDOS -->
+    <section id="proximos-partidos" class="section-padding reveal" style="padding-bottom: 20px;">
       <h2 class="section-title">Próximos <span>Partidos</span></h2>
-      <div id="upcoming-matches-container" style="max-width: 800px; margin: 0 auto; text-align: center;">
-          <!-- Aquí van los flyers o el mensaje de espera -->
-      </div>
+      <div id="upcoming-matches-container" style="max-width: 800px; margin: 0 auto; text-align: center;"></div>
     </section>
 
     <!-- SECCIÓN COMPETENCIA -->
-    <section id="fixture" class="section-padding" style="padding-top: 20px;">
+    <section id="fixture" class="section-padding reveal" style="padding-top: 20px;">
       <h2 class="section-title">Campaña <span>Actual</span></h2>
       <div id="publicFixturesContainer" style="max-width: 900px; margin: 0 auto;"></div>
     </section>
 
     <!-- SECCIÓN PLANTELES -->
-    <section id="planteles" class="section-padding">
+    <section id="planteles" class="section-padding reveal">
       <h2 class="section-title">Nuestros <span>Planteles</span></h2>
       <div id="rostersContainer" style="max-width: 900px; margin: 0 auto;"></div>
     </section>
 
     <!-- SECCIÓN CUMPLEAÑOS DEL MES -->
-    <section id="cumpleanos" class="section-padding">
+    <section id="cumpleanos" class="section-padding reveal">
       <h2 class="section-title">Cumpleaños de <span id="currentMonthName">Este Mes</span></h2>
       <p style="text-align: center; color: #a3a3a3; font-size: 1rem; max-width: 600px; margin: 0 auto 30px; padding: 0 10px;">Saludamos a todos los integrantes de la familia Funebrera que celebran un año más de vida junto a nosotros.</p>
       <div id="birthdaysContainer" style="max-width: 800px; margin: 0 auto;">
@@ -379,40 +387,29 @@
       </div>
     </section>
 
-    <!-- =====================================
-         SECCIÓN: PORTAL DE SOCIOS AMIGABLE
-         ===================================== -->
-    <section id="socios-portal" class="section-padding">
+    <!-- SECCIÓN PORTAL DE SOCIOS -->
+    <section id="socios-portal" class="section-padding reveal">
       <h2 class="section-title">Portal de <span>Socios</span></h2>
       <p style="text-align: center; color: #a3a3a3; font-size: 1rem; max-width: 600px; margin: 0 auto 30px;">Ingresa para abonar tu cuota social o imprimir tus comprobantes.</p>
       
-      <!-- CUADRO DE LOGIN AMIGABLE -->
       <div id="login-socio-box" class="glass-premium" style="max-width: 450px; margin: 0 auto; text-align: center; padding: 30px;">
         <h3 style="color: #fff; font-family: 'Bebas Neue', cursive; font-size: 2rem; margin-top: 0;">Ingreso al Portal</h3>
-        
-        <!-- EXPLICACIÓN CLARA DEL DNI Y LA FECHA -->
         <label style="display: block; text-align: left; color: #a3a3a3; font-size: 0.85rem; margin-bottom: 5px;"><strong>Tu Usuario (Ingresa tu DNI):</strong></label>
         <input type="number" id="socioDniInput" class="form-input" placeholder="Ej: 35123456" style="text-align: center; font-size: 1.1rem;">
-        
         <label style="display: block; text-align: left; color: #a3a3a3; font-size: 0.85rem; margin-bottom: 5px; margin-top: 15px;"><strong>Tu Contraseña (Fecha de nacimiento sin barras):</strong></label>
         <div style="position: relative; margin-bottom: 5px;">
             <input type="password" id="socioPassInput" class="form-input" placeholder="Ej: 13031990" style="text-align: center; font-size: 1.1rem; padding-right: 40px; margin-bottom: 0;">
             <span id="toggleSocioPass" style="position: absolute; right: 15px; top: 12px; cursor: pointer; font-size: 1.2rem;">👁️</span>
         </div>
-        
         <button id="btnBuscarSocio" class="action-btn" style="margin-top: 20px;">Ingresar a mi Cuenta</button>
         <p id="socioError" style="color: #ff3b3b; font-size: 0.85rem; margin-top: 15px; display: none;"></p>
-        
-        <!-- LINK A WHATSAPP DEL CREADOR (FABIÁN) SI NO ESTÁ REGISTRADO -->
         <div id="socioWpLink" style="display: none; margin-top: 15px; border-top: 1px solid #333; padding-top: 15px;">
             <p style="color: #a3a3a3; font-size: 0.85rem; margin-bottom: 10px;">¿No estás registrado o tienes problemas para ingresar?</p>
             <a href="https://wa.me/5493624168410" target="_blank" style="color: #10b981; text-decoration: none; font-weight: bold; font-size: 0.9rem;">📲 Contáctanos por WhatsApp para ayudarte</a>
         </div>
       </div>
 
-      <!-- DASHBOARD DEL SOCIO PASO A PASO -->
       <div id="socio-dashboard" class="glass-premium" style="display:none; max-width: 600px; margin: 0 auto; padding: 30px;">
-         
          <div id="comprobante-imprimir" style="background: #ffffff; padding: 20px; border-radius: 8px; color: #000; display: none;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #dc2626; padding-bottom: 10px; margin-bottom: 20px;">
                 <h2 style="margin: 0; font-family: 'Bebas Neue', cursive; font-size: 2rem; color: #dc2626;">CLUB FUNEBRERO</h2>
@@ -426,11 +423,9 @@
             <p style="font-size: 0.8rem; color: #666; margin-top: 30px; text-align: center; border-top: 1px solid #ccc; padding-top: 10px;">Este comprobante es generado automáticamente por el sistema de Club Funebrero.</p>
          </div>
 
-         <!-- Título Amigable -->
          <h3 style="color: #fff; font-family: 'Bebas Neue', cursive; font-size: 2.2rem; margin-top: 0; text-align: center;">¡Hola, <span id="dash-nombre" style="color: #dc2626;">Socio</span>! 👋</h3>
          <p style="text-align: center; color: #a3a3a3; font-size: 0.95rem; margin-bottom: 25px;">No te preocupes si la tecnología te cuesta un poco, ¡te vamos a guiar paso a paso para que puedas hacer tu aporte al club sin problemas!</p>
          
-         <!-- PASO 1: Elegir Monto -->
          <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
             <h4 style="color: #10b981; margin-top: 0; font-family: 'Bebas Neue', cursive; font-size: 1.5rem; letter-spacing: 1px;">Paso 1: Elige tu aporte</h4>
             <div style="font-size: 0.9rem; color: #a3a3a3; text-transform: uppercase;">Monto a Abonar (Mínimo $5.000)</div>
@@ -441,44 +436,29 @@
             </div>
          </div>
 
-         <!-- PASO 2: Pagar -->
          <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
             <h4 style="color: #3b82f6; margin-top: 0; font-family: 'Bebas Neue', cursive; font-size: 1.5rem; letter-spacing: 1px;">Paso 2: Realiza el pago</h4>
             <p style="font-size: 0.85rem; color: #a3a3a3; margin-bottom: 15px;">Elige la opción que te quede más cómoda (Billeteras Virtuales o Bancos):</p>
-            
-            <a href="https://mpago.la/16hZWUT" target="_blank" id="btnPagarMP" class="action-btn" style="background: #009ee3; color: white; text-align: center; text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px;">
-                💳 Tocar aquí para pagar con Mercado Pago
-            </a>
+            <a href="https://mpago.la/16hZWUT" target="_blank" id="btnPagarMP" class="action-btn" style="background: #009ee3; color: white; text-align: center; text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px;">💳 Tocar aquí para pagar con Mercado Pago</a>
             
             <div style="border-top: 1px dashed #333; padding-top: 15px; margin-top: 15px;">
                 <p style="color: #fff; font-weight: 600; margin-bottom: 5px;">O transfiere desde cualquier cuenta o billetera (Ualá, Naranja X, MODO, Bancos) a:</p>
                 <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; display: inline-block; text-align: left;">
-                    
-                    <!-- BOTONES COPIAR AÑADIDOS -->
                     <span style="color: #a3a3a3; font-size: 0.8rem;">CVU/CBU:</span> <strong style="color: #10b981; letter-spacing: 1px;" id="textToCopyCvu">0000003100137467286158</strong> 
                     <span style="cursor:pointer; color:#3b82f6; font-size: 0.8rem; margin-left: 5px;" onclick="copiarAlPortapapeles('textToCopyCvu')">📋 Copiar</span><br>
-                    
                     <span style="color: #a3a3a3; font-size: 0.8rem;">Alias:</span> <strong style="color: #10b981; letter-spacing: 1px;" id="textToCopyAlias">funebrerosocios.mp</strong>
                     <span style="cursor:pointer; color:#3b82f6; font-size: 0.8rem; margin-left: 5px;" onclick="copiarAlPortapapeles('textToCopyAlias')">📋 Copiar</span><br>
-                    
                     <span style="color: #a3a3a3; font-size: 0.8rem;">A nombre de:</span> <strong style="color: #fff;">Vicente Anibal Gallozo</strong>
                 </div>
             </div>
          </div>
 
-         <!-- PASO 3: Enviar Whatsapp -->
          <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 20px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
             <h4 style="color: #f59e0b; margin-top: 0; font-family: 'Bebas Neue', cursive; font-size: 1.5rem; letter-spacing: 1px;">Paso 3: Confirma tu aporte</h4>
             <p style="font-size: 0.85rem; color: #a3a3a3; margin-bottom: 15px;">Una vez hecho el pago en tu aplicación, envíanos el comprobante por WhatsApp presionando el botón verde. Al hacerlo, se habilitará tu recibo oficial.</p>
-            
-            <button id="btnEnviarWhatsApp" class="action-btn" style="background: #25D366; margin-bottom: 10px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px;">
-               📲 1. Enviar comprobante al WhatsApp
-            </button>
-            
-            <button id="btnDescargarPdf" class="outline-btn" style="padding: 12px; font-size: 1rem; border-color: #3b82f6; color: #3b82f6; width: 100%; margin-top: 0; margin-bottom: 0; opacity: 0.5; cursor: not-allowed;" disabled>
-               📄 2. Descargar Mi Recibo (PDF)
-            </button>
-            <p id="pdfInfoText" style="font-size: 0.75rem; color: #ef4444; margin-top: 8px;">* Envía el WhatsApp primero para poder generar el recibo.</p>
+            <button id="btnEnviarWhatsApp" class="action-btn" style="background: #25D366; margin-bottom: 10px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px;">📲 1. Enviar comprobante al WhatsApp</button>
+            <button id="btnDescargarPdf" class="outline-btn" style="padding: 12px; font-size: 1rem; border-color: #3b82f6; color: #3b82f6; width: 100%; margin-top: 0; margin-bottom: 0; opacity: 0.5; cursor: not-allowed;" disabled>📄 2. Descargar Mi Recibo (PDF)</button>
+            <p id="pdfInfoText" style="font-size: 0.75rem; color: #ef4444; margin-top: 8px;">Envía el WhatsApp primero para poder generar el recibo.</p>
          </div>
 
          <button id="btnSalirSocio" class="outline-btn" style="border: none; color: #a3a3a3; text-decoration: underline; width: 100%;">Cerrar Sesión</button>
@@ -486,10 +466,10 @@
     </section>
 
     <!-- SECCIÓN INSTITUCIONAL -->
-    <section id="institucional" class="section-padding">
+    <section id="institucional" class="section-padding reveal">
       <h2 class="section-title">Vida <span>Institucional</span></h2>
       <div style="max-width: 900px; margin: 0 auto;">
-        <details class="fune-accordion">
+        <details class="fune-accordion reveal">
           <summary>📜 Boletín Oficial y Actas</summary>
           <div class="fune-accordion-content" id="meetingsContainer"></div>
         </details>
@@ -520,7 +500,6 @@
 
   <!-- LÓGICA DE AUDIO, LANDING Y COPIAR AL PORTAPAPELES -->
   <script>
-    // FUNCION PARA COPIAR AL PORTAPAPELES (Para el CVU y Alias)
     function copiarAlPortapapeles(idElemento) {
         var texto = document.getElementById(idElemento).innerText;
         navigator.clipboard.writeText(texto).then(function() {
@@ -529,6 +508,16 @@
             alert('Error al copiar.');
         });
     }
+
+    // Efecto de Header Dinámico al hacer Scroll
+    window.addEventListener('scroll', () => {
+        const header = document.querySelector('.header');
+        if (window.scrollY > 50) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+    });
 
     document.addEventListener("DOMContentLoaded", () => {
       const btnEnter = document.getElementById("btn-enter-stadium");
@@ -646,7 +635,6 @@
     });
   </script>
 
-  <!-- CARGA DEL SCRIPT DE LA APP (Añadido parámetro para Evitar Caché JS) -->
   <script>
     document.write('<script type="module" src="/js/app.js?v=' + new Date().getTime() + '"><\/script>');
   </script>
