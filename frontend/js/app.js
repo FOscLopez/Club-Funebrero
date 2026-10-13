@@ -45,7 +45,6 @@ function initScrollReveal() {
     document.querySelectorAll('.reveal').forEach(el => scrollObserver.observe(el));
 }
 
-// Reevaluar animaciones cuando se pintan cosas nuevas desde Firebase
 window.observeDynamicElements = () => {
     setTimeout(() => {
         document.querySelectorAll('.reveal:not(.active)').forEach(el => scrollObserver.observe(el));
@@ -106,7 +105,7 @@ async function initApp() {
 }
 
 // ==========================================
-// RENDER: FIXTURES (CAMBIADO A FILAS HORIZONTALES)
+// RENDER: FIXTURES (RESTAURADO ACORDEÓN CON GRILLA PREMIUM)
 // ==========================================
 function renderFixtures(fixtures) {
     const container = document.getElementById("publicFixturesContainer");
@@ -127,7 +126,7 @@ function renderFixtures(fixtures) {
             return getNum(a.round) - getNum(b.round);
         });
         
-        finalHtml += `<div class="app-row reveal"><h3 class="row-title" style="font-size: 1.5rem; margin-top: 15px;">🏆 CATEGORÍA ${cat}</h3><div class="horizontal-scroller">`;
+        finalHtml += `<details class="fune-accordion reveal"><summary>🏆 CATEGORÍA ${cat}</summary><div class="fune-accordion-content custom-grid">`;
         
         finalHtml += grouped[cat].map(f => {
             const isFinished = f.status === "finished";
@@ -165,14 +164,14 @@ function renderFixtures(fixtures) {
                     ${photosHtml}
                 </div>`;
         }).join("");
-        finalHtml += `</div></div>`;
+        finalHtml += `</div></details>`;
     });
     container.innerHTML = finalHtml;
     if(window.observeDynamicElements) window.observeDynamicElements();
 }
 
 // ==========================================
-// RENDER: PLANTELES (ACTUALIZADO A PELOTA SONRIENTE/FOTOS)
+// RENDER: PLANTELES (RESTAURADO ACORDEÓN CON GRILLA PREMIUM)
 // ==========================================
 function renderRosters(players) {
     const container = document.getElementById("rostersContainer");
@@ -182,30 +181,28 @@ function renderRosters(players) {
     const grouped = {};
     players.forEach(p => { if (!grouped[p.categoryId]) grouped[p.categoryId] = []; grouped[p.categoryId].push(p); });
     
-    // SVG de Pelota Sonriente que servirá de avatar dinámico
     const svgBall = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23ea580c' stroke='%23431407' stroke-width='4'/><path d='M50 4 v92' stroke='%23431407' stroke-width='3' fill='none'/><path d='M4 50 h92' stroke='%23431407' stroke-width='3' fill='none'/><path d='M15 15 a 40 40 0 0 0 0 70' stroke='%23431407' stroke-width='3' fill='none'/><path d='M85 15 a 40 40 0 0 1 0 70' stroke='%23431407' stroke-width='3' fill='none'/><circle cx='35' cy='35' r='6' fill='%23000'/><circle cx='65' cy='35' r='6' fill='%23000'/><path d='M35 55 Q50 75 65 55' stroke='%23000' stroke-width='5' fill='none' stroke-linecap='round'/></svg>";
 
     let html = "";
     Object.keys(grouped).sort().forEach(cat => {
-        html += `<div class="app-row reveal"><h3 class="row-title" style="font-size: 1.5rem; margin-top: 15px;">🏀 CATEGORÍA ${cat} <span style="font-size: 0.9rem; color: #a3a3a3; font-family: 'Poppins', sans-serif; font-weight: normal; margin-left: 10px;">(${grouped[cat].length} Jugadores)</span></h3><div class="horizontal-scroller">`;
+        html += `<details class="fune-accordion reveal"><summary>🏀 CATEGORÍA ${cat} <span style="font-size: 0.9rem; color: #a3a3a3; font-family: 'Poppins', sans-serif; font-weight: normal; margin-left: 10px;">(${grouped[cat].length} Jugadores)</span></summary><div class="fune-accordion-content custom-grid-players">`;
         
         grouped[cat].sort((a, b) => a.name.localeCompare(b.name)).forEach(p => {
             html += `
                 <div class="player-card">
-                    <!-- Si subes una foto, se mostrará aquí; si no, la pelota sonriente -->
                     <img src="${p.photoUrl || svgBall}" class="smiling-ball" alt="Jugador">
                     <strong style="color: #fff; display: block; font-family: 'Bebas Neue', cursive; font-size: 1.2rem; letter-spacing: 1px;">${p.name}</strong>
                     <span style="color: #a3a3a3; font-size: 0.75rem;">Nac: ${p.birthdate}</span>
                 </div>`;
         });
-        html += `</div></div>`;
+        html += `</div></details>`;
     });
     container.innerHTML = html;
     if(window.observeDynamicElements) window.observeDynamicElements();
 }
 
 // ==========================================
-// RENDER: CUMPLEAÑOS (CAMBIO A FILAS HORIZONTALES)
+// RENDER: CUMPLEAÑOS (GRILLA WRAP)
 // ==========================================
 function renderBirthdays(players) {
     const container = document.getElementById("birthdaysContainer");
@@ -242,7 +239,7 @@ function renderBirthdays(players) {
         return dayA - dayB;
     });
 
-    let html = `<div class="horizontal-scroller" style="padding-bottom: 30px;">`;
+    let html = `<div class="custom-grid">`;
     birthdaysThisMonth.forEach(p => {
         let pDay = parseInt(p.birthdate.split(/[-/]/)[0], 10);
         let isToday = (pDay === currentDay);
@@ -282,7 +279,7 @@ function renderBirthdays(players) {
 }
 
 // ==========================================
-// RENDER: ACTAS INSTITUCIONALES (CAMBIO A FILAS HORIZONTALES)
+// RENDER: ACTAS INSTITUCIONALES (RESTAURADO ACORDEÓN CON GRILLA PREMIUM)
 // ==========================================
 function renderMeetings(meetings) {
     const container = document.getElementById("meetingsContainer");
@@ -294,7 +291,7 @@ function renderMeetings(meetings) {
 
     meetings.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    let html = `<div class="app-row reveal"><div class="horizontal-scroller">`;
+    let html = `<details class="fune-accordion reveal" open><summary>📜 BOLETÍN OFICIAL Y ACTAS</summary><div class="fune-accordion-content custom-grid">`;
     
     html += meetings.map(m => {
         let pdfHtml = "";
@@ -323,7 +320,7 @@ function renderMeetings(meetings) {
             </div>`;
     }).join("");
     
-    html += `</div></div>`;
+    html += `</div></details>`;
     container.innerHTML = html;
     if(window.observeDynamicElements) window.observeDynamicElements();
 }
