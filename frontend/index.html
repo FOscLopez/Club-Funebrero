@@ -7,7 +7,7 @@
   
   <link rel="icon" type="image/png" href="logo-funebrero_2.png">
   <link rel="apple-touch-icon" href="logo-funebrero_2.png">
-  <meta name="theme-color" content="#dc2626"> 
+  <meta name="theme-color" content="#dc2626">
   <link rel="manifest" href="manifest.json">
   
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -23,6 +23,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
+    /* ANIMACIONES DE SCROLL (REVEAL MOTOR) */
     .reveal {
         opacity: 0;
         transform: translateY(40px);
@@ -85,14 +86,11 @@
       <p style="color: #64748b; margin-top: 20px; font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase;">Activar Sonido 🔊</p>
   </div>
 
-  <!-- PANTALLA DE CARGA ANIMADA CINEMÁTICA -->
+  <!-- PANTALLA DE CARGA ANIMADA -->
   <div id="landing-overlay">
     
     <div id="shot-clock">08</div>
 
-    <!-- ELIMINADO EL VIDEO ANTIGUO QUE CAUSABA EL DOBLE FONDO -->
-
-    <!-- SECUENCIA BÁSQUET REALISTA -->
     <div class="landing-anim-container">
         <div class="landing-hoop"></div>
         <div class="landing-ball ball-1"></div>
@@ -141,16 +139,20 @@
   <section id="inicio" class="hero">
     <div class="hero-container">
       <div class="hero-logo-wrapper"><img src="logo-funebrero_2.png" alt="Escudo Funebrero" id="main-logo"></div>
-      <div class="title-container reveal"><h1 class="club-title-glow">CLUB ATLÉTICO FUNEBRERO</h1></div>
-      <p class="hero-subtitle reveal">Asociación Civil Club Social Cultural y Deportivo</p>
       
-      <div class="hero-socials reveal">
+      <!-- CORRECCIÓN: Le quito el .reveal para que aparezca rápido sin necesitar SCROLL -->
+      <div class="title-container"><h1 class="club-title-glow">CLUB ATLÉTICO FUNEBRERO</h1></div>
+      <p class="hero-subtitle">Asociación Civil Club Social Cultural y Deportivo</p>
+      
+      <!-- CORRECCIÓN: Le quito el .reveal -->
+      <div class="hero-socials">
         <a href="https://www.facebook.com/profile.php?id=61558452983433" target="_blank" class="social-btn btn-fb">📘 Facebook Club</a>
         <a href="https://www.facebook.com/profile.php?id=61592882245302" target="_blank" class="social-btn btn-fb">🏀 Escuelita de Básquet</a>
         <a href="https://www.instagram.com/clubfunebreroo/" target="_blank" class="social-btn btn-ig">📸 Instagram Oficial</a>
       </div>
 
-      <div id="main-carousel-container" class="main-carousel reveal" style="display: none;"></div>
+      <!-- CORRECCIÓN: Le quito el .reveal para que el carrusel aparezca solo sin tener que bajar la pantalla -->
+      <div id="main-carousel-container" class="main-carousel" style="display: none;"></div>
     </div>
   </section>
 
