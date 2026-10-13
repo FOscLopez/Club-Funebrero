@@ -57,6 +57,7 @@
         box-sizing: border-box;
         overflow: hidden;
     }
+    
     #landing-video { 
         position: absolute; top: 50%; left: 50%; 
         transform: translate(-50%, -50%); 
@@ -82,7 +83,6 @@
         letter-spacing: 2px;
         z-index: 5;
     }
-
   </style>
 </head>
 <body>
@@ -98,28 +98,23 @@
       <p style="color: #64748b; margin-top: 20px; font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase;">Activar Sonido 🔊</p>
   </div>
 
-  <!-- PANTALLA DE CARGA ANIMADA CINEMÁTICA -->
+  <!-- PANTALLA DE CARGA ANIMADA (NUEVA SECUENCIA BÁSQUET) -->
   <div id="landing-overlay">
     
     <div id="shot-clock">08</div>
     <video id="landing-video" src="/img/animacion.mp4" muted playsinline preload="auto"></video>
 
-    <!-- SECUENCIA BÁSQUET Y LOGO -->
+    <!-- SECUENCIA BÁSQUET REALISTA -->
     <div class="landing-anim-container">
-        <!-- El Aro -->
         <div class="landing-hoop"></div>
-        <!-- Las 3 Pelotas (2 fallan, 1 entra) -->
         <div class="landing-ball ball-1"></div>
         <div class="landing-ball ball-2"></div>
         <div class="landing-ball ball-3"></div>
-        <!-- Efecto Expansivo y Logo Final -->
         <div class="landing-shockwave"></div>
         <img src="logo-funebrero_2.png" class="landing-logo-center" alt="Funebrero">
     </div>
 
-    <!-- Título que aparece al final -->
     <h1 class="landing-title">CLUB ATLÉTICO <br><span>FUNEBRERO</span></h1>
-
   </div>
 
   <!-- TICKER -->
@@ -386,6 +381,10 @@
                           hideOverlay();
                       }
                   }, 1000);
+
+                  // Nota: Eliminé el código antiguo de generación de chispas aquí en JS 
+                  // porque ya no es necesario (la cinemática CSS se reproduce sola al abrir el overlay).
+
               }, 400);
           });
       }
