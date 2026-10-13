@@ -45,6 +45,7 @@ function initScrollReveal() {
     document.querySelectorAll('.reveal').forEach(el => scrollObserver.observe(el));
 }
 
+// Reevaluar animaciones cuando se pintan cosas nuevas desde Firebase
 window.observeDynamicElements = () => {
     setTimeout(() => {
         document.querySelectorAll('.reveal:not(.active)').forEach(el => scrollObserver.observe(el));
@@ -105,7 +106,7 @@ async function initApp() {
 }
 
 // ==========================================
-// RENDER: FIXTURES (RESTAURADO ACORDEÓN CON GRILLA PREMIUM)
+// RENDER: FIXTURES
 // ==========================================
 function renderFixtures(fixtures) {
     const container = document.getElementById("publicFixturesContainer");
@@ -171,7 +172,7 @@ function renderFixtures(fixtures) {
 }
 
 // ==========================================
-// RENDER: PLANTELES (RESTAURADO ACORDEÓN CON GRILLA PREMIUM)
+// RENDER: PLANTELES
 // ==========================================
 function renderRosters(players) {
     const container = document.getElementById("rostersContainer");
@@ -202,7 +203,7 @@ function renderRosters(players) {
 }
 
 // ==========================================
-// RENDER: CUMPLEAÑOS (GRILLA WRAP)
+// RENDER: CUMPLEAÑOS
 // ==========================================
 function renderBirthdays(players) {
     const container = document.getElementById("birthdaysContainer");
@@ -279,7 +280,7 @@ function renderBirthdays(players) {
 }
 
 // ==========================================
-// RENDER: ACTAS INSTITUCIONALES (RESTAURADO ACORDEÓN CON GRILLA PREMIUM)
+// RENDER: ACTAS INSTITUCIONALES 
 // ==========================================
 function renderMeetings(meetings) {
     const container = document.getElementById("meetingsContainer");
@@ -326,7 +327,7 @@ function renderMeetings(meetings) {
 }
 
 // ==========================================
-// RENDER: SPONSORS (CARRUSEL PUBLICITARIO)
+// RENDER: SPONSORS 
 // ==========================================
 function renderSponsors(sponsors) {
     const container = document.getElementById("sponsorsContainer");
