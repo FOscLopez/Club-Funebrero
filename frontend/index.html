@@ -26,9 +26,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
-    /* ====================================================
-       ANIMACIONES DE SCROLL (REVEAL MOTOR)
-       ==================================================== */
+    /* ANIMACIONES DE SCROLL (REVEAL MOTOR) */
     .reveal {
         opacity: 0;
         transform: translateY(40px);
@@ -47,26 +45,6 @@
         border-bottom-color: #ff3b3b;
     }
 
-    /* ====================================================
-       1. EFECTOS VISUALES PREMIUM (FONDO VIVO)
-       ==================================================== */
-    @keyframes dynamicBg {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    body { 
-      background: linear-gradient(-45deg, #050505, #1a0505, #000000, #2b0808);
-      background-size: 400% 400%;
-      animation: dynamicBg 20s ease infinite;
-      color: white; font-family: 'Poppins', sans-serif;
-      margin: 0; padding: 0; overflow-x: hidden;
-      scroll-behavior: smooth;
-    }
-
-    /* ====================================================
-       2. BOTÓN INGRESO Y LANDING ANIMADA
-       ==================================================== */
     #enter-stadium-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #050505; z-index: 2000000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
     .btn-enter { background: #dc2626; color: #fff; border: 2px solid #ffbaba; padding: 15px 40px; font-family: 'Bebas Neue', cursive; font-size: 2rem; letter-spacing: 2px; border-radius: 8px; cursor: pointer; box-shadow: 0 0 20px rgba(220,38,38,0.6); transition: 0.3s; animation: pulseBd 2s infinite; text-transform: uppercase; }
     .btn-enter:hover { background: #ff3b3b; transform: scale(1.05); box-shadow: 0 0 40px rgba(220,38,38,0.8); }
@@ -75,12 +53,17 @@
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
         background-color: #000000; z-index: 999999;
         display: none; 
-        flex-direction: column; align-items: center; justify-content: center;
         transition: opacity 0.8s ease, visibility 0.8s;
         box-sizing: border-box;
         overflow: hidden;
     }
-    #landing-video { max-width: 350px; width: 90%; outline: none; mix-blend-mode: screen; position: relative; z-index: 2; }
+    #landing-video { 
+        position: absolute; top: 50%; left: 50%; 
+        transform: translate(-50%, -50%); 
+        max-width: 350px; width: 90%; 
+        outline: none; mix-blend-mode: screen; 
+        z-index: 2; opacity: 0.2; 
+    }
     
     #shot-clock {
         position: absolute;
@@ -97,61 +80,7 @@
         background: rgba(0,0,0,0.8);
         box-shadow: 0 0 15px rgba(220, 38, 38, 0.3) inset;
         letter-spacing: 2px;
-        z-index: 2;
-    }
-
-    .landing-title { font-family: 'Bebas Neue', cursive; font-size: 3.5rem; color: #ffffff; margin-top: 20px; letter-spacing: 2px; text-shadow: 2px 2px 0px #000, -1px -1px 0px #dc2626; text-align: center; opacity: 0; animation: fadeInText 1s forwards 0.5s; position: relative; z-index: 2;}
-    .landing-title span { color: #dc2626; }
-    @keyframes fadeInText { to { opacity: 1; } }
-
-    /* ---- INICIO EFECTO SOLDADURA ---- */
-    .weld-spark {
-        position: absolute;
-        width: 8px; height: 8px;
-        background: #ffffff;
-        border-radius: 50%;
-        box-shadow: 0 0 15px 8px #dc2626, 0 0 30px 15px #ffbaba;
-        z-index: 10;
-        animation: sparkPath 8s linear forwards, sparkFlicker 0.1s infinite alternate;
-    }
-    @keyframes sparkFlicker {
-        0% { transform: scale(1); opacity: 0.8; }
-        100% { transform: scale(1.8); opacity: 1; box-shadow: 0 0 25px 12px #dc2626, 0 0 45px 20px #ffffff; }
-    }
-
-    /* CORRECCIÓN: Saltos de línea eliminados */
-    @keyframes sparkPath {
-        0%   { top: 0; left: 0; }
-        25%  { top: 0; left: calc(100% - 8px); }
-        50%  { top: calc(100% - 8px); left: calc(100% - 8px); }
-        75%  { top: calc(100% - 8px); left: 0; }
-        100% { top: 0; left: 0; }
-    }
-
-    .weld-line {
-        position: absolute;
-        background: #dc2626;
-        box-shadow: 0 0 15px #dc2626, 0 0 25px #dc2626;
         z-index: 5;
-    }
-    .weld-top    { top: 0; left: 0; height: 4px; width: 0; animation: drawTop 2s linear forwards; }
-    .weld-right  { top: 0; right: 0; width: 4px; height: 0; animation: drawRight 2s linear 2s forwards; }
-    .weld-bottom { bottom: 0; right: 0; height: 4px; width: 0; animation: drawBottom 2s linear 4s forwards; }
-    .weld-left   { bottom: 0; left: 0; width: 4px; height: 0; animation: drawLeft 2s linear 6s forwards; }
-
-    @keyframes drawTop    { to { width: 100%; } }
-    @keyframes drawRight  { to { height: 100%; } }
-    @keyframes drawBottom { to { width: 100%; } }
-    @keyframes drawLeft   { to { height: 100%; } }
-
-    .flying-spark {
-        position: absolute;
-        width: 3px; height: 3px;
-        background: #ffffff;
-        border-radius: 50%;
-        box-shadow: 0 0 8px 3px #dc2626, 0 0 12px 5px #ffbaba;
-        pointer-events: none;
-        z-index: 9;
     }
 
   </style>
@@ -169,19 +98,28 @@
       <p style="color: #64748b; margin-top: 20px; font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase;">Activar Sonido 🔊</p>
   </div>
 
-  <!-- PANTALLA DE CARGA ANIMADA -->
+  <!-- PANTALLA DE CARGA ANIMADA CINEMÁTICA -->
   <div id="landing-overlay">
     
-    <!-- Efecto Soldadura Borde Perimetral -->
-    <div class="weld-spark"></div>
-    <div class="weld-line weld-top"></div>
-    <div class="weld-line weld-right"></div>
-    <div class="weld-line weld-bottom"></div>
-    <div class="weld-line weld-left"></div>
-
     <div id="shot-clock">08</div>
     <video id="landing-video" src="/img/animacion.mp4" muted playsinline preload="auto"></video>
+
+    <!-- SECUENCIA BÁSQUET Y LOGO -->
+    <div class="landing-anim-container">
+        <!-- El Aro -->
+        <div class="landing-hoop"></div>
+        <!-- Las 3 Pelotas (2 fallan, 1 entra) -->
+        <div class="landing-ball ball-1"></div>
+        <div class="landing-ball ball-2"></div>
+        <div class="landing-ball ball-3"></div>
+        <!-- Efecto Expansivo y Logo Final -->
+        <div class="landing-shockwave"></div>
+        <img src="logo-funebrero_2.png" class="landing-logo-center" alt="Funebrero">
+    </div>
+
+    <!-- Título que aparece al final -->
     <h1 class="landing-title">CLUB ATLÉTICO <br><span>FUNEBRERO</span></h1>
+
   </div>
 
   <!-- TICKER -->
@@ -344,7 +282,10 @@
     <section id="institucional" class="section-padding reveal">
       <h2 class="section-title">Vida <span>Institucional</span></h2>
       <div style="max-width: 900px; margin: 0 auto;">
-        <div id="meetingsContainer"></div>
+        <details class="fune-accordion reveal">
+          <summary>📜 Boletín Oficial y Actas</summary>
+          <div class="fune-accordion-content" id="meetingsContainer"></div>
+        </details>
       </div>
     </section>
   </main>
@@ -370,7 +311,7 @@
     </div>
   </footer>
 
-  <!-- LÓGICA DE AUDIO, LANDING Y COPIAR AL PORTAPAPELES -->
+  <!-- LÓGICA DE AUDIO Y LANDING -->
   <script>
     function copiarAlPortapapeles(idElemento) {
         var texto = document.getElementById(idElemento).innerText;
@@ -445,42 +386,6 @@
                           hideOverlay();
                       }
                   }, 1000);
-
-                  const sparkInterval = setInterval(() => {
-                      if (isHidden) {
-                          clearInterval(sparkInterval);
-                          return;
-                      }
-                      const mainSpark = document.querySelector('.weld-spark');
-                      if (!mainSpark) return;
-                      const rect = mainSpark.getBoundingClientRect();
-                      
-                      const particle = document.createElement('div');
-                      particle.className = 'flying-spark';
-                      particle.style.left = rect.left + 'px';
-                      particle.style.top = rect.top + 'px';
-                      overlay.appendChild(particle);
-
-                      const centerX = window.innerWidth / 2;
-                      const centerY = window.innerHeight / 2;
-                      const destX = centerX + (Math.random() - 0.5) * 600; 
-                      const destY = centerY + (Math.random() - 0.5) * 600;
-
-                      /* CORRECCIÓN: Saltos de línea eliminados */
-                      particle.animate([
-                          { transform: `translate(0, 0) scale(1.5)`, opacity: 1 },
-                          { transform: `translate(${destX - rect.left}px, ${destY - rect.top}px) scale(0)`, opacity: 0 }
-                      ], {
-                          duration: 600 + Math.random() * 600,
-                          easing: 'ease-out'
-                      });
-
-                      setTimeout(() => {
-                          if(particle.parentNode) particle.remove();
-                      }, 1200);
-
-                  }, 40);
-
               }, 400);
           });
       }
