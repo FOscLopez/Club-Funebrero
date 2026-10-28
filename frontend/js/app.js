@@ -1,7 +1,7 @@
 import { listenToFixtures, getPlayers, listenToMeetings, listenToSponsors, getSocioByDni, registerPaymentIntent, listenToCarouselImages, listenToUpcomingMatches } from "./services/firestore.service.js";
 
 const CLUB_LOGOS = {
-    "FUNEBRERO": "https://i.ibb.co/r85gwzH/funebrero.webp",
+    "FUNEBRERO": "logo-funebrero_2.png", // Asegurado con tu imagen local
     "UNIÓN": "https://i.ibb.co/YGgpKFT/union.webp",
     "UNION": "https://i.ibb.co/YGgpKFT/union.webp",
     "URQUIZA": "https://i.ibb.co/ZpRhBV70/urquiza.webp",
@@ -14,7 +14,7 @@ const CLUB_LOGOS = {
     "BERMEJO": "https://i.ibb.co/kVw1Gqcd/puerto-bermejo.webp"
 };
 
-const DEFAULT_LOGO = "https://i.ibb.co/Cpw4zbBv/571425287-18303994912267310-8920899741855718292-n.jpg";
+const DEFAULT_LOGO = "logo-funebrero_2.png";
 const GEMINI_API_KEY = "AIzaSyDvsq3fg1nEOQxR8wVcZW8rEX2lcc_xC8U";
 
 let globalData = { fixtures: [], players: [], meetings: [], sponsors: [], currentSocio: null, carouselImages: [], upcomingMatches: [] };

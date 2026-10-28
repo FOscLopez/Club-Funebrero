@@ -54,10 +54,29 @@
     }
     
     #landing-video { 
-        width: 100%;
-        height: 100%;
-        object-fit: contain; 
-        z-index: 10; 
+        position: absolute; top: 50%; left: 50%; 
+        transform: translate(-50%, -50%); 
+        max-width: 350px; width: 90%; 
+        outline: none; mix-blend-mode: screen; 
+        z-index: 2; opacity: 0.2; 
+    }
+    
+    #shot-clock {
+        position: absolute;
+        top: 40px; 
+        left: 50%;
+        transform: translateX(-50%); 
+        font-family: 'Bebas Neue', cursive;
+        font-size: 3.5rem;
+        color: #dc2626;
+        text-shadow: 0 0 10px rgba(220, 38, 38, 0.8), 0 0 20px rgba(220, 38, 38, 0.5);
+        border: 2px solid #dc2626;
+        padding: 5px 25px;
+        border-radius: 8px;
+        background: rgba(0,0,0,0.8);
+        box-shadow: 0 0 15px rgba(220, 38, 38, 0.3) inset;
+        letter-spacing: 2px;
+        z-index: 5;
     }
   </style>
 </head>
@@ -73,7 +92,22 @@
   </div>
 
   <div id="landing-overlay">
-    <video id="landing-video" src="/img/animacion.mp4" playsinline preload="auto"></video>
+    
+    <div id="shot-clock">08</div>
+
+    <!-- ELIMINADO EL VIDEO ANTIGUO QUE CAUSABA EL DOBLE FONDO -->
+
+    <!-- SECUENCIA BÁSQUET REALISTA -->
+    <div class="landing-anim-container">
+        <div class="landing-hoop"></div>
+        <div class="landing-ball ball-1"></div>
+        <div class="landing-ball ball-2"></div>
+        <div class="landing-ball ball-3"></div>
+        <div class="landing-shockwave"></div>
+        <img src="logo-funebrero_2.png" class="landing-logo-center" alt="Funebrero">
+    </div>
+
+    <h1 class="landing-title">CLUB ATLÉTICO <br><span>FUNEBRERO</span></h1>
   </div>
 
   <div class="ticker-wrap">
@@ -109,16 +143,17 @@
   <section id="inicio" class="hero">
     <div class="hero-container">
       <div class="hero-logo-wrapper"><img src="logo-funebrero_2.png" alt="Escudo Funebrero" id="main-logo"></div>
-      <div class="title-container reveal"><h1 class="club-title-glow">CLUB ATLÉTICO FUNEBRERO</h1></div>
-      <p class="hero-subtitle reveal">Asociación Civil Club Social Cultural y Deportivo</p>
       
-      <div class="hero-socials reveal">
+      <div class="title-container"><h1 class="club-title-glow">CLUB ATLÉTICO FUNEBRERO</h1></div>
+      <p class="hero-subtitle">Asociación Civil Club Social Cultural y Deportivo</p>
+      
+      <div class="hero-socials">
         <a href="https://www.facebook.com/profile.php?id=61558452983433" target="_blank" class="social-btn btn-fb">📘 Facebook Club</a>
         <a href="https://www.facebook.com/profile.php?id=61592882245302" target="_blank" class="social-btn btn-fb">🏀 Escuelita de Básquet</a>
         <a href="https://www.instagram.com/clubfunebreroo/" target="_blank" class="social-btn btn-ig">📸 Instagram Oficial</a>
       </div>
 
-      <div id="main-carousel-container" class="main-carousel reveal" style="display: none;"></div>
+      <div id="main-carousel-container" class="main-carousel" style="display: none;"></div>
     </div>
   </section>
 
@@ -227,7 +262,7 @@
     <section id="institucional" class="section-padding reveal">
       <h2 class="section-title">Vida <span>Institucional</span></h2>
       <div style="max-width: 900px; margin: 0 auto;">
-        <details class="fune-accordion reveal">
+        <details class="fune-accordion reveal" open>
           <summary>📜 Boletín Oficial y Actas</summary>
           <div class="fune-accordion-content" id="meetingsContainer"></div>
         </details>
@@ -243,7 +278,6 @@
   <footer class="main-footer" style="padding: 40px 15px; background: #000; border-top: 2px solid #dc2626; text-align: center;">
     <img src="logo-funebrero_2.png" alt="Escudo" style="width: 50px; margin-bottom: 15px; filter: grayscale(100%); opacity: 0.3;">
     <p style="color: #ffffff; margin: 0; font-size: 1rem; letter-spacing: 1px;">© 2026 Club Atlético Funebrero</p>
-    <p style="color: #64748b; font-size: 0.8rem; margin-top: 5px;">Todos los derechos reservados.</p>
     
     <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); max-width: 600px; margin-left: auto; margin-right: auto;">
       <p style="color: #a3a3a3; font-size: 0.85rem; margin-bottom: 15px;">Diseño y Desarrollo por <strong style="color: #dc2626; font-family: 'Bebas Neue', cursive; font-size: 1.2rem; letter-spacing: 1px;">Rey Digital del Norte</strong></p>
@@ -278,7 +312,7 @@
       const btnEnter = document.getElementById("btn-enter-stadium");
       const enterScreen = document.getElementById("enter-stadium-screen");
       const overlay = document.getElementById("landing-overlay");
-      const video = document.getElementById("landing-video");
+      const clockElement = document.getElementById("shot-clock");
       const audioLanding = document.getElementById("audio-landing");
       const audioFondo = document.getElementById("audio-fondo");
       let isHidden = false;
@@ -312,14 +346,18 @@
                       audioLanding.volume = 1.0;
                       audioLanding.play().catch(e=>console.log(e));
                   }
-                  if(video) {
-                      video.currentTime = 0;
-                      video.play().catch(e=>console.log(e));
-                  }
 
-                  setTimeout(() => {
-                      hideOverlay();
-                  }, 9000);
+                  const countdown = setInterval(() => {
+                      let timeLeft = parseInt(clockElement.textContent);
+                      timeLeft--;
+                      if (timeLeft >= 0) {
+                          clockElement.textContent = timeLeft.toString().padStart(2, '0');
+                      }
+                      if (timeLeft <= 0) {
+                          clearInterval(countdown);
+                          hideOverlay();
+                      }
+                  }, 1000);
 
               }, 400);
           });
