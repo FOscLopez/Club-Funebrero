@@ -44,12 +44,10 @@
     .btn-enter { background: #dc2626; color: #fff; border: 2px solid #ffbaba; padding: 15px 40px; font-family: 'Bebas Neue', cursive; font-size: 2rem; letter-spacing: 2px; border-radius: 8px; cursor: pointer; box-shadow: 0 0 20px rgba(220,38,38,0.6); transition: 0.3s; animation: pulseBd 2s infinite; text-transform: uppercase; }
     .btn-enter:hover { background: #ff3b3b; transform: scale(1.05); box-shadow: 0 0 40px rgba(220,38,38,0.8); }
 
-    /* PANTALLA DE CARGA DEL VIDEO */
     #landing-overlay {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
         background-color: #000000; z-index: 999999;
         display: none; 
-        justify-content: center; align-items: center;
         transition: opacity 0.8s ease, visibility 0.8s;
         box-sizing: border-box;
         overflow: hidden;
@@ -58,30 +56,26 @@
     #landing-video { 
         width: 100%;
         height: 100%;
-        object-fit: contain;
+        object-fit: contain; 
         z-index: 10; 
     }
   </style>
 </head>
 <body>
 
-  <!-- ETIQUETAS DE AUDIO Y VIDEO -->
   <audio id="audio-landing" src="/audio/landing.mp3"></audio>
   <audio id="audio-fondo" src="/audio/fondo.mp3" loop></audio>
 
-  <!-- BOTÓN DE INGRESO -->
   <div id="enter-stadium-screen">
       <img src="logo-funebrero_2.png" alt="Escudo" style="width: 150px; margin-bottom: 30px; animation: floatLogo 3s ease-in-out infinite;">
       <button id="btn-enter-stadium" class="btn-enter">INGRESAR AL ESTADIO</button>
       <p style="color: #64748b; margin-top: 20px; font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase;">Activar Sonido 🔊</p>
   </div>
 
-  <!-- PANTALLA DE CARGA REPRODUCIENDO TU VIDEO "animacion.mp4" -->
   <div id="landing-overlay">
     <video id="landing-video" src="/img/animacion.mp4" playsinline preload="auto"></video>
   </div>
 
-  <!-- TICKER -->
   <div class="ticker-wrap">
     <div class="ticker-move" id="tickerContent">
       <div class="ticker-item"><span>CLUB FUNEBRERO</span> Bienvenidos a la nueva plataforma oficial.</div>
@@ -89,7 +83,6 @@
     </div>
   </div>
 
-  <!-- NAVEGACIÓN CRISTAL -->
   <header class="header">
     <div class="header-inner">
       <div class="header-brand" style="display: flex; align-items: center; gap: 12px; justify-content: center;">
@@ -113,7 +106,6 @@
     </div>
   </header>
 
-  <!-- HERO -->
   <section id="inicio" class="hero">
     <div class="hero-container">
       <div class="hero-logo-wrapper"><img src="logo-funebrero_2.png" alt="Escudo Funebrero" id="main-logo"></div>
@@ -209,7 +201,7 @@
             <a href="https://mpago.la/16hZWUT" target="_blank" id="btnPagarMP" class="action-btn" style="background: #009ee3; color: white; text-align: center; text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px;">💳 Tocar aquí para pagar con Mercado Pago</a>
             
             <div style="border-top: 1px dashed #333; padding-top: 15px; margin-top: 15px;">
-                <p style="color: #fff; font-weight: 600; margin-bottom: 5px;">O transfiere desde cualquier cuenta o billetera (Ualá, Naranja X, MODO, Bancos) a:</p>
+                <p style="color: #fff; font-weight: 600; margin-bottom: 5px;">O transfiere desde cualquier cuenta o billetera a:</p>
                 <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; display: inline-block; text-align: left;">
                     <span style="color: #a3a3a3; font-size: 0.8rem;">CVU/CBU:</span> <strong style="color: #10b981; letter-spacing: 1px;" id="textToCopyCvu">0000003100137467286158</strong> 
                     <span style="cursor:pointer; color:#3b82f6; font-size: 0.8rem; margin-left: 5px;" onclick="copiarAlPortapapeles('textToCopyCvu')">📋 Copiar</span><br>
@@ -232,7 +224,6 @@
       </div>
     </section>
 
-    <!-- SECCIÓN INSTITUCIONAL -->
     <section id="institucional" class="section-padding reveal">
       <h2 class="section-title">Vida <span>Institucional</span></h2>
       <div style="max-width: 900px; margin: 0 auto;">
@@ -264,7 +255,6 @@
     </div>
   </footer>
 
-  <!-- LÓGICA DE AUDIO Y LANDING -->
   <script>
     function copiarAlPortapapeles(idElemento) {
         var texto = document.getElementById(idElemento).innerText;
@@ -275,7 +265,6 @@
         });
     }
 
-    // Efecto de Header Dinámico al hacer Scroll
     window.addEventListener('scroll', () => {
         const header = document.querySelector('.header');
         if (window.scrollY > 50) {
@@ -323,13 +312,11 @@
                       audioLanding.volume = 1.0;
                       audioLanding.play().catch(e=>console.log(e));
                   }
-
                   if(video) {
                       video.currentTime = 0;
                       video.play().catch(e=>console.log(e));
                   }
 
-                  // Duración exacta del video (9 segundos) antes de ocultar el overlay
                   setTimeout(() => {
                       hideOverlay();
                   }, 9000);
@@ -339,9 +326,6 @@
       }
     });
 
-    // ==========================================
-    // CACHE BUSTER EXTREMO AUTOMÁTICO
-    // ==========================================
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('/sw.js?v=' + new Date().getTime()).then(reg => {

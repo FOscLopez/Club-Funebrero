@@ -28,9 +28,6 @@ function getLogoSrc(clubName) {
     return DEFAULT_LOGO;
 }
 
-// ==========================================
-// INICIADOR DE ANIMACIONES DE SCROLL
-// ==========================================
 const scrollObserverOptions = { root: null, rootMargin: '0px', threshold: 0.15 };
 const scrollObserver = new IntersectionObserver((entries, observer) => {
     entries.forEach(entry => {
@@ -175,8 +172,6 @@ function renderRosters(players) {
     const grouped = {};
     players.forEach(p => { if (!grouped[p.categoryId]) grouped[p.categoryId] = []; grouped[p.categoryId].push(p); });
     
-    const svgBall = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23ea580c' stroke='%23431407' stroke-width='4'/><path d='M50 4 v92' stroke='%23431407' stroke-width='3' fill='none'/><path d='M4 50 h92' stroke='%23431407' stroke-width='3' fill='none'/><path d='M15 15 a 40 40 0 0 0 0 70' stroke='%23431407' stroke-width='3' fill='none'/><path d='M85 15 a 40 40 0 0 1 0 70' stroke='%23431407' stroke-width='3' fill='none'/><circle cx='35' cy='35' r='6' fill='%23000'/><circle cx='65' cy='35' r='6' fill='%23000'/><path d='M35 55 Q50 75 65 55' stroke='%23000' stroke-width='5' fill='none' stroke-linecap='round'/></svg>";
-
     let html = "";
     Object.keys(grouped).sort().forEach(cat => {
         html += `<details class="fune-accordion reveal"><summary>🏀 CATEGORÍA ${cat} <span style="font-size: 0.9rem; color: #a3a3a3; font-family: 'Poppins', sans-serif; font-weight: normal; margin-left: 10px;">(${grouped[cat].length} Jugadores)</span></summary><div class="fune-accordion-content custom-grid-players">`;
@@ -184,7 +179,6 @@ function renderRosters(players) {
         grouped[cat].sort((a, b) => a.name.localeCompare(b.name)).forEach(p => {
             html += `
                 <div class="player-card">
-                    <img src="${p.photoUrl || svgBall}" class="smiling-ball" alt="Jugador">
                     <strong style="color: #fff; display: block; font-family: 'Bebas Neue', cursive; font-size: 1.2rem; letter-spacing: 1px;">${p.name}</strong>
                     <span style="color: #a3a3a3; font-size: 0.75rem;">Nac: ${p.birthdate}</span>
                 </div>`;

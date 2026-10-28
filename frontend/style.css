@@ -39,17 +39,23 @@ html {
     scroll-behavior: smooth;
 }
 
-/* FONDO MESH ANIMADO */
+/* FONDO MESH ANIMADO (Efecto "Estadio Vivo") */
 body {
-    background: radial-gradient(circle at 15% 50%, rgba(220, 38, 38, 0.08), transparent 25%),
-                radial-gradient(circle at 85% 30%, rgba(220, 38, 38, 0.05), transparent 25%),
+    background: radial-gradient(circle at 15% 50%, rgba(220, 38, 38, 0.12), transparent 30%),
+                radial-gradient(circle at 85% 30%, rgba(220, 38, 38, 0.06), transparent 30%),
                 var(--bg-deep);
-    background-size: 100vw 100vh;
+    background-size: 200% 200%;
     background-attachment: fixed;
     color: var(--blanco-puro);
     font-family: var(--font-textos);
     min-height: 100vh;
     overflow-x: hidden;
+    animation: arenaBreathing 15s ease-in-out infinite alternate;
+}
+
+@keyframes arenaBreathing {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
 }
 
 /* ====================================================
@@ -71,26 +77,26 @@ body {
     justify-content: center;
 }
 
-/* Tarjeta de Partido Premium */
+/* Tarjeta de Partido Premium (Efecto Inmersivo) */
 .match-card {
     flex: 1 1 300px;
     max-width: 350px;
-    background: rgba(15, 15, 15, 0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: linear-gradient(145deg, rgba(15, 15, 15, 0.95), rgba(5, 5, 5, 0.98));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--gris-borde);
     border-top: 3px solid var(--rojo-funebrero);
     border-radius: 16px;
     padding: 20px;
     position: relative;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.8);
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.9);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .match-card:hover {
-    transform: translateY(-8px);
-    border-color: rgba(220, 38, 38, 0.4);
-    box-shadow: 0 15px 35px rgba(220, 38, 38, 0.15);
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(255, 59, 59, 0.6);
+    box-shadow: 0 20px 40px rgba(220, 38, 38, 0.25), inset 0 0 15px rgba(220, 38, 38, 0.1);
 }
 
 .match-teams {
@@ -104,7 +110,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 35%;
+    width: 30%;
     text-align: center;
 }
 
@@ -118,7 +124,7 @@ body {
 }
 
 .match-card:hover .match-team img {
-    transform: scale(1.1);
+    transform: scale(1.15);
 }
 
 .match-team span {
@@ -130,44 +136,58 @@ body {
 
 .match-score-box {
     font-family: var(--font-titulos);
-    font-size: 2.2rem;
+    font-size: 2rem;
     color: var(--rojo-funebrero);
-    text-shadow: 0 0 15px rgba(220,38,38,0.5);
+    text-shadow: 0 0 15px rgba(220,38,38,0.7);
     background: #000;
     padding: 5px 15px;
     border-radius: 8px;
-    border: 1px solid rgba(220,38,38,0.3);
+    border: 1px solid rgba(220,38,38,0.4);
+    white-space: nowrap; 
+    text-align: center;
+    min-width: 80px;
+    box-shadow: inset 0 0 10px rgba(220, 38, 38, 0.15);
 }
 
 /* Tarjeta de Jugador Premium */
 .player-card {
     width: 100%;
-    background: rgba(10, 10, 10, 0.8);
+    background: linear-gradient(145deg, rgba(12, 12, 12, 0.9), rgba(3, 3, 3, 0.95));
     border: 1px solid var(--gris-borde);
     border-bottom: 3px solid var(--rojo-funebrero);
     border-radius: 12px;
     padding: 15px;
     text-align: center;
-    transition: 0.3s;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6);
 }
 
 .player-card:hover {
-    transform: translateY(-5px);
-    background: rgba(20, 20, 20, 0.9);
-    border-color: rgba(220, 38, 38, 0.3);
+    transform: translateY(-6px);
+    background: rgba(25, 25, 25, 0.95);
+    border-color: rgba(255, 59, 59, 0.5);
+    box-shadow: 0 12px 25px rgba(220, 38, 38, 0.2);
 }
 
 /* Tarjeta de Documento (Actas) Premium */
 .meeting-card-horiz {
     flex: 1 1 300px;
     max-width: 350px;
-    background: rgba(15, 23, 42, 0.6);
+    background: rgba(15, 23, 42, 0.7);
     padding: 20px;
     border-radius: 12px;
-    border: 1px solid var(--gris-borde);
+    border: 1px solid rgba(59, 130, 246, 0.2);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    transition: 0.3s;
+}
+
+.meeting-card-horiz:hover {
+    border-color: rgba(59, 130, 246, 0.6);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(59, 130, 246, 0.2);
 }
 
 /* TICKER */
@@ -183,7 +203,7 @@ body {
     left: 0;
     z-index: 1000;
     height: 35px;
-    box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
+    box-shadow: 0 4px 20px rgba(220, 38, 38, 0.4);
 }
 
 .ticker-move {
@@ -217,7 +237,7 @@ body {
     100% { transform: translateX(-100%); }
 }
 
-/* NAVEGACIÓN MODERNA */
+/* NAVEGACIÓN MODERNA CON EFECTO PROFUNDO */
 .header {
     position: fixed;
     left: 0;
@@ -233,8 +253,9 @@ body {
 }
 
 .header:hover {
-    background: rgba(3, 3, 3, 0.9);
-    border-bottom: 1px solid rgba(220, 38, 38, 0.4);
+    background: rgba(3, 3, 3, 0.95);
+    border-bottom: 1px solid rgba(220, 38, 38, 0.6);
+    box-shadow: 0 5px 20px rgba(220, 38, 38, 0.2);
 }
 
 .header-inner {
@@ -275,7 +296,7 @@ body {
 
 .nav-links a:hover {
     color: var(--blanco-puro);
-    text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
 }
 
 .nav-links a:hover::after {
@@ -301,9 +322,15 @@ body {
     transform: translate(-50%, -50%);
     width: 60vw;
     height: 60vw;
-    background: radial-gradient(circle, rgba(220, 38, 38, 0.15) 0%, transparent 60%);
+    background: radial-gradient(circle, rgba(220, 38, 38, 0.2) 0%, transparent 60%);
     z-index: 0;
     pointer-events: none;
+    animation: heroGlow 4s infinite alternate ease-in-out;
+}
+
+@keyframes heroGlow {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+    100% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
 }
 
 .hero-logo-wrapper {
@@ -314,12 +341,12 @@ body {
 
 #main-logo {
     width: 150px;
-    filter: drop-shadow(0 15px 25px rgba(220, 38, 38, 0.5));
+    filter: drop-shadow(0 15px 35px rgba(220, 38, 38, 0.6));
 }
 
 @keyframes floatLogo {
     0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-15px) rotate(2deg); filter: drop-shadow(0 25px 35px rgba(220, 38, 38, 0.7)); }
+    50% { transform: translateY(-15px) rotate(2deg); filter: drop-shadow(0 25px 45px rgba(220, 38, 38, 0.9)); }
 }
 
 .club-title-glow {
@@ -405,7 +432,7 @@ body {
 .action-btn:hover, .btn-enter:hover {
     background: linear-gradient(135deg, #dc2626, #ff3b3b);
     transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(220, 38, 38, 0.6), inset 0 2px 5px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 30px rgba(220, 38, 38, 0.8), inset 0 2px 5px rgba(255, 255, 255, 0.3);
     border-color: #fff;
 }
 
@@ -423,9 +450,9 @@ body {
 
 .outline-btn:hover {
     border-color: var(--rojo-neon);
-    background: rgba(220, 38, 38, 0.1);
-    color: var(--rojo-neon);
-    box-shadow: 0 0 15px rgba(220, 38, 38, 0.3);
+    background: rgba(220, 38, 38, 0.15);
+    color: var(--blanco-puro);
+    box-shadow: 0 0 15px rgba(220, 38, 38, 0.4);
 }
 
 .form-input {
@@ -443,23 +470,25 @@ body {
 
 .form-input:focus {
     border-color: var(--rojo-funebrero);
-    box-shadow: inset 0 2px 10px rgba(0,0,0,0.8), 0 0 15px rgba(220, 38, 38, 0.2);
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.8), 0 0 20px rgba(220, 38, 38, 0.3);
 }
 
 /* ====================================================
-   LOS ACORDEONES CLÁSICOS ESTILO PREMIUM
+   ACORDEONES CLÁSICOS ESTILO PREMIUM EN LLAMAS
    ==================================================== */
 details.fune-accordion {
-    background: rgba(15, 15, 15, 0.5);
+    background: rgba(15, 15, 15, 0.6);
     border: 1px solid var(--gris-borde);
     border-radius: 12px;
     margin-bottom: 20px;
     transition: all 0.3s ease;
     overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
 
 details.fune-accordion:hover {
-    border-color: rgba(220, 38, 38, 0.3);
+    border-color: rgba(220, 38, 38, 0.5);
+    box-shadow: 0 10px 30px rgba(220, 38, 38, 0.15);
 }
 
 details.fune-accordion summary {
@@ -472,35 +501,50 @@ details.fune-accordion summary {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(90deg, rgba(0,0,0,0.8), rgba(20,0,0,0.8));
-    transition: background 0.3s ease;
+    background: linear-gradient(90deg, rgba(15,15,15,0.9), rgba(35,5,5,0.9));
+    transition: all 0.4s ease;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
+    border-left: 4px solid transparent;
+}
+
+details.fune-accordion summary:hover {
+    background: linear-gradient(90deg, rgba(20,5,5,0.9), rgba(50,5,5,0.9));
+    border-left: 4px solid var(--rojo-neon);
 }
 
 details.fune-accordion[open] summary {
     border-bottom: 1px solid var(--gris-borde);
     color: var(--rojo-neon);
+    border-left: 4px solid var(--rojo-funebrero);
+    text-shadow: 0 0 15px rgba(220, 38, 38, 0.6);
 }
 
 .fune-accordion-content { 
     padding: 15px; 
 }
 
-/* TÍTULOS DE SECCIÓN */
+/* TÍTULOS DE SECCIÓN INCANDESCENTES */
 .section-title {
     text-align: center;
     font-family: var(--font-titulos);
-    font-size: 3.5rem;
-    margin-bottom: 30px;
+    font-size: 3.8rem;
+    margin-bottom: 40px;
     letter-spacing: 2px;
     color: var(--blanco-puro);
     text-transform: uppercase;
+    text-shadow: 0 5px 15px rgba(0,0,0,0.8);
 }
 
 .section-title span {
     color: var(--rojo-neon);
-    text-shadow: 0 0 20px rgba(220, 38, 38, 0.4);
+    text-shadow: 0 0 15px var(--rojo-funebrero), 0 0 30px var(--rojo-funebrero);
+    animation: neonPulse 2s infinite alternate;
+}
+
+@keyframes neonPulse {
+    0% { text-shadow: 0 0 10px var(--rojo-funebrero), 0 0 20px var(--rojo-funebrero); opacity: 0.9; }
+    100% { text-shadow: 0 0 20px var(--rojo-funebrero), 0 0 40px var(--rojo-neon); opacity: 1; }
 }
 
 .section-padding { padding: 40px 0; max-width: 100%; position: relative; }
@@ -521,7 +565,7 @@ details.fune-accordion[open] summary {
 }
 .birthday-card.is-today { background: linear-gradient(135deg, rgba(220,38,38,0.15), rgba(15,15,15,0.95)); border-left: 4px solid #dc2626; border-color: rgba(220,38,38,0.4); position: relative; overflow: hidden; }
 
-.sponsors-bar { background: #020202; padding: 30px 0; border-top: 1px solid rgba(220, 38, 38, 0.2); border-bottom: 1px solid rgba(220, 38, 38, 0.2); overflow: hidden; position: relative; box-shadow: inset 0 0 30px rgba(0,0,0,0.8); }
+.sponsors-bar { background: #020202; padding: 30px 0; border-top: 1px solid rgba(220, 38, 38, 0.2); border-bottom: 1px solid rgba(220, 38, 38, 0.2); overflow: hidden; position: relative; box-shadow: inset 0 0 40px rgba(0,0,0,0.9); }
 .sponsors-track { display: flex; gap: 30px; width: max-content; animation: sponsorScroll 35s linear infinite; padding-left: 30px; align-items: center; }
 .sponsors-track:hover { animation-play-state: paused; }
 @keyframes sponsorScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
@@ -541,25 +585,6 @@ details.fune-accordion[open] summary {
 .main-carousel { width: 100%; max-width: 600px; height: 250px; margin: 30px auto 0; position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(220,38,38,0.2); border: 1px solid rgba(255,255,255,0.1); background: #000; }
 .carousel-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1s ease-in-out; object-fit: cover; }
 .carousel-slide.active { opacity: 1; }
-
-/* ANIMACIÓN PELOTA SONRIENTE (PLANTELES) */
-.smiling-ball {
-    width: 65px;
-    height: 65px;
-    margin: 0 auto 10px;
-    display: block;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--rojo-funebrero);
-    animation: bounceRotate 3s infinite ease-in-out;
-    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
-    background: #000;
-}
-
-@keyframes bounceRotate {
-    0%, 100% { transform: translateY(0) rotate(-5deg); }
-    50% { transform: translateY(-8px) rotate(5deg); }
-}
 
 @media (min-width: 992px) {
     .club-title-glow { font-size: 6.5rem; }
