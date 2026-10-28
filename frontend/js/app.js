@@ -45,7 +45,6 @@ function initScrollReveal() {
     document.querySelectorAll('.reveal').forEach(el => scrollObserver.observe(el));
 }
 
-// Reevaluar animaciones cuando se pintan cosas nuevas desde Firebase
 window.observeDynamicElements = () => {
     setTimeout(() => {
         document.querySelectorAll('.reveal:not(.active)').forEach(el => scrollObserver.observe(el));
@@ -105,9 +104,6 @@ async function initApp() {
     initSociosPortal();
 }
 
-// ==========================================
-// RENDER: FIXTURES
-// ==========================================
 function renderFixtures(fixtures) {
     const container = document.getElementById("publicFixturesContainer");
     if (!container) return;
@@ -171,9 +167,6 @@ function renderFixtures(fixtures) {
     if(window.observeDynamicElements) window.observeDynamicElements();
 }
 
-// ==========================================
-// RENDER: PLANTELES
-// ==========================================
 function renderRosters(players) {
     const container = document.getElementById("rostersContainer");
     if (!container) return;
@@ -202,9 +195,6 @@ function renderRosters(players) {
     if(window.observeDynamicElements) window.observeDynamicElements();
 }
 
-// ==========================================
-// RENDER: CUMPLEAÑOS
-// ==========================================
 function renderBirthdays(players) {
     const container = document.getElementById("birthdaysContainer");
     const ticker = document.getElementById("tickerContent");
@@ -279,9 +269,6 @@ function renderBirthdays(players) {
     container.innerHTML = html;
 }
 
-// ==========================================
-// RENDER: ACTAS INSTITUCIONALES 
-// ==========================================
 function renderMeetings(meetings) {
     const container = document.getElementById("meetingsContainer");
     if (!container) return;
@@ -326,9 +313,6 @@ function renderMeetings(meetings) {
     if(window.observeDynamicElements) window.observeDynamicElements();
 }
 
-// ==========================================
-// RENDER: SPONSORS 
-// ==========================================
 function renderSponsors(sponsors) {
     const container = document.getElementById("sponsorsContainer");
     if (!container) return;
@@ -343,9 +327,6 @@ function renderSponsors(sponsors) {
         </a>`).join("");
 }
 
-// ==========================================
-// RENDER CARRUSEL PRINCIPAL DE FOTOS
-// ==========================================
 let carouselInterval = null;
 function renderMainCarousel(images) {
     const container = document.getElementById("main-carousel-container");
@@ -376,9 +357,6 @@ function renderMainCarousel(images) {
     }
 }
 
-// ==========================================
-// RENDER PRÓXIMOS PARTIDOS
-// ==========================================
 let matchesInterval = null;
 function renderUpcomingMatches(matches) {
     const container = document.getElementById("upcoming-matches-container");
@@ -404,7 +382,7 @@ function renderUpcomingMatches(matches) {
     container.innerHTML = `
         <div class="reveal" style="position: relative; height: 400px; border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(220, 38, 38, 0.3);">
             ${activeMatches.map((match, idx) => `
-                <img src="${match.imageUrl}" class="match-slide ${idx === 0 ? 'active' : ''}" style="position: absolute; top: 0; left: 0; width: 100\%; height: 100\%; opacity: ${idx === 0 ? '1' : '0'}; transition: opacity 1s ease-in-out; object-fit: contain;" alt="Próximo Partido">
+                <img src="${match.imageUrl}" class="match-slide ${idx === 0 ? 'active' : ''}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: ${idx === 0 ? '1' : '0'}; transition: opacity 1s ease-in-out; object-fit: contain;" alt="Próximo Partido">
             `).join("")}
         </div>
     `;
@@ -424,9 +402,6 @@ function renderUpcomingMatches(matches) {
     }
 }
 
-// ==========================================
-// PORTAL DE SOCIOS
-// ==========================================
 function initSociosPortal() {
     const btnBuscar = document.getElementById("btnBuscarSocio");
     const dniInput = document.getElementById("socioDniInput");
@@ -581,9 +556,6 @@ function initSociosPortal() {
     });
 }
 
-// ==========================================
-// FUNEBOT OMNISCIENTE
-// ==========================================
 function initFuneBot() {
   const toggleBtn = document.getElementById("chatbot-toggle");
   const chatContainer = document.getElementById("chatbot-container");

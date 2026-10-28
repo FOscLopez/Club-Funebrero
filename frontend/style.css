@@ -542,6 +542,25 @@ details.fune-accordion[open] summary {
 .carousel-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1s ease-in-out; object-fit: cover; }
 .carousel-slide.active { opacity: 1; }
 
+/* ANIMACIÓN PELOTA SONRIENTE (PLANTELES) */
+.smiling-ball {
+    width: 65px;
+    height: 65px;
+    margin: 0 auto 10px;
+    display: block;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--rojo-funebrero);
+    animation: bounceRotate 3s infinite ease-in-out;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+    background: #000;
+}
+
+@keyframes bounceRotate {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    50% { transform: translateY(-8px) rotate(5deg); }
+}
+
 @media (min-width: 992px) {
     .club-title-glow { font-size: 6.5rem; }
     .hero-subtitle { font-size: 1.2rem; }
