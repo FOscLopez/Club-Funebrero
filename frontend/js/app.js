@@ -1,7 +1,7 @@
 import { listenToFixtures, getPlayers, listenToMeetings, listenToSponsors, getSocioByDni, registerPaymentIntent, listenToCarouselImages, listenToUpcomingMatches } from "./services/firestore.service.js";
 
 const CLUB_LOGOS = {
-    "FUNEBRERO": "logo-funebrero_2.png", // <- CORREGIDO AL LOGO LOCAL 100% SEGURO
+    "FUNEBRERO": "logo-funebrero_2.png",
     "UNIÓN": "https://i.ibb.co/YGgpKFT/union.webp",
     "UNION": "https://i.ibb.co/YGgpKFT/union.webp",
     "URQUIZA": "https://i.ibb.co/ZpRhBV70/urquiza.webp",
@@ -14,7 +14,7 @@ const CLUB_LOGOS = {
     "BERMEJO": "https://i.ibb.co/kVw1Gqcd/puerto-bermejo.webp"
 };
 
-const DEFAULT_LOGO = "logo-funebrero_2.png"; // <- CORREGIDO AL LOGO LOCAL
+const DEFAULT_LOGO = "logo-funebrero_2.png";
 const GEMINI_API_KEY = "AIzaSyDvsq3fg1nEOQxR8wVcZW8rEX2lcc_xC8U";
 
 let globalData = { fixtures: [], players: [], meetings: [], sponsors: [], currentSocio: null, carouselImages: [], upcomingMatches: [] };
@@ -172,8 +172,6 @@ function renderRosters(players) {
     const grouped = {};
     players.forEach(p => { if (!grouped[p.categoryId]) grouped[p.categoryId] = []; grouped[p.categoryId].push(p); });
     
-    const svgBall = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23ea580c' stroke='%23431407' stroke-width='4'/><path d='M50 4 v92' stroke='%23431407' stroke-width='3' fill='none'/><path d='M4 50 h92' stroke='%23431407' stroke-width='3' fill='none'/><path d='M15 15 a 40 40 0 0 0 0 70' stroke='%23431407' stroke-width='3' fill='none'/><path d='M85 15 a 40 40 0 0 1 0 70' stroke='%23431407' stroke-width='3' fill='none'/><circle cx='35' cy='35' r='6' fill='%23000'/><circle cx='65' cy='35' r='6' fill='%23000'/><path d='M35 55 Q50 75 65 55' stroke='%23000' stroke-width='5' fill='none' stroke-linecap='round'/></svg>";
-
     let html = "";
     Object.keys(grouped).sort().forEach(cat => {
         html += `<details class="fune-accordion reveal"><summary>🏀 CATEGORÍA ${cat} <span style="font-size: 0.9rem; color: #a3a3a3; font-family: 'Poppins', sans-serif; font-weight: normal; margin-left: 10px;">(${grouped[cat].length} Jugadores)</span></summary><div class="fune-accordion-content custom-grid-players">`;
@@ -181,7 +179,6 @@ function renderRosters(players) {
         grouped[cat].sort((a, b) => a.name.localeCompare(b.name)).forEach(p => {
             html += `
                 <div class="player-card">
-                    <img src="${p.photoUrl || svgBall}" class="smiling-ball" alt="Jugador">
                     <strong style="color: #fff; display: block; font-family: 'Bebas Neue', cursive; font-size: 1.2rem; letter-spacing: 1px;">${p.name}</strong>
                     <span style="color: #a3a3a3; font-size: 0.75rem;">Nac: ${p.birthdate}</span>
                 </div>`;

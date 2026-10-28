@@ -44,37 +44,29 @@
     .btn-enter { background: #dc2626; color: #fff; border: 2px solid #ffbaba; padding: 15px 40px; font-family: 'Bebas Neue', cursive; font-size: 2rem; letter-spacing: 2px; border-radius: 8px; cursor: pointer; box-shadow: 0 0 20px rgba(220,38,38,0.6); transition: 0.3s; animation: pulseBd 2s infinite; text-transform: uppercase; }
     .btn-enter:hover { background: #ff3b3b; transform: scale(1.05); box-shadow: 0 0 40px rgba(220,38,38,0.8); }
 
+    /* PANTALLA DE CARGA DEL VIDEO */
     #landing-overlay {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
         background-color: #000000; z-index: 999999;
         display: none; 
+        justify-content: center; align-items: center;
         transition: opacity 0.8s ease, visibility 0.8s;
         box-sizing: border-box;
         overflow: hidden;
     }
     
-    #shot-clock {
-        position: absolute;
-        top: 40px; 
-        left: 50%;
-        transform: translateX(-50%); 
-        font-family: 'Bebas Neue', cursive;
-        font-size: 3.5rem;
-        color: #dc2626;
-        text-shadow: 0 0 10px rgba(220, 38, 38, 0.8), 0 0 20px rgba(220, 38, 38, 0.5);
-        border: 2px solid #dc2626;
-        padding: 5px 25px;
-        border-radius: 8px;
-        background: rgba(0,0,0,0.8);
-        box-shadow: 0 0 15px rgba(220, 38, 38, 0.3) inset;
-        letter-spacing: 2px;
-        z-index: 5;
+    /* TU VIDEO A PANTALLA COMPLETA */
+    #landing-video { 
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        z-index: 10; 
     }
   </style>
 </head>
 <body>
 
-  <!-- ETIQUETAS DE AUDIO -->
+  <!-- ETIQUETAS DE AUDIO Y VIDEO -->
   <audio id="audio-landing" src="/audio/landing.mp3"></audio>
   <audio id="audio-fondo" src="/audio/fondo.mp3" loop></audio>
 
@@ -85,22 +77,9 @@
       <p style="color: #64748b; margin-top: 20px; font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase;">Activar Sonido 🔊</p>
   </div>
 
-  <!-- PANTALLA DE CARGA ANIMADA CINEMÁTICA -->
+  <!-- PANTALLA DE CARGA REPRODUCIENDO TU VIDEO "animacion.mp4" -->
   <div id="landing-overlay">
-    
-    <div id="shot-clock">08</div>
-
-    <!-- SECUENCIA BÁSQUET REALISTA -->
-    <div class="landing-anim-container">
-        <div class="landing-hoop"></div>
-        <div class="landing-ball ball-1"></div>
-        <div class="landing-ball ball-2"></div>
-        <div class="landing-ball ball-3"></div>
-        <div class="landing-shockwave"></div>
-        <img src="logo-funebrero_2.png" class="landing-logo-center" alt="Funebrero">
-    </div>
-
-    <h1 class="landing-title">CLUB ATLÉTICO <br><span>FUNEBRERO</span></h1>
+    <video id="landing-video" src="/img/animacion.mp4" muted playsinline preload="auto"></video>
   </div>
 
   <!-- TICKER -->
@@ -257,7 +236,7 @@
     <section id="institucional" class="section-padding reveal">
       <h2 class="section-title">Vida <span>Institucional</span></h2>
       <div style="max-width: 900px; margin: 0 auto;">
-        <details class="fune-accordion reveal">
+        <details class="fune-accordion reveal" open>
           <summary>📜 Boletín Oficial y Actas</summary>
           <div class="fune-accordion-content" id="meetingsContainer"></div>
         </details>
@@ -307,7 +286,7 @@
       const btnEnter = document.getElementById("btn-enter-stadium");
       const enterScreen = document.getElementById("enter-stadium-screen");
       const overlay = document.getElementById("landing-overlay");
-      const clockElement = document.getElementById("shot-clock");
+      const video = document.getElementById("landing-video");
       const audioLanding = document.getElementById("audio-landing");
       const audioFondo = document.getElementById("audio-fondo");
       let isHidden = false;
@@ -341,18 +320,14 @@
                       audioLanding.volume = 1.0;
                       audioLanding.play().catch(e=>console.log(e));
                   }
+                  if(video) {
+                      video.currentTime = 0;
+                      video.play().catch(e=>console.log(e));
+                  }
 
-                  const countdown = setInterval(() => {
-                      let timeLeft = parseInt(clockElement.textContent);
-                      timeLeft--;
-                      if (timeLeft >= 0) {
-                          clockElement.textContent = timeLeft.toString().padStart(2, '0');
-                      }
-                      if (timeLeft <= 0) {
-                          clearInterval(countdown);
-                          hideOverlay();
-                      }
-                  }, 1000);
+                  setTimeout(() => {
+                      hideOverlay();
+                  }, 9000);
 
               }, 400);
           });
