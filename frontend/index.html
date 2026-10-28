@@ -53,14 +53,6 @@
         overflow: hidden;
     }
     
-    #landing-video { 
-        position: absolute; top: 50%; left: 50%; 
-        transform: translate(-50%, -50%); 
-        max-width: 350px; width: 90%; 
-        outline: none; mix-blend-mode: screen; 
-        z-index: 2; opacity: 0.2; 
-    }
-    
     #shot-clock {
         position: absolute;
         top: 40px; 
@@ -82,20 +74,21 @@
 </head>
 <body>
 
+  <!-- ETIQUETAS DE AUDIO -->
   <audio id="audio-landing" src="/audio/landing.mp3"></audio>
   <audio id="audio-fondo" src="/audio/fondo.mp3" loop></audio>
 
+  <!-- BOTÓN DE INGRESO -->
   <div id="enter-stadium-screen">
       <img src="logo-funebrero_2.png" alt="Escudo" style="width: 150px; margin-bottom: 30px; animation: floatLogo 3s ease-in-out infinite;">
       <button id="btn-enter-stadium" class="btn-enter">INGRESAR AL ESTADIO</button>
       <p style="color: #64748b; margin-top: 20px; font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase;">Activar Sonido 🔊</p>
   </div>
 
+  <!-- PANTALLA DE CARGA ANIMADA CINEMÁTICA -->
   <div id="landing-overlay">
     
     <div id="shot-clock">08</div>
-
-    <!-- ELIMINADO EL VIDEO ANTIGUO QUE CAUSABA EL DOBLE FONDO -->
 
     <!-- SECUENCIA BÁSQUET REALISTA -->
     <div class="landing-anim-container">
@@ -110,6 +103,7 @@
     <h1 class="landing-title">CLUB ATLÉTICO <br><span>FUNEBRERO</span></h1>
   </div>
 
+  <!-- TICKER -->
   <div class="ticker-wrap">
     <div class="ticker-move" id="tickerContent">
       <div class="ticker-item"><span>CLUB FUNEBRERO</span> Bienvenidos a la nueva plataforma oficial.</div>
@@ -117,6 +111,7 @@
     </div>
   </div>
 
+  <!-- NAVEGACIÓN CRISTAL -->
   <header class="header">
     <div class="header-inner">
       <div class="header-brand" style="display: flex; align-items: center; gap: 12px; justify-content: center;">
@@ -140,20 +135,20 @@
     </div>
   </header>
 
+  <!-- HERO -->
   <section id="inicio" class="hero">
     <div class="hero-container">
       <div class="hero-logo-wrapper"><img src="logo-funebrero_2.png" alt="Escudo Funebrero" id="main-logo"></div>
+      <div class="title-container reveal"><h1 class="club-title-glow">CLUB ATLÉTICO FUNEBRERO</h1></div>
+      <p class="hero-subtitle reveal">Asociación Civil Club Social Cultural y Deportivo</p>
       
-      <div class="title-container"><h1 class="club-title-glow">CLUB ATLÉTICO FUNEBRERO</h1></div>
-      <p class="hero-subtitle">Asociación Civil Club Social Cultural y Deportivo</p>
-      
-      <div class="hero-socials">
+      <div class="hero-socials reveal">
         <a href="https://www.facebook.com/profile.php?id=61558452983433" target="_blank" class="social-btn btn-fb">📘 Facebook Club</a>
         <a href="https://www.facebook.com/profile.php?id=61592882245302" target="_blank" class="social-btn btn-fb">🏀 Escuelita de Básquet</a>
         <a href="https://www.instagram.com/clubfunebreroo/" target="_blank" class="social-btn btn-ig">📸 Instagram Oficial</a>
       </div>
 
-      <div id="main-carousel-container" class="main-carousel" style="display: none;"></div>
+      <div id="main-carousel-container" class="main-carousel reveal" style="display: none;"></div>
     </div>
   </section>
 
@@ -262,7 +257,7 @@
     <section id="institucional" class="section-padding reveal">
       <h2 class="section-title">Vida <span>Institucional</span></h2>
       <div style="max-width: 900px; margin: 0 auto;">
-        <details class="fune-accordion reveal" open>
+        <details class="fune-accordion reveal">
           <summary>📜 Boletín Oficial y Actas</summary>
           <div class="fune-accordion-content" id="meetingsContainer"></div>
         </details>
