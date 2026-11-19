@@ -1,4 +1,8 @@
-import { listenToFixtures, getPlayers, listenToMeetings, listenToSponsors, getSocioByDni, registerPaymentIntent, listenToCarouselImages, listenToUpcomingMatches } from "./services/firestore.service.js";
+import { 
+    listenToFixtures, getPlayers, listenToMeetings, listenToSponsors, 
+    getSocioByDni, registerPaymentIntent, listenToCarouselImages, 
+    listenToUpcomingMatches, listenToSocios, updateSocio 
+} from "./services/firestore.service.js";
 
 const CLUB_LOGOS = {
     "FUNEBRERO": "logo-funebrero_2.png",
@@ -16,8 +20,19 @@ const CLUB_LOGOS = {
 
 const DEFAULT_LOGO = "logo-funebrero_2.png";
 const GEMINI_API_KEY = "AIzaSyDvsq3fg1nEOQxR8wVcZW8rEX2lcc_xC8U";
+const ADMIN_CUOTAS_WHATSAPP = "5493625451176";
+const CUOTA_VALOR_MENSUAL = 5000;
 
-let globalData = { fixtures: [], players: [], meetings: [], sponsors: [], currentSocio: null, carouselImages: [], upcomingMatches: [] };
+// INICIO OFICIAL DEL CONTROL DE CUOTAS: MARZO 2027
+const CUOTAS_START_YEAR = 2027;
+const CUOTAS_START_MONTH = 3; // 1 = Enero ... 3 = Marzo
+const MONTH_SHORT = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
+let globalData = { 
+    fixtures: [], players: [], meetings: [], sponsors: [], 
+    socios: [], currentSocio: null, carouselImages: [], upcomingMatches: [] 
+};
+let sociosFilterState = { search: "", status: "all" };
 
 function getLogoSrc(clubName) {
     if (!clubName) return DEFAULT_LOGO;
@@ -28,6 +43,102 @@ function getLogoSrc(clubName) {
     return DEFAULT_LOGO;
 }
 
+// ==========================================
+// MOTOR DE CÁLCULO DE CUOTAS (DESDE MARZO 2027, VENCIMIENTO DÍA 10)
+// ==========================================
+function formatMonthKey(key) {
+    const [y, m] = key.split("-");
+    const idx = parseInt(m, 10) - 1;
+    return `${MONTH_SHORT[idx] || m} ${y}`;
+}
+
+function getSelectableMonthKeys() {
+    const keys = [];
+    const now = new Date();
+    const endYear = Math.max(now.getFullYear() + 1, 2028);
+    let y = CUOTAS_START_YEAR;
+    let m = CUOTAS_START_MONTH;
+    while (y < endYear || (y === endYear && m <= 12)) {
+        keys.push(`${y}-${String(m).padStart(2, "0")}`);
+        m++;
+        if (m > 12) { m = 1; y++; }
+    }
+    return keys;
+}
+
+function evaluateSocioStatus(socio) {
+    const paidMonths = Array.isArray(socio.paidMonths) ? [...new Set(socio.paidMonths)].sort() : [];
+    const now = new Date();
+    const currYear = now.getFullYear();
+    const currMonth = now.getMonth() + 1;
+    const currDay = now.getDate();
+
+    const isBeforeStart = (currYear < CUOTAS_START_YEAR) || (currYear === CUOTAS_START_YEAR && currMonth < CUOTAS_START_MONTH);
+
+    if (isBeforeStart) {
+        return {
+            status: "al-dia",
+            label: "AL DÍA (Inicio Mar 2027)",
+            paidMonths,
+            owedMonths: [],
+            pendingCurrentMonth: null,
+            isBeforeStart: true
+        };
+    }
+
+    const owedMonths = [];
+    let pendingCurrentMonth = null;
+
+    let y = CUOTAS_START_YEAR;
+    let m = CUOTAS_START_MONTH;
+    while (y < currYear || (y === currYear && m <= currMonth)) {
+        const key = `${y}-${String(m).padStart(2, "0")}`;
+        if (!paidMonths.includes(key)) {
+            if (y === currYear && m === currMonth && currDay <= 10) {
+                pendingCurrentMonth = key;
+            } else {
+                owedMonths.push(key);
+            }
+        }
+        m++;
+        if (m > 12) { m = 1; y++; }
+    }
+
+    if (owedMonths.length > 0) {
+        return {
+            status: "moroso",
+            label: `MOROSO (${owedMonths.length} ${owedMonths.length === 1 ? "mes" : "meses"})`,
+            paidMonths,
+            owedMonths,
+            pendingCurrentMonth,
+            isBeforeStart: false
+        };
+    }
+
+    if (pendingCurrentMonth) {
+        return {
+            status: "en-plazo",
+            label: "VENCE EL 10",
+            paidMonths,
+            owedMonths: [],
+            pendingCurrentMonth,
+            isBeforeStart: false
+        };
+    }
+
+    return {
+        status: "al-dia",
+        label: "AL DÍA",
+        paidMonths,
+        owedMonths: [],
+        pendingCurrentMonth: null,
+        isBeforeStart: false
+    };
+}
+
+// ==========================================
+// INICIADOR DE ANIMACIONES DE SCROLL
+// ==========================================
 const scrollObserverOptions = { root: null, rootMargin: '0px', threshold: 0.15 };
 const scrollObserver = new IntersectionObserver((entries, observer) => {
     entries.forEach(entry => {
@@ -97,10 +208,140 @@ async function initApp() {
         globalData.upcomingMatches = matches;
         renderUpcomingMatches(matches);
     });
+
+    listenToSocios((socios) => {
+        globalData.socios = socios;
+        renderPublicSociosGrid();
+        if (globalData.currentSocio && globalData.currentSocio.id) {
+            const updated = socios.find(s => s.id === globalData.currentSocio.id);
+            if (updated) {
+                globalData.currentSocio = updated;
+                renderSocioDashboardCuotas(updated);
+            }
+        }
+    });
     
+    initSociosGridControls();
     initSociosPortal();
 }
 
+// ==========================================
+// PLANILLA PÚBLICA DE SOCIOS
+// ==========================================
+function initSociosGridControls() {
+    const searchInput = document.getElementById("sociosSearchInput");
+    if (searchInput) {
+        searchInput.addEventListener("input", (e) => {
+            sociosFilterState.search = e.target.value.trim().toLowerCase();
+            renderPublicSociosGrid();
+        });
+    }
+    document.querySelectorAll(".filter-chip").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".filter-chip").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            sociosFilterState.status = btn.getAttribute("data-filter") || "all";
+            renderPublicSociosGrid();
+        });
+    });
+}
+
+window.scrollToSocioLogin = () => {
+    const loginBox = document.getElementById("login-socio-box");
+    const dniInput = document.getElementById("socioDniInput");
+    if (loginBox) loginBox.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (dniInput) setTimeout(() => dniInput.focus(), 500);
+};
+
+function renderPublicSociosGrid() {
+    const tbody = document.getElementById("publicSociosTableBody");
+    const summaryBar = document.getElementById("sociosSummaryBar");
+    if (!tbody) return;
+
+    if (globalData.socios.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding: 25px;">Aún no hay socios cargados en el padrón.</td></tr>`;
+        return;
+    }
+
+    let countOk = 0, countWarn = 0, countBad = 0;
+
+    const evaluated = globalData.socios.map(s => {
+        const info = evaluateSocioStatus(s);
+        if (info.status === "al-dia") countOk++;
+        else if (info.status === "en-plazo") countWarn++;
+        else countBad++;
+        return { socio: s, info };
+    });
+
+    if (summaryBar) {
+        summaryBar.innerHTML = `
+            <span class="summary-pill pill-ok">✅ Al día: ${countOk}</span>
+            <span class="summary-pill pill-warn">⏳ En plazo (1 al 10): ${countWarn}</span>
+            <span class="summary-pill pill-bad">🚨 Morosos: ${countBad}</span>
+        `;
+    }
+
+    const filtered = evaluated.filter(({ socio, info }) => {
+        const matchesStatus = sociosFilterState.status === "all" || info.status === sociosFilterState.status;
+        const q = sociosFilterState.search;
+        const matchesSearch = !q ||
+            (socio.name || "").toLowerCase().includes(q) ||
+            String(socio.numSocio || "").toLowerCase().includes(q);
+        return matchesStatus && matchesSearch;
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding: 20px;">No se encontraron socios con ese filtro.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(({ socio, info }) => {
+        const rowClass = info.status === "al-dia" ? "row-al-dia" : (info.status === "en-plazo" ? "row-en-plazo" : "row-moroso");
+        const badgeIcon = info.status === "al-dia" ? "✅" : (info.status === "en-plazo" ? "⏳" : "🚨");
+
+        const paidHtml = info.paidMonths.length > 0
+            ? info.paidMonths.map(k => `<span class="month-pill paid">${formatMonthKey(k)}</span>`).join("")
+            : `<span style="color:#64748b; font-size:0.78rem;">Sin pagos aún</span>`;
+
+        let owedHtml = "";
+        if (info.owedMonths.length > 0) {
+            owedHtml += info.owedMonths.map(k => `<span class="month-pill owed">${formatMonthKey(k)}</span>`).join("");
+        }
+        if (info.pendingCurrentMonth) {
+            owedHtml += `<span class="month-pill pending">${formatMonthKey(info.pendingCurrentMonth)} (hasta el 10)</span>`;
+        }
+        if (!owedHtml) {
+            owedHtml = `<span style="color:#34d399; font-size:0.8rem; font-weight:600;">Ninguno</span>`;
+        }
+
+        const owedListText = [...info.owedMonths, ...(info.pendingCurrentMonth ? [info.pendingCurrentMonth] : [])]
+            .map(formatMonthKey).join(", ");
+        const wpText = owedListText
+            ? `Hola 👋, soy *${socio.name}* (Socio Nº ${socio.numSocio || 'S/N'}). Quiero consultar/regularizar mis cuotas (${owedListText}).`
+            : `Hola 👋, soy *${socio.name}* (Socio Nº ${socio.numSocio || 'S/N'}). Quiero consultar sobre mi cuota social.`;
+        const wpUrl = `https://wa.me/${ADMIN_CUOTAS_WHATSAPP}?text=${encodeURIComponent(wpText)}`;
+
+        return `
+            <tr class="${rowClass}">
+                <td>
+                    <strong style="color:#fff; display:block;">${socio.name}</strong>
+                    <span style="color:#94a3b8; font-size:0.75rem;">Socio Nº ${socio.numSocio || 'S/N'}</span>
+                </td>
+                <td><span class="status-badge ${info.status}">${badgeIcon} ${info.label}</span></td>
+                <td>${paidHtml}</td>
+                <td>${owedHtml}</td>
+                <td style="text-align:right; white-space:nowrap;">
+                    <button type="button" class="mini-action-btn pay" onclick="scrollToSocioLogin()">💳 Pagar</button>
+                    <a href="${wpUrl}" target="_blank" class="mini-action-btn wp">📲 Admin</a>
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+// ==========================================
+// RENDER: FIXTURES
+// ==========================================
 function renderFixtures(fixtures) {
     const container = document.getElementById("publicFixturesContainer");
     if (!container) return;
@@ -164,6 +405,9 @@ function renderFixtures(fixtures) {
     if(window.observeDynamicElements) window.observeDynamicElements();
 }
 
+// ==========================================
+// RENDER: PLANTELES
+// ==========================================
 function renderRosters(players) {
     const container = document.getElementById("rostersContainer");
     if (!container) return;
@@ -172,6 +416,8 @@ function renderRosters(players) {
     const grouped = {};
     players.forEach(p => { if (!grouped[p.categoryId]) grouped[p.categoryId] = []; grouped[p.categoryId].push(p); });
     
+    const svgBall = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23ea580c' stroke='%23431407' stroke-width='4'/><path d='M50 4 v92' stroke='%23431407' stroke-width='3' fill='none'/><path d='M4 50 h92' stroke='%23431407' stroke-width='3' fill='none'/><path d='M15 15 a 40 40 0 0 0 0 70' stroke='%23431407' stroke-width='3' fill='none'/><path d='M85 15 a 40 40 0 0 1 0 70' stroke='%23431407' stroke-width='3' fill='none'/><circle cx='35' cy='35' r='6' fill='%23000'/><circle cx='65' cy='35' r='6' fill='%23000'/><path d='M35 55 Q50 75 65 55' stroke='%23000' stroke-width='5' fill='none' stroke-linecap='round'/></svg>";
+
     let html = "";
     Object.keys(grouped).sort().forEach(cat => {
         html += `<details class="fune-accordion reveal"><summary>🏀 CATEGORÍA ${cat} <span style="font-size: 0.9rem; color: #a3a3a3; font-family: 'Poppins', sans-serif; font-weight: normal; margin-left: 10px;">(${grouped[cat].length} Jugadores)</span></summary><div class="fune-accordion-content custom-grid-players">`;
@@ -179,6 +425,7 @@ function renderRosters(players) {
         grouped[cat].sort((a, b) => a.name.localeCompare(b.name)).forEach(p => {
             html += `
                 <div class="player-card">
+                    <img src="${p.photoUrl || svgBall}" class="smiling-ball" alt="Jugador">
                     <strong style="color: #fff; display: block; font-family: 'Bebas Neue', cursive; font-size: 1.2rem; letter-spacing: 1px;">${p.name}</strong>
                     <span style="color: #a3a3a3; font-size: 0.75rem;">Nac: ${p.birthdate}</span>
                 </div>`;
@@ -189,6 +436,9 @@ function renderRosters(players) {
     if(window.observeDynamicElements) window.observeDynamicElements();
 }
 
+// ==========================================
+// RENDER: CUMPLEAÑOS
+// ==========================================
 function renderBirthdays(players) {
     const container = document.getElementById("birthdaysContainer");
     const ticker = document.getElementById("tickerContent");
@@ -263,6 +513,9 @@ function renderBirthdays(players) {
     container.innerHTML = html;
 }
 
+// ==========================================
+// RENDER: ACTAS INSTITUCIONALES
+// ==========================================
 function renderMeetings(meetings) {
     const container = document.getElementById("meetingsContainer");
     if (!container) return;
@@ -273,7 +526,7 @@ function renderMeetings(meetings) {
 
     meetings.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    let html = `<details class="fune-accordion reveal" open><summary>📜 BOLETÍN OFICIAL Y ACTAS</summary><div class="fune-accordion-content custom-grid">`;
+    let html = `<div class="custom-grid">`;
     
     html += meetings.map(m => {
         let pdfHtml = "";
@@ -302,11 +555,14 @@ function renderMeetings(meetings) {
             </div>`;
     }).join("");
     
-    html += `</div></details>`;
+    html += `</div>`;
     container.innerHTML = html;
     if(window.observeDynamicElements) window.observeDynamicElements();
 }
 
+// ==========================================
+// RENDER: SPONSORS
+// ==========================================
 function renderSponsors(sponsors) {
     const container = document.getElementById("sponsorsContainer");
     if (!container) return;
@@ -321,6 +577,9 @@ function renderSponsors(sponsors) {
         </a>`).join("");
 }
 
+// ==========================================
+// RENDER: CARRUSEL PRINCIPAL
+// ==========================================
 let carouselInterval = null;
 function renderMainCarousel(images) {
     const container = document.getElementById("main-carousel-container");
@@ -351,6 +610,9 @@ function renderMainCarousel(images) {
     }
 }
 
+// ==========================================
+// RENDER: PRÓXIMOS PARTIDOS
+// ==========================================
 let matchesInterval = null;
 function renderUpcomingMatches(matches) {
     const container = document.getElementById("upcoming-matches-container");
@@ -394,6 +656,67 @@ function renderUpcomingMatches(matches) {
             slides[currentIndex].style.opacity = '1';
         }, 5000);
     }
+    if(window.observeDynamicElements) window.observeDynamicElements();
+}
+
+// ==========================================
+// PORTAL DE SOCIOS (AUTOGESTIÓN DE CUOTAS)
+// ==========================================
+function renderSocioDashboardCuotas(socio) {
+    const banner = document.getElementById("dash-status-banner");
+    const selector = document.getElementById("socioMonthsSelector");
+    const pagoMonto = document.getElementById("pagoMonto");
+    if (!banner || !selector) return;
+
+    const info = evaluateSocioStatus(socio);
+    if (info.status === "al-dia") {
+        banner.className = "socio-alert-banner ok";
+        banner.innerHTML = info.isBeforeStart
+            ? "✅ Estás AL DÍA. El calendario de cuotas comienza en Marzo 2027 (podés adelantar cuotas si querés)."
+            : "✅ ¡Excelente! Estás AL DÍA con tus cuotas sociales.";
+    } else if (info.status === "en-plazo") {
+        banner.className = "socio-alert-banner warn";
+        banner.innerHTML = `⏳ ALERTA DE PAGO: Tenés tiempo hasta el día 10 para abonar ${formatMonthKey(info.pendingCurrentMonth)} sin mora.`;
+    } else {
+        banner.className = "socio-alert-banner bad";
+        const deudaTxt = info.owedMonths.map(formatMonthKey).join(", ");
+        banner.innerHTML = `🚨 CUOTA VENCIDA: Adeudás ${deudaTxt}. Seleccioná los meses abajo para ponerte al día.`;
+    }
+
+    const selectableKeys = getSelectableMonthKeys();
+    const toAutoCheck = [...info.owedMonths, ...(info.pendingCurrentMonth ? [info.pendingCurrentMonth] : [])];
+    const firstUnpaid = selectableKeys.find(k => !info.paidMonths.includes(k));
+
+    selector.innerHTML = selectableKeys.map(key => {
+        const isPaid = info.paidMonths.includes(key);
+        const isOwed = info.owedMonths.includes(key);
+        const shouldCheck = !isPaid && (toAutoCheck.length > 0 ? toAutoCheck.includes(key) : key === firstUnpaid);
+        const cls = isPaid ? "is-paid" : (isOwed ? "is-owed" : "");
+        return `
+            <label class="month-check-label ${cls}">
+                <input type="checkbox" class="socio-month-cb" value="${key}" ${isPaid ? "checked disabled" : (shouldCheck ? "checked" : "")}>
+                <span>${formatMonthKey(key)}${isPaid ? " ✓" : ""}</span>
+            </label>
+        `;
+    }).join("");
+
+    const updateSelectedAmount = () => {
+        const selected = Array.from(document.querySelectorAll(".socio-month-cb:checked:not(:disabled)")).map(cb => cb.value);
+        const count = Math.max(selected.length, 1);
+        const calculated = count * CUOTA_VALOR_MENSUAL;
+        if (pagoMonto) {
+            pagoMonto.min = calculated;
+            pagoMonto.value = calculated;
+            document.getElementById("pdf-monto").textContent = calculated;
+        }
+        const pdfMeses = document.getElementById("pdf-meses");
+        if (pdfMeses) pdfMeses.textContent = selected.length > 0 ? selected.map(formatMonthKey).join(", ") : "Aporte Voluntario";
+    };
+
+    selector.querySelectorAll(".socio-month-cb:not(:disabled)").forEach(cb => {
+        cb.addEventListener("change", updateSelectedAmount);
+    });
+    updateSelectedAmount();
 }
 
 function initSociosPortal() {
@@ -442,10 +765,8 @@ function initSociosPortal() {
         
         let socio = await getSocioByDni(dni);
 
-        if(!socio) { socio = { name: "Socio de Prueba Funebrero", dni: dni, birthdate: pass, numSocio: "00" }; }
-
         if (socio) {
-            const cleanBirth = socio.birthdate.replace(/[^0-9]/g, '');
+            const cleanBirth = (socio.birthdate || "").replace(/[^0-9]/g, '');
             
             if (pass !== cleanBirth) {
                 errorMsg.textContent = "Contraseña incorrecta. (Recuerda: fecha de nacimiento sin barras, ej: 13031990)";
@@ -454,15 +775,10 @@ function initSociosPortal() {
                 globalData.currentSocio = socio;
                 document.getElementById("dash-nombre").textContent = socio.name; 
                 document.getElementById("pdf-nombre").textContent = socio.name;
-                
                 document.getElementById("pdf-dni").innerHTML = `${socio.dni} <strong style="color:#dc2626; margin-left: 10px;">| N° Socio: ${socio.numSocio || 'S/N'}</strong>`;
-                
-                if(pagoMonto) {
-                    pagoMonto.value = 5000; 
-                    document.getElementById("pdf-monto").textContent = pagoMonto.value;
-                }
-                const hoy = new Date();
-                document.getElementById("pdf-fecha").textContent = hoy.toLocaleDateString();
+                document.getElementById("pdf-fecha").textContent = new Date().toLocaleDateString();
+
+                renderSocioDashboardCuotas(socio);
 
                 if (btnDescargarPdf) {
                     btnDescargarPdf.disabled = true;
@@ -484,8 +800,9 @@ function initSociosPortal() {
 
     if(pagoMonto) {
         pagoMonto.addEventListener("blur", () => {
-            if (parseInt(pagoMonto.value) < 5000 || isNaN(pagoMonto.value)) {
-                pagoMonto.value = 5000;
+            const minVal = parseInt(pagoMonto.min, 10) || CUOTA_VALOR_MENSUAL;
+            if (parseInt(pagoMonto.value, 10) < minVal || isNaN(parseInt(pagoMonto.value, 10))) {
+                pagoMonto.value = minVal;
             }
             document.getElementById("pdf-monto").textContent = pagoMonto.value;
         });
@@ -501,27 +818,57 @@ function initSociosPortal() {
 
     btnPagarMP.addEventListener("click", async () => {
         if(globalData.currentSocio) {
+            const selectedMonths = Array.from(document.querySelectorAll(".socio-month-cb:checked:not(:disabled)")).map(cb => cb.value);
             await registerPaymentIntent({ 
+                socioId: globalData.currentSocio.id || null,
                 socioDni: globalData.currentSocio.dni, 
                 socioNombre: globalData.currentSocio.name, 
-                monto: pagoMonto ? parseInt(pagoMonto.value) : 5000 
+                months: selectedMonths,
+                monto: pagoMonto ? parseInt(pagoMonto.value, 10) : CUOTA_VALOR_MENSUAL,
+                origen: "portal_mp"
             });
         }
     });
 
     if(btnEnviarWhatsApp) {
-        btnEnviarWhatsApp.addEventListener("click", () => {
+        btnEnviarWhatsApp.addEventListener("click", async () => {
             if(globalData.currentSocio) {
-                const monto = pagoMonto ? pagoMonto.value : "5000";
-                
+                const selectedMonths = Array.from(document.querySelectorAll(".socio-month-cb:checked:not(:disabled)")).map(cb => cb.value);
+                const monto = pagoMonto ? parseInt(pagoMonto.value, 10) : CUOTA_VALOR_MENSUAL;
                 document.getElementById("pdf-monto").textContent = monto;
+                const mesesLegibles = selectedMonths.length > 0 ? selectedMonths.map(formatMonthKey).join(", ") : "Aporte Voluntario";
+                const pdfMeses = document.getElementById("pdf-meses");
+                if (pdfMeses) pdfMeses.textContent = mesesLegibles;
+
+                // Carga automatizada en Firestore de las cuotas abonadas por el socio
+                if (globalData.currentSocio.id && selectedMonths.length > 0) {
+                    const prevPaid = Array.isArray(globalData.currentSocio.paidMonths) ? globalData.currentSocio.paidMonths : [];
+                    const mergedPaid = [...new Set([...prevPaid, ...selectedMonths])].sort();
+                    try {
+                        await updateSocio(globalData.currentSocio.id, {
+                            paidMonths: mergedPaid,
+                            lastPaymentDate: new Date().toISOString()
+                        });
+                        await registerPaymentIntent({
+                            socioId: globalData.currentSocio.id,
+                            socioDni: globalData.currentSocio.dni,
+                            socioNombre: globalData.currentSocio.name,
+                            months: selectedMonths,
+                            monto: monto,
+                            status: "acreditado_portal",
+                            origen: "portal_socios"
+                        });
+                        globalData.currentSocio.paidMonths = mergedPaid;
+                        renderSocioDashboardCuotas(globalData.currentSocio);
+                    } catch (err) {
+                        console.error("Error acreditando cuota automática:", err);
+                    }
+                }
                 
                 const numSo = globalData.currentSocio.numSocio || 'S/N';
-                const mensaje = `Hola Vicente 👋.\n\nSoy el socio/a *${globalData.currentSocio.name}*\n(DNI: ${globalData.currentSocio.dni} - Socio Nº: ${numSo}). \n\nTe envío adjunto el comprobante de mi aporte al Club por el monto de *$${monto}*.\n\n¡Abrazo Funebrero!`;
+                const mensaje = `Hola Vicente 👋.\n\nSoy el socio/a *${globalData.currentSocio.name}*\n(DNI: ${globalData.currentSocio.dni} - Socio Nº: ${numSo}).\nMeses abonados: *${mesesLegibles}*.\nMonto total: *$${monto}*.\n\nTe envío adjunto el comprobante de mi aporte al Club.\n¡Abrazo Funebrero!`;
                 
-                const telefonoClub = "5493625451176"; 
-                
-                const url = `https://wa.me/${telefonoClub}?text=${encodeURIComponent(mensaje)}`;
+                const url = `https://wa.me/${ADMIN_CUOTAS_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
                 window.open(url, "_blank");
 
                 if (btnDescargarPdf) {
@@ -550,6 +897,9 @@ function initSociosPortal() {
     });
 }
 
+// ==========================================
+// FUNEBOT OMNISCIENTE
+// ==========================================
 function initFuneBot() {
   const toggleBtn = document.getElementById("chatbot-toggle");
   const chatContainer = document.getElementById("chatbot-container");

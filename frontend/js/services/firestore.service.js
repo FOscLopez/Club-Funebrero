@@ -4,8 +4,7 @@ import {
 import { app } from "./firebase.config.js";
 
 // ==========================================
-// ¡AQUÍ ESTÁ LA SOLUCIÓN AL ERROR!
-// Conectamos a tu base de datos llamada "funebrero" 
+// Base de datos llamada "funebrero"
 // ==========================================
 export const db = getFirestore(app, "funebrero");
 
@@ -122,13 +121,21 @@ export async function deleteSponsor(id) {
 }
 
 // ==============================
-// PORTAL SOCIOS
+// PORTAL SOCIOS Y CUOTAS
 // ==============================
 export async function getSocios() {
   try {
     const snapshot = await getDocs(query(collection(db, "socios"), orderBy("name", "asc")));
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) { return []; }
+}
+
+export function listenToSocios(callback) {
+  return onSnapshot(collection(db, "socios"), (snapshot) => {
+    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    data.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+    callback(data);
+  });
 }
 
 export async function addSociosBulk(sociosArray) {
@@ -138,6 +145,10 @@ export async function addSociosBulk(sociosArray) {
     batch.set(newRef, s);
   });
   await batch.commit();
+}
+
+export async function updateSocio(id, data) {
+  await updateDoc(doc(db, "socios", id), data);
 }
 
 export async function deleteSocio(id) {
@@ -156,10 +167,18 @@ export async function getSocioByDni(dni) {
 export async function registerPaymentIntent(data) {
   try {
       data.createdAt = new Date().toISOString();
-      data.status = "pendiente";
+      if (!data.status) data.status = "pendiente";
       const docRef = await addDoc(collection(db, "pagos_socios"), data);
       return docRef.id;
   } catch (e) { return null; }
+}
+
+export async function getPagosSocios() {
+  try {
+    const snapshot = await getDocs(collection(db, "pagos_socios"));
+    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return data.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  } catch (e) { return []; }
 }
 
 // ==============================
@@ -189,7 +208,7 @@ export async function deleteCarouselImage(id) {
 }
 
 // ==============================
-// PRÓXIMOS PARTIDOS (NUEVO)
+// PRÓXIMOS PARTIDOS
 // ==============================
 export async function getUpcomingMatches() {
   try {

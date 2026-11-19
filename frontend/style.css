@@ -547,7 +547,7 @@ details.fune-accordion[open] summary {
     100% { text-shadow: 0 0 20px var(--rojo-funebrero), 0 0 40px var(--rojo-neon); opacity: 1; }
 }
 
-.section-padding { padding: 40px 0; max-width: 100%; position: relative; }
+.section-padding { padding: 40px 15px; max-width: 100%; position: relative; }
 
 /* SPONSORS Y CUMPLEAÑOS */
 .birthday-card { 
@@ -585,6 +585,353 @@ details.fune-accordion[open] summary {
 .main-carousel { width: 100%; max-width: 600px; height: 250px; margin: 30px auto 0; position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(220,38,38,0.2); border: 1px solid rgba(255,255,255,0.1); background: #000; }
 .carousel-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1s ease-in-out; object-fit: cover; }
 .carousel-slide.active { opacity: 1; }
+
+/* ANIMACIÓN PELOTA SONRIENTE (PLANTELES) */
+.smiling-ball {
+    width: 65px;
+    height: 65px;
+    margin: 0 auto 10px;
+    display: block;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--rojo-funebrero);
+    animation: bounceRotate 3s infinite ease-in-out;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+    background: #000;
+}
+
+@keyframes bounceRotate {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    50% { transform: translateY(-8px) rotate(5deg); }
+}
+
+/* ====================================================
+   PLANILLA PÚBLICA DE CUOTAS DE SOCIOS (MARZO 2027+)
+   ==================================================== */
+.socios-grid-wrapper {
+    max-width: 1100px;
+    margin: 50px auto 0;
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--gris-borde);
+    border-top: 3px solid var(--rojo-funebrero);
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+}
+
+.socios-grid-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.socios-grid-header h3 {
+    font-family: var(--font-titulos);
+    font-size: 2.4rem;
+    letter-spacing: 2px;
+    color: var(--blanco-puro);
+}
+
+.socios-grid-header h3 span {
+    color: var(--rojo-neon);
+}
+
+.socios-summary-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin: 15px 0 20px;
+}
+
+.summary-pill {
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+}
+
+.summary-pill.pill-ok {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.5);
+    color: #34d399;
+}
+
+.summary-pill.pill-warn {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.5);
+    color: #fbbf24;
+}
+
+.summary-pill.pill-bad {
+    background: rgba(220, 38, 38, 0.2);
+    border-color: rgba(239, 68, 68, 0.6);
+    color: #f87171;
+    animation: alertPulse 1.8s infinite;
+}
+
+@keyframes alertPulse {
+    0%, 100% { box-shadow: 0 0 0 rgba(220, 38, 38, 0.2); }
+    50% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.7); }
+}
+
+.socios-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.socios-search-input {
+    flex: 1;
+    min-width: 220px;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #000;
+    color: #fff;
+    font-family: var(--font-textos);
+    outline: none;
+}
+
+.socios-search-input:focus {
+    border-color: var(--rojo-funebrero);
+}
+
+.socios-filter-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.filter-chip {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #333;
+    color: #cbd5e1;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.filter-chip.active, .filter-chip:hover {
+    background: var(--rojo-funebrero);
+    border-color: var(--rojo-neon);
+    color: #fff;
+}
+
+.socios-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.socios-status-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+    font-size: 0.88rem;
+}
+
+.socios-status-table th {
+    background: rgba(20, 20, 20, 0.95);
+    color: var(--rojo-neon);
+    font-family: var(--font-titulos);
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+    text-align: left;
+    padding: 14px 12px;
+    border-bottom: 2px solid rgba(220, 38, 38, 0.4);
+}
+
+.socios-status-table td {
+    padding: 13px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    vertical-align: middle;
+}
+
+.socios-status-table tr.row-al-dia {
+    background: rgba(16, 185, 129, 0.05);
+    border-left: 4px solid #10b981;
+}
+
+.socios-status-table tr.row-en-plazo {
+    background: rgba(245, 158, 11, 0.07);
+    border-left: 4px solid #f59e0b;
+}
+
+.socios-status-table tr.row-moroso {
+    background: rgba(220, 38, 38, 0.14);
+    border-left: 4px solid #ef4444;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.status-badge.al-dia {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.5);
+}
+
+.status-badge.en-plazo {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.6);
+    animation: alertPulse 2s infinite;
+}
+
+.status-badge.moroso {
+    background: rgba(220, 38, 38, 0.3);
+    color: #fca5a5;
+    border: 1px solid #ef4444;
+    animation: alertPulse 1.4s infinite;
+}
+
+.month-pill {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin: 2px;
+    white-space: nowrap;
+}
+
+.month-pill.paid {
+    background: rgba(16, 185, 129, 0.18);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.month-pill.owed {
+    background: rgba(239, 68, 68, 0.22);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.45);
+}
+
+.month-pill.pending {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fde68a;
+    border: 1px solid rgba(245, 158, 11, 0.45);
+}
+
+.mini-action-btn {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    margin: 2px;
+    transition: 0.2s;
+    white-space: nowrap;
+}
+
+.mini-action-btn.pay {
+    background: #dc2626;
+    color: #fff;
+}
+
+.mini-action-btn.pay:hover {
+    background: #ff3b3b;
+}
+
+.mini-action-btn.wp {
+    background: rgba(37, 211, 102, 0.18);
+    color: #4ade80;
+    border: 1px solid rgba(37, 211, 102, 0.45);
+}
+
+.mini-action-btn.wp:hover {
+    background: #25D366;
+    color: #fff;
+}
+
+/* Selector de meses dentro del Portal de Socios */
+.months-selector-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+    text-align: left;
+}
+
+.month-check-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: rgba(255, 255, 255, 0.03);
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.month-check-label.is-owed {
+    border-color: rgba(239, 68, 68, 0.6);
+    background: rgba(220, 38, 38, 0.14);
+    color: #fecaca;
+}
+
+.month-check-label.is-paid {
+    border-color: rgba(16, 185, 129, 0.4);
+    background: rgba(16, 185, 129, 0.12);
+    color: #6ee7b7;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.socio-alert-banner {
+    padding: 12px 15px;
+    border-radius: 10px;
+    margin-bottom: 18px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.socio-alert-banner.ok {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid #10b981;
+    color: #6ee7b7;
+}
+
+.socio-alert-banner.warn {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid #f59e0b;
+    color: #fde68a;
+}
+
+.socio-alert-banner.bad {
+    background: rgba(220, 38, 38, 0.22);
+    border: 1px solid #ef4444;
+    color: #fecaca;
+    animation: alertPulse 1.5s infinite;
+}
 
 @media (min-width: 992px) {
     .club-title-glow { font-size: 6.5rem; }

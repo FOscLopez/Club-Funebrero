@@ -5,7 +5,8 @@ import {
     getFixtures, updateFixture, deleteFixture,
     getMeetings, createMeeting, updateMeeting, deleteMeeting,
     getSponsors, createSponsor, updateSponsor, deleteSponsor,
-    addSociosBulk, getSocios, deleteSocio,
+    addSociosBulk, getSocios, updateSocio, deleteSocio,
+    registerPaymentIntent, getPagosSocios,
     getCarouselImages, createCarouselImage, deleteCarouselImage,
     getUpcomingMatches, createUpcomingMatch, deleteUpcomingMatch 
 } from "./services/firestore.service.js";
@@ -21,13 +22,67 @@ let isSuperAdmin = false;
 let isSocioEditor = false;
 
 const IMGBB_API_KEY = "4b6599a15cc7870198cb96ee95df9905";
+const CUOTA_VALOR_MENSUAL = 5000;
+const CUOTAS_START_YEAR = 2027;
+const CUOTAS_START_MONTH = 3;
+const MONTH_SHORT = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
 let allFixturesCache = [];
 let allMeetingsCache = [];
 let allSponsorsCache = [];
+let allSociosCache = [];
 let currentEditTarget = { id: null, type: null }; 
 let currentSort = { column: 'createdAt', direction: 'desc' };
 let pendingSponsorData = null;
+
+function formatMonthKey(key) {
+    const [y, m] = key.split("-");
+    const idx = parseInt(m, 10) - 1;
+    return `${MONTH_SHORT[idx] || m} ${y}`;
+}
+
+function getAdminMonthKeys() {
+    const keys = [];
+    const now = new Date();
+    const endYear = Math.max(now.getFullYear() + 1, 2028);
+    let y = CUOTAS_START_YEAR;
+    let m = CUOTAS_START_MONTH;
+    while (y < endYear || (y === endYear && m <= 12)) {
+        keys.push(`${y}-${String(m).padStart(2, "0")}`);
+        m++;
+        if (m > 12) { m = 1; y++; }
+    }
+    return keys;
+}
+
+function evaluateSocioStatusAdmin(socio) {
+    const paidMonths = Array.isArray(socio.paidMonths) ? [...new Set(socio.paidMonths)].sort() : [];
+    const now = new Date();
+    const currYear = now.getFullYear();
+    const currMonth = now.getMonth() + 1;
+    const currDay = now.getDate();
+
+    if (currYear < CUOTAS_START_YEAR || (currYear === CUOTAS_START_YEAR && currMonth < CUOTAS_START_MONTH)) {
+        return { status: "al-dia", label: `Al día (${paidMonths.length} pag.)`, color: "#34d399" };
+    }
+
+    const owed = [];
+    let pending = false;
+    let y = CUOTAS_START_YEAR, m = CUOTAS_START_MONTH;
+    while (y < currYear || (y === currYear && m <= currMonth)) {
+        const key = `${y}-${String(m).padStart(2, "0")}`;
+        if (!paidMonths.includes(key)) {
+            if (y === currYear && m === currMonth && currDay <= 10) pending = true;
+            else owed.push(key);
+        }
+        m++;
+        if (m > 12) { m = 1; y++; }
+    }
+
+    if (owed.length > 0) return { status: "moroso", label: `Moroso (${owed.length} adeud.)`, color: "#f87171" };
+    if (pending) return { status: "en-plazo", label: "Vence el 10", color: "#fbbf24" };
+    return { status: "al-dia", label: "Al día", color: "#34d399" };
+}
 
 window.setSort = (column) => {
     if (currentSort.column === column) {
@@ -67,6 +122,7 @@ onAuthStateChanged(auth, (user) => {
             loadMeetingsAdmin();
             loadSponsorsAdmin();
             loadSociosAdmin(); 
+            loadPagosHistorialAdmin();
             loadMainCarouselAdmin(); 
             loadUpcomingMatchesAdmin(); 
             
@@ -78,11 +134,12 @@ onAuthStateChanged(auth, (user) => {
             const style = document.createElement('style');
             style.innerHTML = `
                 details.fune-accordion { display: none !important; }
-                #moduloSociosCarga, #moduloSociosLista { display: block !important; }
+                #moduloSociosCarga, #moduloSociosLista, #moduloSociosCuotas { display: block !important; }
             `;
             document.head.appendChild(style);
             
             loadSociosAdmin();
+            loadPagosHistorialAdmin();
 
         } else {
             badge.textContent = "✍️ Editor";
@@ -167,7 +224,7 @@ document.getElementById("socioForm").addEventListener("submit", async (e) => {
             let dni = parts[2].replace(/\./g, '').trim(); 
             let birthdate = parts[3].trim();
             let numSocio = parts[4] ? parts[4].trim() : "S/N";
-            sociosToSave.push({ name, dni, birthdate, numSocio, createdAt: new Date().toISOString() });
+            sociosToSave.push({ name, dni, birthdate, numSocio, paidMonths: [], createdAt: new Date().toISOString() });
         } else {
             const dniMatch = cleanLine.match(/\b\d{1,2}\.?\d{3}\.?\d{3}\b/);
             const dateMatch = cleanLine.match(/\b\d{2}[/-]\d{2}[/-]\d{4}\b/);
@@ -186,7 +243,7 @@ document.getElementById("socioForm").addEventListener("submit", async (e) => {
                 name = name.replace(/^\d+\s*/, ''); 
                 name = name.replace(/^,|,$/g, '').trim(); 
                 
-                sociosToSave.push({ name, dni, birthdate, numSocio, createdAt: new Date().toISOString() });
+                sociosToSave.push({ name, dni, birthdate, numSocio, paidMonths: [], createdAt: new Date().toISOString() });
             }
         }
     });
@@ -210,19 +267,25 @@ async function loadSociosAdmin() {
     const tbody = document.getElementById("sociosListContainer");
     try {
         const socios = await getSocios();
+        allSociosCache = socios;
+        populateCuotasSocioDropdown();
+
         if(socios.length === 0) { tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No hay socios registrados.</td></tr>"; return; }
         
-        tbody.innerHTML = socios.map(s => `
+        tbody.innerHTML = socios.map(s => {
+            const st = evaluateSocioStatusAdmin(s);
+            return `
             <tr>
                 <td style="color:#f59e0b; font-weight:bold;">${s.numSocio || 'S/N'}</td>
                 <td style="font-weight:600;">${s.name}</td>
                 <td style="color:#3b82f6;">${s.dni}</td>
-                <td style="color:#a3a3a3;">${s.birthdate}</td>
-                <td style="text-align:right;">
+                <td style="color:${st.color}; font-weight:700; font-size:0.85rem;">${st.label}</td>
+                <td style="text-align:right; white-space:nowrap;">
+                    <button class="action-btn" style="background:#10b981; padding: 5px 10px; font-size: 0.78rem; margin-right: 5px;" onclick="jumpToSocioCuotas('${s.id}')">💰 Cuotas</button>
                     <button class="delete-btn" onclick="deleteSocioAdmin('${s.id}')">Borrar</button>
                 </td>
             </tr>
-        `).join("");
+        `;}).join("");
     } catch(e) { tbody.innerHTML = "<tr><td colspan='5'>Error al cargar socios</td></tr>"; }
 }
 
@@ -234,6 +297,178 @@ window.deleteSocioAdmin = async (id) => {
 };
 
 // =========================================
+// MÓDULO 9: GESTIÓN MANUAL DE CUOTAS
+// =========================================
+function populateCuotasSocioDropdown() {
+    const select = document.getElementById("cuotasSocioSelect");
+    if (!select) return;
+    const prevValue = select.value;
+    select.innerHTML = '<option value="">Seleccionar Socio...</option>' +
+        allSociosCache.map(s => `<option value="${s.id}">Nº ${s.numSocio || 'S/N'} - ${s.name} (DNI: ${s.dni})</option>`).join("");
+    if (prevValue && allSociosCache.some(s => s.id === prevValue)) {
+        select.value = prevValue;
+    }
+}
+
+window.jumpToSocioCuotas = (socioId) => {
+    const mod = document.getElementById("moduloSociosCuotas");
+    const select = document.getElementById("cuotasSocioSelect");
+    if (mod) {
+        mod.open = true;
+        mod.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    if (select) {
+        select.value = socioId;
+        renderAdminMonthsCheckboxes(socioId);
+    }
+};
+
+function renderAdminMonthsCheckboxes(socioId) {
+    const infoBox = document.getElementById("adminCuotasSocioInfo");
+    const nameEl = document.getElementById("adminCuotasSocioNombre");
+    const grid = document.getElementById("adminMonthsCheckboxes");
+    const montoInput = document.getElementById("cuotasMontoManual");
+
+    const socio = allSociosCache.find(s => s.id === socioId);
+    if (!socio) {
+        infoBox.style.display = "none";
+        return;
+    }
+
+    infoBox.style.display = "block";
+    nameEl.textContent = `${socio.name} (Socio Nº ${socio.numSocio || 'S/N'} · DNI: ${socio.dni})`;
+
+    const paidMonths = Array.isArray(socio.paidMonths) ? socio.paidMonths : [];
+    const keys = getAdminMonthKeys();
+
+    grid.innerHTML = keys.map(key => {
+        const isPaid = paidMonths.includes(key);
+        return `
+            <label class="admin-month-box ${isPaid ? 'checked-month' : ''}">
+                <input type="checkbox" class="admin-month-cb" value="${key}" ${isPaid ? 'checked' : ''}>
+                <span>${formatMonthKey(key)}</span>
+            </label>
+        `;
+    }).join("");
+
+    const recalcManualAmount = () => {
+        const checked = Array.from(grid.querySelectorAll(".admin-month-cb:checked")).map(cb => cb.value);
+        const newlyAdded = checked.filter(k => !paidMonths.includes(k));
+        grid.querySelectorAll(".admin-month-box").forEach(lbl => {
+            const cb = lbl.querySelector("input");
+            lbl.classList.toggle("checked-month", cb.checked);
+        });
+        if (montoInput) {
+            montoInput.value = newlyAdded.length > 0 ? newlyAdded.length * CUOTA_VALOR_MENSUAL : 0;
+        }
+    };
+
+    grid.querySelectorAll(".admin-month-cb").forEach(cb => cb.addEventListener("change", recalcManualAmount));
+    recalcManualAmount();
+}
+
+const cuotasSelectEl = document.getElementById("cuotasSocioSelect");
+if (cuotasSelectEl) {
+    cuotasSelectEl.addEventListener("change", (e) => renderAdminMonthsCheckboxes(e.target.value));
+}
+
+const btnCheckAll2027 = document.getElementById("btnCheckAll2027");
+if (btnCheckAll2027) {
+    btnCheckAll2027.addEventListener("click", () => {
+        document.querySelectorAll(".admin-month-cb").forEach(cb => {
+            if (cb.value.startsWith("2027-")) {
+                cb.checked = true;
+                cb.dispatchEvent(new Event("change"));
+            }
+        });
+    });
+}
+
+const btnUncheckAllCuotas = document.getElementById("btnUncheckAllCuotas");
+if (btnUncheckAllCuotas) {
+    btnUncheckAllCuotas.addEventListener("click", () => {
+        document.querySelectorAll(".admin-month-cb").forEach(cb => {
+            cb.checked = false;
+            cb.dispatchEvent(new Event("change"));
+        });
+    });
+}
+
+const btnGuardarCuotasManual = document.getElementById("btnGuardarCuotasManual");
+if (btnGuardarCuotasManual) {
+    btnGuardarCuotasManual.addEventListener("click", async () => {
+        const socioId = document.getElementById("cuotasSocioSelect").value;
+        const socio = allSociosCache.find(s => s.id === socioId);
+        if (!socio) return;
+
+        const prevPaid = Array.isArray(socio.paidMonths) ? socio.paidMonths : [];
+        const selected = Array.from(document.querySelectorAll(".admin-month-cb:checked")).map(cb => cb.value).sort();
+        const newlyAdded = selected.filter(k => !prevPaid.includes(k));
+        const monto = parseInt(document.getElementById("cuotasMontoManual").value, 10) || 0;
+
+        btnGuardarCuotasManual.textContent = "⏳ Guardando...";
+        btnGuardarCuotasManual.disabled = true;
+
+        try {
+            await updateSocio(socio.id, {
+                paidMonths: selected,
+                lastPaymentDate: new Date().toISOString()
+            });
+
+            if (newlyAdded.length > 0 || monto > 0) {
+                await registerPaymentIntent({
+                    socioId: socio.id,
+                    socioDni: socio.dni,
+                    socioNombre: socio.name,
+                    months: newlyAdded.length > 0 ? newlyAdded : selected,
+                    monto: monto,
+                    status: "acreditado_manual",
+                    origen: "admin_manual"
+                });
+            }
+
+            await loadSociosAdmin();
+            await loadPagosHistorialAdmin();
+            renderAdminMonthsCheckboxes(socio.id);
+            alert(`✅ Cuotas actualizadas para ${socio.name}.`);
+        } catch (err) {
+            alert("Error al guardar las cuotas.");
+        } finally {
+            btnGuardarCuotasManual.textContent = "💾 Guardar Cuotas del Socio";
+            btnGuardarCuotasManual.disabled = false;
+        }
+    });
+}
+
+async function loadPagosHistorialAdmin() {
+    const tbody = document.getElementById("pagosHistorialList");
+    if (!tbody) return;
+    try {
+        const pagos = await getPagosSocios();
+        if (pagos.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8;">Aún no hay pagos registrados.</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = pagos.slice(0, 30).map(p => {
+            const fecha = p.createdAt ? new Date(p.createdAt).toLocaleDateString("es-AR") : "-";
+            const meses = Array.isArray(p.months) && p.months.length > 0 ? p.months.map(formatMonthKey).join(", ") : "-";
+            const origenLabel = p.origen === "admin_manual" ? "🛠️ Admin Manual" : (p.origen === "portal_socios" ? "🌐 Portal Socios" : "💳 Mercado Pago");
+            return `
+                <tr>
+                    <td style="color:#94a3b8; font-size:0.82rem;">${fecha}</td>
+                    <td><strong>${p.socioNombre || "-"}</strong><br><span style="color:#64748b; font-size:0.75rem;">DNI: ${p.socioDni || "-"}</span></td>
+                    <td style="color:#6ee7b7; font-size:0.82rem;">${meses}</td>
+                    <td style="color:#10b981; font-weight:bold;">$${p.monto || 0}</td>
+                    <td style="font-size:0.8rem;">${origenLabel}</td>
+                </tr>
+            `;
+        }).join("");
+    } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Error al cargar historial.</td></tr>`;
+    }
+}
+
+// =========================================
 // TABLA DE FIXTURES (EDICIÓN EN LÍNEA)
 // =========================================
 async function loadFixtures() {
@@ -243,23 +478,17 @@ async function loadFixtures() {
         const snapshot = await getDocs(q);
         allFixturesCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderFixturesTable();
-        
-        // ACTUALIZAMOS EL DESPLEGABLE DE FLYERS AUTOMÁTICAMENTE
         populateFlyerDropdown();
-        // RECARGAMOS LA TABLA DE FLYERS PARA VER LOS VÍNCULOS
         loadUpcomingMatchesAdmin();
-        
     } catch (error) { 
         tbody.innerHTML = '<tr><td colspan="6">Error de lectura.</td></tr>'; 
     }
 }
 
-// NUEVA FUNCIÓN: Rellena la lista de partidos programados para el módulo de Flyers
 function populateFlyerDropdown() {
     const select = document.getElementById("flyerFixtureSelect");
     if (!select) return;
     
-    // Filtramos solo los partidos que NO estén finalizados
     const scheduledFixtures = allFixturesCache.filter(f => f.status !== "finished");
     
     if (scheduledFixtures.length === 0) {
@@ -649,7 +878,7 @@ window.deleteMainCarouselImgAdmin = async (id) => {
 };
 
 // ==========================================
-// NUEVO: GESTIÓN DE PRÓXIMOS PARTIDOS
+// GESTIÓN DE PRÓXIMOS PARTIDOS
 // ==========================================
 document.getElementById("triggerUpcomingMatchUploadBtn").addEventListener("click", () => {
     document.getElementById("upcomingMatchFileUploader").click();
@@ -659,7 +888,6 @@ document.getElementById("upcomingMatchFileUploader").onchange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // VALIDACIÓN: Verificamos que se haya seleccionado un partido del menú
     const fixtureId = document.getElementById("flyerFixtureSelect").value;
     if(!fixtureId) {
         alert("Por favor, selecciona a qué partido corresponde el flyer antes de subirlo.");
@@ -679,7 +907,6 @@ document.getElementById("upcomingMatchFileUploader").onchange = async (e) => {
         const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
         const data = await res.json();
         if (data.success) {
-            // Guardamos el flyer JUNTO con el ID del partido
             await createUpcomingMatch({ imageUrl: data.data.url, fixtureId: fixtureId });
             loadUpcomingMatchesAdmin();
             alert("Flyer vinculado y agregado correctamente.");
@@ -700,7 +927,6 @@ async function loadUpcomingMatchesAdmin() {
         if(images.length === 0) { tbody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>No hay flyers cargados</td></tr>"; return; }
         
         tbody.innerHTML = images.map(img => {
-            // Buscamos el partido vinculado en el caché
             const linkedFix = allFixturesCache.find(f => f.id === img.fixtureId);
             const fixText = linkedFix ? `${linkedFix.homeClubId} vs ${linkedFix.awayClubId} (${linkedFix.status === 'finished' ? 'FINALIZADO' : 'PENDIENTE'})` : 'Sin vincular';
             
