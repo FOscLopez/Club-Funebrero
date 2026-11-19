@@ -61,6 +61,22 @@
         object-fit: contain;
         z-index: 10; 
     }
+
+    .socios-status-table th.sortable-col {
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.2s, color 0.2s;
+    }
+    .socios-status-table th.sortable-col:hover {
+        background: rgba(220, 38, 38, 0.15);
+        color: #fff;
+    }
+    .sort-arrow {
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.8rem;
+        margin-left: 5px;
+        color: #94a3b8;
+    }
   </style>
 </head>
 <body>
@@ -158,7 +174,7 @@
     <!-- PORTAL DE SOCIOS + PLANILLA PÚBLICA DE CUOTAS -->
     <section id="socios-portal" class="section-padding reveal">
       <h2 class="section-title">Portal de <span>Socios</span></h2>
-      <p style="text-align: center; color: #a3a3a3; font-size: 1rem; max-width: 600px; margin: 0 auto 30px;">Ingresa para abonar tu cuota social (del 1 al 10 de cada mes) o imprimir tus comprobantes.</p>
+      <p style="text-align: center; color: #a3a3a3; font-size: 1rem; max-width: 600px; margin: 0 auto 30px;">Ingresa para abonar tu cuota social ($10.000 · del 1 al 10 de cada mes) o imprimir tus comprobantes.</p>
       
       <div id="login-socio-box" class="glass-premium" style="max-width: 450px; margin: 0 auto; text-align: center; padding: 30px;">
         <h3 style="color: #fff; font-family: 'Bebas Neue', cursive; font-size: 2rem; margin-top: 0;">Ingreso al Portal</h3>
@@ -198,13 +214,13 @@
          
          <div style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
             <h4 style="color: #10b981; margin-top: 0; font-family: 'Bebas Neue', cursive; font-size: 1.5rem; letter-spacing: 1px;">Paso 1: Elige los meses y el monto</h4>
-            <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 10px;">Marcá una o varias cuotas ($5.000 por mes, a partir de Marzo 2027):</p>
+            <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 10px;">Marcá una o varias cuotas ($10.000 por mes, a partir de Marzo 2027):</p>
             <div id="socioMonthsSelector" class="months-selector-grid"></div>
-            <div style="font-size: 0.85rem; color: #a3a3a3; text-transform: uppercase; margin-top: 18px;">Monto Total a Abonar</div>
+            <div style="font-size: 0.85rem; color: #a3a3a3; text-transform: uppercase; margin-top: 18px;">Monto Total a Abonar (Mínimo $10.000 por cuota)</div>
             <p style="font-size: 0.78rem; color: #64748b; margin: 4px 0 10px;">Puedes aportar más si deseas hacer una donación extra al club.</p>
             <div style="display: flex; justify-content: center; align-items: center; gap: 5px; color: #10b981;">
                 <span style="font-size: 2.5rem; font-family: 'Bebas Neue', cursive;">$</span>
-                <input type="number" id="pagoMonto" value="5000" min="5000" step="500" style="background: transparent; border: none; color: #10b981; font-family: 'Bebas Neue', cursive; font-size: 2.5rem; width: 160px; outline: none; border-bottom: 2px dashed #10b981; text-align: center;">
+                <input type="number" id="pagoMonto" value="10000" min="10000" step="500" style="background: transparent; border: none; color: #10b981; font-family: 'Bebas Neue', cursive; font-size: 2.5rem; width: 170px; outline: none; border-bottom: 2px dashed #10b981; text-align: center;">
             </div>
          </div>
 
@@ -236,12 +252,12 @@
          <button id="btnSalirSocio" class="outline-btn" style="border: none; color: #a3a3a3; text-decoration: underline; width: 100%;">Cerrar Sesión</button>
       </div>
 
-      <!-- PLANILLA PÚBLICA DE ESTADO DE CUOTAS (DESDE MARZO 2027) -->
+      <!-- PLANILLA PÚBLICA DE ESTADO DE CUOTAS (DESDE MARZO 2027) CON ACORDEÓN -->
       <div class="socios-grid-wrapper" id="planilla-socios-publica">
         <div class="socios-grid-header">
           <h3>Estado de Cuotas <span>Socios</span></h3>
           <p id="sociosPeriodoInfo" style="color: #94a3b8; font-size: 0.88rem; margin-top: 6px;">
-            Control vigente a partir de <strong>Marzo 2027</strong> · Vencimiento del <strong>1 al 10</strong> de cada mes.
+            Control vigente a partir de <strong>Marzo 2027</strong> · Vencimiento del <strong>1 al 10</strong> de cada mes · Cuota común: <strong>$10.000</strong>.
           </p>
         </div>
 
@@ -261,22 +277,28 @@
           </div>
         </div>
 
-        <div class="socios-table-scroll">
-          <table class="socios-status-table">
-            <thead>
-              <tr>
-                <th>Socio</th>
-                <th>Estado</th>
-                <th>Meses Pagados</th>
-                <th>Meses Adeudados</th>
-                <th style="text-align: right;">Regularizar</th>
-              </tr>
-            </thead>
-            <tbody id="publicSociosTableBody">
-              <tr><td colspan="5" style="text-align:center; color:#94a3b8; padding: 25px;">Cargando padrón de socios...</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <!-- ACORDEÓN DESPLEGABLE PARA LA PLANILLA -->
+        <details id="sociosAccordion" class="fune-accordion" style="margin-bottom: 0;">
+          <summary>📋 Ver Planilla Completa de Socios <span id="sociosAccordionCount" style="font-size: 0.9rem; color: #94a3b8; font-family: 'Poppins', sans-serif; font-weight: 600;">(Tocar para desplegar)</span></summary>
+          <div class="fune-accordion-content" style="padding: 0;">
+            <div class="socios-table-scroll" style="border: none; border-radius: 0;">
+              <table class="socios-status-table">
+                <thead>
+                  <tr>
+                    <th class="sortable-col" onclick="setSociosSort('name')">Socio <span id="sortSocioName" class="sort-arrow">↑</span></th>
+                    <th class="sortable-col" onclick="setSociosSort('status')">Estado <span id="sortSocioStatus" class="sort-arrow">↕</span></th>
+                    <th class="sortable-col" onclick="setSociosSort('paid')">Meses Pagados <span id="sortSocioPaid" class="sort-arrow">↕</span></th>
+                    <th class="sortable-col" onclick="setSociosSort('owed')">Meses Adeudados <span id="sortSocioOwed" class="sort-arrow">↕</span></th>
+                    <th class="sortable-col" style="text-align: right;" onclick="setSociosSort('numSocio')">Regularizar <span id="sortSocioNum" class="sort-arrow">↕</span></th>
+                  </tr>
+                </thead>
+                <tbody id="publicSociosTableBody">
+                  <tr><td colspan="5" style="text-align:center; color:#94a3b8; padding: 25px;">Cargando padrón de socios...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </details>
       </div>
     </section>
 

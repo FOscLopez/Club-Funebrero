@@ -22,7 +22,7 @@ let isSuperAdmin = false;
 let isSocioEditor = false;
 
 const IMGBB_API_KEY = "4b6599a15cc7870198cb96ee95df9905";
-const CUOTA_VALOR_MENSUAL = 5000;
+const CUOTA_VALOR_MENSUAL = 10000;
 const CUOTAS_START_YEAR = 2027;
 const CUOTAS_START_MONTH = 3;
 const MONTH_SHORT = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];

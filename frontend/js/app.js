@@ -21,7 +21,7 @@ const CLUB_LOGOS = {
 const DEFAULT_LOGO = "logo-funebrero_2.png";
 const GEMINI_API_KEY = "AIzaSyDvsq3fg1nEOQxR8wVcZW8rEX2lcc_xC8U";
 const ADMIN_CUOTAS_WHATSAPP = "5493625451176";
-const CUOTA_VALOR_MENSUAL = 5000;
+const CUOTA_VALOR_MENSUAL = 10000;
 
 // INICIO OFICIAL DEL CONTROL DE CUOTAS: MARZO 2027
 const CUOTAS_START_YEAR = 2027;
@@ -33,6 +33,7 @@ let globalData = {
     socios: [], currentSocio: null, carouselImages: [], upcomingMatches: [] 
 };
 let sociosFilterState = { search: "", status: "all" };
+let sociosSortState = { column: "name", direction: "asc" };
 
 function getLogoSrc(clubName) {
     if (!clubName) return DEFAULT_LOGO;
@@ -78,6 +79,7 @@ function evaluateSocioStatus(socio) {
     if (isBeforeStart) {
         return {
             status: "al-dia",
+            statusRank: 1,
             label: "AL DÍA (Inicio Mar 2027)",
             paidMonths,
             owedMonths: [],
@@ -107,6 +109,7 @@ function evaluateSocioStatus(socio) {
     if (owedMonths.length > 0) {
         return {
             status: "moroso",
+            statusRank: 3,
             label: `MOROSO (${owedMonths.length} ${owedMonths.length === 1 ? "mes" : "meses"})`,
             paidMonths,
             owedMonths,
@@ -118,6 +121,7 @@ function evaluateSocioStatus(socio) {
     if (pendingCurrentMonth) {
         return {
             status: "en-plazo",
+            statusRank: 2,
             label: "VENCE EL 10",
             paidMonths,
             owedMonths: [],
@@ -128,6 +132,7 @@ function evaluateSocioStatus(socio) {
 
     return {
         status: "al-dia",
+        statusRank: 1,
         label: "AL DÍA",
         paidMonths,
         owedMonths: [],
@@ -226,13 +231,47 @@ async function initApp() {
 }
 
 // ==========================================
-// PLANILLA PÚBLICA DE SOCIOS
+// PLANILLA PÚBLICA DE SOCIOS (CON ORDENAMIENTO POR COLUMNAS)
 // ==========================================
+window.setSociosSort = (column) => {
+    if (sociosSortState.column === column) {
+        sociosSortState.direction = sociosSortState.direction === "asc" ? "desc" : "asc";
+    } else {
+        sociosSortState.column = column;
+        sociosSortState.direction = "asc";
+    }
+
+    const arrows = {
+        name: "sortSocioName",
+        status: "sortSocioStatus",
+        paid: "sortSocioPaid",
+        owed: "sortSocioOwed",
+        numSocio: "sortSocioNum"
+    };
+
+    Object.keys(arrows).forEach(col => {
+        const el = document.getElementById(arrows[col]);
+        if (!el) return;
+        if (col === sociosSortState.column) {
+            el.textContent = sociosSortState.direction === "asc" ? "↑" : "↓";
+            el.style.color = "#ff3b3b";
+        } else {
+            el.textContent = "↕";
+            el.style.color = "#94a3b8";
+        }
+    });
+
+    renderPublicSociosGrid();
+};
+
 function initSociosGridControls() {
     const searchInput = document.getElementById("sociosSearchInput");
+    const accordion = document.getElementById("sociosAccordion");
+
     if (searchInput) {
         searchInput.addEventListener("input", (e) => {
             sociosFilterState.search = e.target.value.trim().toLowerCase();
+            if (sociosFilterState.search && accordion) accordion.open = true;
             renderPublicSociosGrid();
         });
     }
@@ -241,6 +280,7 @@ function initSociosGridControls() {
             document.querySelectorAll(".filter-chip").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
             sociosFilterState.status = btn.getAttribute("data-filter") || "all";
+            if (accordion) accordion.open = true;
             renderPublicSociosGrid();
         });
     });
@@ -256,6 +296,7 @@ window.scrollToSocioLogin = () => {
 function renderPublicSociosGrid() {
     const tbody = document.getElementById("publicSociosTableBody");
     const summaryBar = document.getElementById("sociosSummaryBar");
+    const accCount = document.getElementById("sociosAccordionCount");
     if (!tbody) return;
 
     if (globalData.socios.length === 0) {
@@ -281,13 +322,46 @@ function renderPublicSociosGrid() {
         `;
     }
 
-    const filtered = evaluated.filter(({ socio, info }) => {
+    let filtered = evaluated.filter(({ socio, info }) => {
         const matchesStatus = sociosFilterState.status === "all" || info.status === sociosFilterState.status;
         const q = sociosFilterState.search;
         const matchesSearch = !q ||
             (socio.name || "").toLowerCase().includes(q) ||
             String(socio.numSocio || "").toLowerCase().includes(q);
         return matchesStatus && matchesSearch;
+    });
+
+    if (accCount) {
+        accCount.textContent = `(${filtered.length} ${filtered.length === 1 ? "socio" : "socios"})`;
+    }
+
+    // Ordenamiento por columna seleccionada
+    const dir = sociosSortState.direction === "asc" ? 1 : -1;
+    filtered.sort((a, b) => {
+        if (sociosSortState.column === "name") {
+            return (a.socio.name || "").localeCompare(b.socio.name || "") * dir;
+        }
+        if (sociosSortState.column === "status") {
+            if (a.info.statusRank !== b.info.statusRank) return (a.info.statusRank - b.info.statusRank) * dir;
+            return (a.socio.name || "").localeCompare(b.socio.name || "");
+        }
+        if (sociosSortState.column === "paid") {
+            if (a.info.paidMonths.length !== b.info.paidMonths.length) return (a.info.paidMonths.length - b.info.paidMonths.length) * dir;
+            return (a.socio.name || "").localeCompare(b.socio.name || "");
+        }
+        if (sociosSortState.column === "owed") {
+            const owedA = a.info.owedMonths.length + (a.info.pendingCurrentMonth ? 0.5 : 0);
+            const owedB = b.info.owedMonths.length + (b.info.pendingCurrentMonth ? 0.5 : 0);
+            if (owedA !== owedB) return (owedA - owedB) * dir;
+            return (a.socio.name || "").localeCompare(b.socio.name || "");
+        }
+        if (sociosSortState.column === "numSocio") {
+            const numA = parseInt(a.socio.numSocio, 10) || 999999;
+            const numB = parseInt(b.socio.numSocio, 10) || 999999;
+            if (numA !== numB) return (numA - numB) * dir;
+            return (a.socio.name || "").localeCompare(b.socio.name || "");
+        }
+        return 0;
     });
 
     if (filtered.length === 0) {
@@ -840,7 +914,6 @@ function initSociosPortal() {
                 const pdfMeses = document.getElementById("pdf-meses");
                 if (pdfMeses) pdfMeses.textContent = mesesLegibles;
 
-                // Carga automatizada en Firestore de las cuotas abonadas por el socio
                 if (globalData.currentSocio.id && selectedMonths.length > 0) {
                     const prevPaid = Array.isArray(globalData.currentSocio.paidMonths) ? globalData.currentSocio.paidMonths : [];
                     const mergedPaid = [...new Set([...prevPaid, ...selectedMonths])].sort();
