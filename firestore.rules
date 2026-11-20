@@ -1,66 +1,90 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Función: Super Administradores (Tú, con acceso total a todo)
+
+    // Verificación base: usuario autenticado y con correo verificado
+    function isAuthenticated() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    // Super Administradores
     function isSuperAdmin() {
-      return request.auth != null && (
+      return isAuthenticated() && (
         request.auth.token.email == "admin@reydigital.com" ||
         request.auth.token.email == "mecinfotec@gmail.com" ||
         request.auth.token.email == "admin@abnch.com"
       );
     }
 
-    // Función: Editores Deportivos (Solo partidos y jugadores)
+    // Editores Deportivos (Solo partidos y jugadores)
     function isEditor() {
-      return request.auth != null && (
-        request.auth.token.email.matches(".*@mesa[.]com") ||
-        request.auth.token.email.matches(".*@prensa[.]com") ||
-        request.auth.token.email == "editor@funebrero.com"
+      return isAuthenticated() && (
+        request.auth.token.email == "editor@funebrero.com" ||
+        request.auth.token.email == "prensa@funebrero.com"
       );
     }
 
-    // NUEVA Función: Editor Exclusivo de Socios
+    // Editor Exclusivo de Socios
     function isSocioEditor() {
-      return request.auth != null && request.auth.token.email == "socios@funebrero.com";
+      return isAuthenticated() && request.auth.token.email == "socios@funebrero.com";
     }
 
-    match /{document=**} {
+    // Validación estricta para nuevos registros de pagos desde el Portal
+    function isValidPaymentCreate() {
+      let data = request.resource.data;
+      return data.keys().hasAll(["socioDni", "socioNombre", "monto", "createdAt", "status"])
+        && data.socioDni is string && data.socioDni.size() >= 6 && data.socioDni.size() <= 12
+        && data.socioNombre is string && data.socioNombre.size() >= 2 && data.socioNombre.size() <= 120
+        && data.monto is number && data.monto >= 5000 && data.monto <= 5000000
+        && data.status in ["pendiente", "acreditado_portal"];
+    }
+
+    // Colecciones públicas de solo lectura para la web
+    match /fixtures/{docId} {
       allow read: if true;
-    }
-
-    // Fixtures y Jugadores (Super Admin y Editores Deportivos)
-    match /fixtures/{document=**} {
-      allow write: if isSuperAdmin() || isEditor();
-    }
-    match /players/{document=**} {
       allow write: if isSuperAdmin() || isEditor();
     }
 
-    // Institucional, Sponsors y Carrusel Principal (Solo Super Admin)
-    match /meetings/{document=**} {
-      allow write: if isSuperAdmin();
+    match /players/{docId} {
+      allow read: if true;
+      allow write: if isSuperAdmin() || isEditor();
     }
-    match /sponsors/{document=**} {
-      allow write: if isSuperAdmin();
-    }
-    match /carousel_images/{document=**} {
-      allow write: if isSuperAdmin();
-    }
-    
-    // Próximos Partidos (Flyers Publicitarios)
-    match /upcoming_matches/{document=**} {
+
+    match /meetings/{docId} {
+      allow read: if true;
       allow write: if isSuperAdmin();
     }
 
-    // Socios (Super Admin y el nuevo Editor de Socios)
-    match /socios/{document=**} {
+    match /sponsors/{docId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    match /carousel_images/{docId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    match /upcoming_matches/{docId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    // Socios: lectura pública para la planilla, escritura solo Admin/Editor Socios
+    match /socios/{docId} {
+      allow read: if true;
       allow write: if isSuperAdmin() || isSocioEditor();
     }
-    
-    // Pagos (El sistema web los escribe automáticamente)
-    match /pagos_socios/{document=**} {
-      allow write: if true; 
+
+    // Pagos: SOLO creación validada desde el portal; lectura, edición y borrado SOLO Admin/Editor Socios
+    match /pagos_socios/{docId} {
+      allow read, update, delete: if isSuperAdmin() || isSocioEditor();
+      allow create: if isSuperAdmin() || isSocioEditor() || isValidPaymentCreate();
+    }
+
+    // Bloqueo por defecto (Zero Trust) para cualquier otra colección
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
